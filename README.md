@@ -69,19 +69,19 @@ Upon first launch, the app requires the MedGemma model weights:
 ## 1. Patient Dashboard
 View your list of patients. Add new profiles or select an existing one to view their innovative "longitudinal chat" interface.
 
-![Patient Dashboard Placeholder](path/to/dashboard.png)
+![Patient Dashboard Mockup](dashboard_mockup.png)
 
 ## 2. Multimodal Chat
 Enter symptoms or upload an X-ray image.
 > **User**: "Analyze this chest X-ray for signs of pneumonia."
 > **MedGemma**: "Based on the image opacity in the lower lobes..."
 
-![Chat Interface Placeholder](path/to/chat_ui.png)
+![Chat Interface Mockup](chat_mockup.png)
 
 ## 3. X-Ray Analysis Tool
 Use the dedicated X-ray tool to highlight specific regions of interest before sending them to the model.
 
-![X-Ray Tool Placeholder](path/to/xray_tool.png)
+![X-Ray Tool Mockup](xray_tool_mockup.png)
 
 # 📄 License & Acknowledgments
 
