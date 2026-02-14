@@ -1,300 +1,492 @@
 package com.google.mediapipe.examples.llminference
 
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.ImageDecoder
+import android.net.Uri
+import android.os.Build
+import android.provider.MediaStore
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.*
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.BoxWithConstraints
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Send
-import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.material.icons.filled.AddPhotoAlternate
+import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.onFocusChanged
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalView
+import android.view.HapticFeedbackConstants
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardCapitalization
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import kotlinx.coroutines.flow.StateFlow
 
 @Composable
 internal fun ChatRoute(
     onClose: () -> Unit
 ) {
-    val context = LocalContext.current.applicationContext
-    val chatViewModel: ChatViewModel = viewModel(factory = ChatViewModel.getFactory(context))
+    val chatViewModel: ChatViewModel = viewModel(factory = ChatViewModel.getFactory())
+    val context = LocalContext.current
 
-    // Reset InferenceModel when entering ChatScreen
     LaunchedEffect(Unit) {
         val inferenceModel = InferenceModel.getInstance(context)
-        chatViewModel.resetInferenceModel(inferenceModel)
+        chatViewModel.setInferenceModel(inferenceModel)
     }
 
     val uiState by chatViewModel.uiState.collectAsStateWithLifecycle()
     val textInputEnabled by chatViewModel.isTextInputEnabled.collectAsStateWithLifecycle()
+
     ChatScreen(
-        context,
         uiState,
         textInputEnabled,
-        remainingTokens = chatViewModel.tokensRemaining,
-        resetTokenCount = {
-            chatViewModel.recomputeSizeInTokens("")
-        },
-        onSendMessage = { message ->
-            chatViewModel.sendMessage(message)
-        },
-        onChangedMessage = { message ->
-            chatViewModel.recomputeSizeInTokens(message)
+        onSendMessage = { message, images ->
+            chatViewModel.sendMessage(message, images)
         },
         onClose = onClose
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChatScreen(
-    context: Context,
     uiState: UiState,
     textInputEnabled: Boolean,
-    remainingTokens: StateFlow<Int>,
-    resetTokenCount: () -> Unit,
-    onSendMessage: (String) -> Unit,
-    onChangedMessage: (String) -> Unit,
+    onSendMessage: (String, List<Bitmap>) -> Unit,
     onClose: () -> Unit
 ) {
     var userMessage by rememberSaveable { mutableStateOf("") }
-    val tokens by remainingTokens.collectAsState(initial = -1)
+    var imageUris by rememberSaveable { mutableStateOf<List<Uri>>(emptyList()) }
+    val context = LocalContext.current
+    val view = LocalView.current
+    val bitmaps = imageUris.mapNotNull { it.toBitmap(context) }
+    val listState = rememberLazyListState()
 
+    // Auto-scroll to latest message
+    LaunchedEffect(uiState.messages.size) {
+        if (uiState.messages.isNotEmpty()) {
+            listState.animateScrollToItem(0)
+        }
+    }
+
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Box(
+                            modifier = Modifier
+                                .size(32.dp)
+                                .clip(CircleShape)
+                                .background(MaterialTheme.colorScheme.primaryContainer),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                Icons.Default.AutoAwesome,
+                                contentDescription = null,
+                                modifier = Modifier.size(18.dp),
+                                tint = MaterialTheme.colorScheme.onPrimaryContainer
+                            )
+                        }
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Column {
+                            Text(
+                                "AI Assistant",
+                                style = MaterialTheme.typography.titleMedium
+                            )
+                            Text(
+                                if (textInputEnabled) "Online" else "Thinking…",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = if (textInputEnabled)
+                                    MaterialTheme.colorScheme.primary
+                                else
+                                    MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                },
+                navigationIcon = {
+                    IconButton(onClick = {
+                        view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
+                        onClose()
+                    }) {
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = stringResource(R.string.close_chat)
+                        )
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    scrolledContainerColor = MaterialTheme.colorScheme.surface
+                )
+            )
+        },
+        containerColor = MaterialTheme.colorScheme.surfaceContainerLow
+    ) { paddingValues ->
+        Column(
+            modifier = Modifier
+                .padding(paddingValues)
+                .fillMaxSize()
+        ) {
+            // Messages list
+            LazyColumn(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp),
+                reverseLayout = true,
+                state = listState,
+                verticalArrangement = Arrangement.spacedBy(2.dp)
+            ) {
+                items(uiState.messages) { chat ->
+                    ChatBubble(chat)
+                }
+
+                // Welcome message when empty
+                if (uiState.messages.isEmpty()) {
+                    item {
+                        WelcomeMessage()
+                    }
+                }
+            }
+
+            // Input area
+            MessageInput(
+                textInputEnabled = textInputEnabled,
+                userMessage = userMessage,
+                images = bitmaps,
+                imageUris = imageUris,
+                onSendMessage = {
+                    if (userMessage.isNotBlank() || bitmaps.isNotEmpty()) {
+                        onSendMessage(userMessage, bitmaps)
+                        userMessage = ""
+                        imageUris = emptyList()
+                    }
+                },
+                onMessageChanged = { userMessage = it },
+                onImagesChanged = { imageUris = it },
+            )
+        }
+    }
+}
+
+@Composable
+private fun WelcomeMessage() {
     Column(
         modifier = Modifier
-            .fillMaxSize(),
-        verticalArrangement = Arrangement.Bottom
+            .fillMaxWidth()
+            .padding(32.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Top bar with close button
-        Row(
+        Box(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(8.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+                .size(64.dp)
+                .clip(CircleShape)
+                .background(MaterialTheme.colorScheme.primaryContainer),
+            contentAlignment = Alignment.Center
         ) {
-            Text(
-                text = InferenceModel.model.toString(),
-                style = MaterialTheme.typography.titleSmall
+            Icon(
+                Icons.Default.AutoAwesome,
+                contentDescription = null,
+                modifier = Modifier.size(32.dp),
+                tint = MaterialTheme.colorScheme.onPrimaryContainer
             )
-            Text(
-                text = if (tokens >= 0) "$tokens ${stringResource(R.string.tokens_remaining)}" else "",
-                style = MaterialTheme.typography.titleSmall
-            )
-            // Wrap the buttons in another Row to keep them together
-            Row {
-                IconButton(
-                    onClick = {
-                        InferenceModel.getInstance(context).resetSession()
-                        uiState.clearMessages()
-                        resetTokenCount()
-                    },
-                    enabled = textInputEnabled
-                ) {
-                    Icon(Icons.Default.Refresh, contentDescription = "Clear Chat")
-                }
-
-                IconButton(
-                    onClick = {
-                        InferenceModel.getInstance(context).close()
-                        uiState.clearMessages()
-                        resetTokenCount()
-                        onClose()
-                    },
-                    enabled = textInputEnabled
-                ) {
-                    Icon(Icons.Default.Close, contentDescription = "Close Chat")
-                }
-            }
         }
+        Spacer(modifier = Modifier.height(16.dp))
+        Text(
+            "How can I help?",
+            style = MaterialTheme.typography.headlineSmall,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+        Spacer(modifier = Modifier.height(4.dp))
+        Text(
+            "Ask me about medical analysis, imaging, or patient data",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    }
+}
 
-        if (tokens == 0) {
-            // Show warning label that context is full
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(Color.LightGray)
-                    .padding(8.dp),
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = stringResource(R.string.context_full_message),
-                    style = MaterialTheme.typography.titleSmall,
-                    color = Color.Red,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
-        }
+@Composable
+fun MessageInput(
+    textInputEnabled: Boolean,
+    userMessage: String,
+    images: List<Bitmap>,
+    imageUris: List<Uri>,
+    onSendMessage: () -> Unit,
+    onMessageChanged: (String) -> Unit,
+    onImagesChanged: (List<Uri>) -> Unit
+) {
+    val imagePicker = rememberLauncherForActivityResult(
+        ActivityResultContracts.PickMultipleVisualMedia()
+    ) { onImagesChanged(it) }
 
-        LazyColumn(
-            modifier = Modifier
-                .weight(1f)
-                .fillMaxWidth()
-                .padding(horizontal = 8.dp),
-            reverseLayout = true
-        ) {
-            items(uiState.messages) { chat ->
-                ChatItem(chat)
-            }
-        }
-
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 16.dp, horizontal = 4.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-
-            Column { }
-
-            Spacer(modifier = Modifier.width(8.dp))
-
-            TextField(
-                value = userMessage,
-                onValueChange = { userMessage = it
-                    // Only recompute on first word or when we get a new word
-                    if (!userMessage.contains(" ") || userMessage.trim() != userMessage)  {
-                        onChangedMessage(userMessage)
-                    }
-                },
-                keyboardOptions = KeyboardOptions(
-                    capitalization = KeyboardCapitalization.Sentences,
-                ),
-                label = {
-                    Text(stringResource(R.string.chat_label))
-                },
-                modifier = Modifier
-                    .weight(0.85f)
-                    .onFocusChanged { focusState ->
-                        if (focusState.isFocused) {
-                            onChangedMessage(userMessage)
-                        }
-                    },
-                enabled = textInputEnabled
-            )
-
-            IconButton(
-                onClick = {
-                    if (userMessage.isNotBlank()) {
-                        onSendMessage(userMessage)
-                        userMessage = ""
-                    }
-                },
-                modifier = Modifier
-                    .padding(start = 16.dp)
-                    .align(Alignment.CenterVertically)
-                    .fillMaxWidth()
-                    .weight(0.15f),
-                enabled = textInputEnabled && tokens > 0
-            ) {
-                Icon(
-                    Icons.AutoMirrored.Default.Send,
-                    contentDescription = stringResource(R.string.action_send),
+    Surface(
+        tonalElevation = 3.dp,
+        color = MaterialTheme.colorScheme.surface
+    ) {
+        Column(modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)) {
+            // Image preview row
+            AnimatedVisibility(visible = images.isNotEmpty()) {
+                LazyRow(
                     modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    items(images) { bitmap ->
+                        Box {
+                            Image(
+                                bitmap = bitmap.asImageBitmap(),
+                                contentDescription = "Attached image",
+                                modifier = Modifier
+                                    .size(72.dp)
+                                    .clip(RoundedCornerShape(12.dp)),
+                                contentScale = ContentScale.Crop
+                            )
+                            // Remove badge
+                            FilledIconButton(
+                                onClick = { onImagesChanged(emptyList()) },
+                                modifier = Modifier
+                                    .size(20.dp)
+                                    .align(Alignment.TopEnd),
+                                colors = IconButtonDefaults.filledIconButtonColors(
+                                    containerColor = MaterialTheme.colorScheme.errorContainer
+                                )
+                            ) {
+                                Icon(
+                                    Icons.Default.Close,
+                                    contentDescription = "Remove",
+                                    modifier = Modifier.size(12.dp),
+                                    tint = MaterialTheme.colorScheme.onErrorContainer
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Input row
+            Row(
+                verticalAlignment = Alignment.Bottom,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                // Attach image button
+                FilledTonalIconButton(
+                    onClick = {
+                        imagePicker.launch(
+                            PickVisualMediaRequest(
+                                ActivityResultContracts.PickVisualMedia.ImageOnly
+                            )
+                        )
+                    },
+                    enabled = textInputEnabled,
+                    modifier = Modifier.size(40.dp)
+                ) {
+                    Icon(
+                        Icons.Default.AddPhotoAlternate,
+                        contentDescription = stringResource(R.string.add_image),
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+
+                Spacer(modifier = Modifier.width(8.dp))
+
+                // Text field
+                OutlinedTextField(
+                    value = userMessage,
+                    onValueChange = onMessageChanged,
+                    keyboardOptions = KeyboardOptions(
+                        capitalization = KeyboardCapitalization.Sentences,
+                        imeAction = ImeAction.Send
+                    ),
+                    keyboardActions = KeyboardActions(
+                        onSend = { if (userMessage.isNotBlank()) onSendMessage() }
+                    ),
+                    placeholder = {
+                        Text(
+                            stringResource(R.string.chat_label),
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    },
+                    modifier = Modifier.weight(1f),
+                    enabled = textInputEnabled,
+                    shape = RoundedCornerShape(24.dp),
+                    maxLines = 4,
+                    textStyle = MaterialTheme.typography.bodyMedium
                 )
+
+                Spacer(modifier = Modifier.width(8.dp))
+
+                // Send button
+                val canSend = textInputEnabled && (userMessage.isNotBlank() || images.isNotEmpty())
+                val view = LocalView.current
+                FilledIconButton(
+                    onClick = {
+                        view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
+                        onSendMessage()
+                    },
+                    enabled = canSend,
+                    modifier = Modifier.size(40.dp),
+                    colors = IconButtonDefaults.filledIconButtonColors(
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.onPrimary,
+                        disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                        disabledContentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                ) {
+                    Icon(
+                        Icons.AutoMirrored.Filled.Send,
+                        contentDescription = stringResource(R.string.action_send),
+                        modifier = Modifier.size(18.dp)
+                    )
+                }
             }
         }
     }
 }
 
 @Composable
-fun ChatItem(
-    chatMessage: ChatMessage
-) {
-    val backgroundColor = if (chatMessage.isFromUser) {
-        MaterialTheme.colorScheme.tertiaryContainer
-    } else if (chatMessage.isThinking) {
-        MaterialTheme.colorScheme.primaryContainer
-    } else {
-        MaterialTheme.colorScheme.secondaryContainer
+fun ChatBubble(chatMessage: ChatMessage) {
+    val isUser = chatMessage.isFromUser
+
+    val bubbleColor = when {
+        isUser -> MaterialTheme.colorScheme.primary
+        chatMessage.isThinking -> MaterialTheme.colorScheme.tertiaryContainer
+        else -> MaterialTheme.colorScheme.secondaryContainer
     }
 
-    val bubbleShape = if (chatMessage.isFromUser) {
-        RoundedCornerShape(20.dp, 4.dp, 20.dp, 20.dp)
-    } else {
-        RoundedCornerShape(4.dp, 20.dp, 20.dp, 20.dp)
+    val textColor = when {
+        isUser -> MaterialTheme.colorScheme.onPrimary
+        chatMessage.isThinking -> MaterialTheme.colorScheme.onTertiaryContainer
+        else -> MaterialTheme.colorScheme.onSecondaryContainer
     }
 
-    val horizontalAlignment = if (chatMessage.isFromUser) {
-        Alignment.End
+    val bubbleShape = if (isUser) {
+        RoundedCornerShape(20.dp, 20.dp, 4.dp, 20.dp)
     } else {
-        Alignment.Start
+        RoundedCornerShape(20.dp, 20.dp, 20.dp, 4.dp)
     }
 
     Column(
-        horizontalAlignment = horizontalAlignment,
+        horizontalAlignment = if (isUser) Alignment.End else Alignment.Start,
         modifier = Modifier
-            .padding(horizontal = 8.dp, vertical = 4.dp)
+            .padding(vertical = 4.dp)
             .fillMaxWidth()
     ) {
-        val author = if (chatMessage.isFromUser) {
-            stringResource(R.string.user_label)
-        } else if (chatMessage.isThinking) {
-            stringResource(R.string.thinking_label)
-        } else {
-            stringResource(R.string.model_label)
-        }
+        // Author label
         Text(
-            text = author,
-            style = MaterialTheme.typography.bodySmall,
-            modifier = Modifier.padding(bottom = 4.dp)
+            text = when {
+                chatMessage.isFromUser -> stringResource(R.string.user_label)
+                chatMessage.isThinking -> stringResource(R.string.thinking_label)
+                else -> stringResource(R.string.model_label)
+            },
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(
+                start = if (!isUser) 8.dp else 0.dp,
+                end = if (isUser) 8.dp else 0.dp,
+                bottom = 2.dp
+            )
         )
-        Row {
-            BoxWithConstraints {
-                Card(
-                    colors = CardDefaults.cardColors(containerColor = backgroundColor),
-                    shape = bubbleShape,
-                    modifier = Modifier.widthIn(0.dp, maxWidth * 0.9f)
-                ) {
-                    if (chatMessage.isLoading) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.padding(16.dp)
-                        )
-                    } else {
-                        Text(
-                            text = chatMessage.message,
-                            modifier = Modifier.padding(16.dp)
-                        )
+
+        Surface(
+            color = bubbleColor,
+            shape = bubbleShape,
+            tonalElevation = if (isUser) 0.dp else 1.dp,
+            modifier = Modifier.widthIn(max = 300.dp)
+        ) {
+            if (chatMessage.isLoading) {
+                // Typing indicator
+                TypingIndicator()
+            } else {
+                Column(modifier = Modifier.padding(12.dp)) {
+                    if (chatMessage.images.isNotEmpty()) {
+                        chatMessage.images.forEach { bitmap ->
+                            Image(
+                                bitmap = bitmap.asImageBitmap(),
+                                contentDescription = "",
+                                modifier = Modifier
+                                    .padding(bottom = 8.dp)
+                                    .heightIn(max = 200.dp)
+                                    .fillMaxWidth()
+                                    .clip(RoundedCornerShape(12.dp)),
+                                contentScale = ContentScale.Fit
+                            )
+                        }
                     }
+                    Text(
+                        text = chatMessage.message,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = textColor
+                    )
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun TypingIndicator() {
+    val infiniteTransition = rememberInfiniteTransition(label = "typing")
+
+    Row(
+        modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        repeat(3) { index ->
+            val alpha by infiniteTransition.animateFloat(
+                initialValue = 0.3f,
+                targetValue = 1f,
+                animationSpec = infiniteRepeatable(
+                    animation = tween(600, delayMillis = index * 200),
+                    repeatMode = RepeatMode.Reverse
+                ),
+                label = "dot_$index"
+            )
+            Box(
+                modifier = Modifier
+                    .size(8.dp)
+                    .clip(CircleShape)
+                    .background(
+                        MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = alpha)
+                    )
+            )
+        }
+    }
+}
+
+private fun Uri.toBitmap(context: Context): Bitmap {
+    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+        ImageDecoder.decodeBitmap(ImageDecoder.createSource(context.contentResolver, this))
+    } else {
+        MediaStore.Images.Media.getBitmap(context.contentResolver, this)
     }
 }
