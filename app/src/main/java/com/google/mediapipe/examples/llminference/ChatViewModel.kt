@@ -21,11 +21,7 @@ class ChatViewModel(
     private val _textInputEnabled = MutableStateFlow(true)
     val isTextInputEnabled: StateFlow<Boolean> = _textInputEnabled.asStateFlow()
 
-    fun setInferenceModel(inferenceModel: InferenceModel) {
-        viewModelScope.launch {
-            // You can add any model-specific initialization here
-        }
-    }
+
 
     fun sendMessage(userMessage: String, userImages: List<Bitmap>) {
         viewModelScope.launch(Dispatchers.IO) {

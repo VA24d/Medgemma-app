@@ -9,7 +9,6 @@ import com.google.mediapipe.examples.llminference.ai.MedicalPromptTemplates
 import com.google.mediapipe.examples.llminference.data.*
 import com.google.mediapipe.examples.llminference.repository.ConsultationRepository
 import com.google.mediapipe.examples.llminference.repository.PatientRepository
-import com.google.mediapipe.examples.llminference.voice.VoiceRecognitionManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -25,7 +24,6 @@ class ConsultationViewModel(application: Application) : AndroidViewModel(applica
         database.consultationDao()
     )
     
-    val voiceManager = VoiceRecognitionManager(application)
     private val visionAnalyzer = com.google.mediapipe.examples.llminference.vision.MedicalImageAnalyzer(application)
     private var inferenceModel: InferenceModel? = null
     
@@ -217,7 +215,6 @@ class ConsultationViewModel(application: Application) : AndroidViewModel(applica
 
     override fun onCleared() {
         super.onCleared()
-        voiceManager.destroy()
         visionAnalyzer.close()
     }
 }

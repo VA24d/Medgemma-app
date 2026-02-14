@@ -115,7 +115,7 @@ class FhirExportManager(private val context: Context) {
 
                 withContext(Dispatchers.Main) {
                     Toast.makeText(context, "Export saved to Downloads: $fileName", Toast.LENGTH_LONG).show()
-                    onComplete(File(Environment.DIRECTORY_DOWNLOADS, fileName)) // Return mock file path
+                    onComplete(null) // Scoped storage doesn't return a File path we can use directly
                 }
 
             } catch (e: Exception) {

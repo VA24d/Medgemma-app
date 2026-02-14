@@ -52,12 +52,9 @@ internal fun ChatRoute(
     onClose: () -> Unit
 ) {
     val chatViewModel: ChatViewModel = viewModel(factory = ChatViewModel.getFactory())
-    val context = LocalContext.current
 
-    LaunchedEffect(Unit) {
-        val inferenceModel = InferenceModel.getInstance(context)
-        chatViewModel.setInferenceModel(inferenceModel)
-    }
+
+    // Model is initialized internally by ViewModel factory
 
     val uiState by chatViewModel.uiState.collectAsStateWithLifecycle()
     val textInputEnabled by chatViewModel.isTextInputEnabled.collectAsStateWithLifecycle()

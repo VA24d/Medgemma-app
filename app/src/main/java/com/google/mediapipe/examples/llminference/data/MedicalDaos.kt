@@ -77,6 +77,9 @@ interface ConsultationDao {
     @Delete
     suspend fun deleteConsultation(consultation: ConsultationEntity)
 
+    @Query("DELETE FROM consultations WHERE patientId = :patientId")
+    suspend fun deleteConsultationsForPatient(patientId: Long)
+
     @Query("DELETE FROM consultations")
     suspend fun deleteAllConsultations()
 }

@@ -208,7 +208,22 @@ fun DiagnosisScreen(
                     OutlinedButton(
                         onClick = {
                             view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
-                            diagnosisResult = null
+                            diagnosisResult = null // Clear previous result
+                            isGenerating = true // Immediately show loading state
+                            scope.launch {
+                                try {
+                                    val inferenceModel = com.google.mediapipe.examples.llminference.InferenceModel.getInstance(context)
+                                    val patientSummary = entries.joinToString("\n") { 
+                                        "- [${it.entryType}] ${it.title}: ${it.content.take(100)}..." 
+                                    }
+                                    val prompt = "Patient ID: $patientId. Medical Entries:\n$patientSummary\n\nBased on these entries, provide a comprehensive diagnosis summary, key findings, and suggested next steps. Format in Markdown."
+                                    diagnosisResult = inferenceModel.generateResponse(prompt)
+                                } catch (e: Exception) {
+                                    diagnosisResult = "Error generating diagnosis: ${e.message}"
+                                } finally {
+                                    isGenerating = false
+                                }
+                            }
                         },
                         modifier = Modifier.weight(1f)
                     ) {
@@ -246,7 +261,8 @@ fun DiagnosisScreen(
                     val qrBitmap = remember(diagnosisResult) {
                         try {
                             val writer = QRCodeWriter()
-                            val text = diagnosisResult!!.take(500) // QR has size limits
+                            // QR limit around 2-3k chars for large versions, but safe limit for legibility is lower (800-1000)
+                            val text = if (diagnosisResult!!.length > 800) diagnosisResult!!.take(800) + "..." else diagnosisResult!!
                             val bitMatrix = writer.encode(text, BarcodeFormat.QR_CODE, 512, 512)
                             val bitmap = Bitmap.createBitmap(512, 512, Bitmap.Config.RGB_565)
                             for (x in 0 until 512) {

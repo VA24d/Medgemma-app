@@ -45,7 +45,12 @@ fun PatientsScreen(
     }
 
     val filteredPatients = if (searchQuery.isBlank()) patients
-    else patients.filter { it.name.contains(searchQuery, ignoreCase = true) }
+    else patients.filter { 
+        it.name.contains(searchQuery, ignoreCase = true) ||
+        it.medicalRecordNumber.contains(searchQuery, ignoreCase = true) ||
+        it.phoneNumber.contains(searchQuery, ignoreCase = true) ||
+        it.allergies.contains(searchQuery, ignoreCase = true)
+    }
 
     Scaffold(
         topBar = {

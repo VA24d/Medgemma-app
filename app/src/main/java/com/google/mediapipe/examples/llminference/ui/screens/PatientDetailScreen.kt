@@ -18,6 +18,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.Dispatchers
 import androidx.compose.ui.unit.dp
 import com.google.mediapipe.examples.llminference.data.MedicalDatabase
 import com.google.mediapipe.examples.llminference.data.MedicalEntryEntity
@@ -34,14 +37,18 @@ fun PatientDetailScreen(
     onViewHistory: (Long) -> Unit,
     onViewDiagnosis: (Long) -> Unit,
     onEntryClick: (Long) -> Unit,
-    onEdit: (Long) -> Unit
+    onEdit: (Long) -> Unit,
+    onDelete: () -> Unit = {}
 ) {
     val context = LocalContext.current
     val view = LocalView.current
+    
     val db = remember { MedicalDatabase.getDatabase(context) }
+    val scope = rememberCoroutineScope()
 
     var patient by remember { mutableStateOf<PatientEntity?>(null) }
     var entries by remember { mutableStateOf<List<MedicalEntryEntity>>(emptyList()) }
+    var showDeleteDialog by remember { mutableStateOf(false) }
 
     LaunchedEffect(patientId) {
         patient = db.patientDao().getPatientSync(patientId)
@@ -64,6 +71,9 @@ fun PatientDetailScreen(
                 actions = {
                     IconButton(onClick = { onEdit(patientId) }) {
                         Icon(Icons.Default.Edit, contentDescription = "Edit")
+                    }
+                    IconButton(onClick = { showDeleteDialog = true }) {
+                        Icon(Icons.Default.Delete, contentDescription = "Delete", tint = MaterialTheme.colorScheme.error)
                     }
                     IconButton(onClick = {
                         view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
@@ -234,11 +244,45 @@ fun PatientDetailScreen(
                     }
                 }
             } else {
-                items(entries.take(10), key = { it.id }) { entry ->
+                items(entries, key = { it.id }) { entry ->
                     EntryCard(entry = entry, onClick = { onEntryClick(entry.id) })
                 }
             }
         }
+    }
+
+    if (showDeleteDialog) {
+        AlertDialog(
+            onDismissRequest = { showDeleteDialog = false },
+            title = { Text("Delete Patient?") },
+            text = { Text("This will permanently delete this patient and all their medical records. This action cannot be undone.") },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        scope.launch {
+                            if (patient != null) {
+                                withContext(kotlinx.coroutines.Dispatchers.IO) {
+                                    db.patientDao().deletePatient(patient!!)
+                                    // Also cascade delete entries
+                                    db.medicalEntryDao().deleteAllEntriesForPatient(patient!!.id)
+                                    db.medicalImageDao().deleteAllImagesForPatient(patient!!.id)
+                                    db.consultationDao().deleteConsultationsForPatient(patient!!.id)
+                                }
+                                showDeleteDialog = false
+                                onDelete() // Call back to navigate away
+                                onBack() 
+                            }
+                        }
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
+                ) {
+                    Text("Delete")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDeleteDialog = false }) { Text("Cancel") }
+            }
+        )
     }
 }
 

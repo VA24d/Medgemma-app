@@ -35,19 +35,9 @@ fun ConsultationScreen(
     val diagnosis by viewModel.diagnosis.collectAsState()
     val aiSuggestions by viewModel.aiSuggestions.collectAsState()
     val isGeneratingAI by viewModel.isGeneratingAI.collectAsState()
-    val recognizedText by viewModel.voiceManager.recognizedText.collectAsState()
-    val isListening by viewModel.voiceManager.isListening.collectAsState()
 
-    var currentField by remember { mutableStateOf("symptoms") }
 
-    // Request audio permission
-    val audioPermissionLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.RequestPermission()
-    ) { isGranted ->
-        if (isGranted) {
-            viewModel.voiceManager.startListening()
-        }
-    }
+
 
     LaunchedEffect(patientId) {
         viewModel.loadPatient(patientId)
@@ -55,17 +45,7 @@ fun ConsultationScreen(
         viewModel.setInferenceModel(inferenceModel)
     }
 
-    // Handle voice recognition results
-    LaunchedEffect(recognizedText) {
-        if (recognizedText.isNotEmpty() && !isListening) {
-            when (currentField) {
-                "chiefComplaint" -> viewModel.updateChiefComplaint(chiefComplaint + " " + recognizedText)
-                "symptoms" -> viewModel.updateSymptoms(symptoms + " " + recognizedText)
-                "vitalSigns" -> viewModel.updateVitalSigns(vitalSigns + " " + recognizedText)
-                "diagnosis" -> viewModel.updateDiagnosis(diagnosis + " " + recognizedText)
-            }
-        }
-    }
+
 
     Scaffold(
         topBar = {
@@ -105,12 +85,7 @@ fun ConsultationScreen(
             ConsultationField(
                 label = "Chief Complaint",
                 value = chiefComplaint,
-                onValueChange = { viewModel.updateChiefComplaint(it) },
-                onVoiceClick = {
-                    currentField = "chiefComplaint"
-                    audioPermissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
-                },
-                isListening = isListening && currentField == "chiefComplaint"
+                onValueChange = { viewModel.updateChiefComplaint(it) }
             )
 
             // Symptoms
@@ -118,11 +93,6 @@ fun ConsultationScreen(
                 label = "Symptoms & History",
                 value = symptoms,
                 onValueChange = { viewModel.updateSymptoms(it) },
-                onVoiceClick = {
-                    currentField = "symptoms"
-                    audioPermissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
-                },
-                isListening = isListening && currentField == "symptoms",
                 minLines = 4
             )
 
@@ -131,11 +101,6 @@ fun ConsultationScreen(
                 label = "Vital Signs",
                 value = vitalSigns,
                 onValueChange = { viewModel.updateVitalSigns(it) },
-                onVoiceClick = {
-                    currentField = "vitalSigns"
-                    audioPermissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
-                },
-                isListening = isListening && currentField == "vitalSigns",
                 placeholder = "BP, Temp, Pulse, SpO2, etc."
             )
 
@@ -197,11 +162,6 @@ fun ConsultationScreen(
                 label = "Diagnosis",
                 value = diagnosis,
                 onValueChange = { viewModel.updateDiagnosis(it) },
-                onVoiceClick = {
-                    currentField = "diagnosis"
-                    audioPermissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
-                },
-                isListening = isListening && currentField == "diagnosis",
                 minLines = 3
             )
         }
@@ -213,8 +173,6 @@ private fun ConsultationField(
     label: String,
     value: String,
     onValueChange: (String) -> Unit,
-    onVoiceClick: () -> Unit,
-    isListening: Boolean,
     minLines: Int = 1,
     placeholder: String = ""
 ) {
@@ -231,18 +189,6 @@ private fun ConsultationField(
             modifier = Modifier.fillMaxWidth(),
             minLines = minLines,
             placeholder = { if (placeholder.isNotEmpty()) Text(placeholder) },
-            trailingIcon = {
-                IconButton(onClick = onVoiceClick) {
-                    Icon(
-                        if (isListening) Icons.Default.Settings else Icons.Default.Call,
-                        "Voice input",
-                        tint = if (isListening) 
-                            MaterialTheme.colorScheme.error 
-                        else 
-                            MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-            },
             colors = OutlinedTextFieldDefaults.colors(
                 focusedBorderColor = MaterialTheme.colorScheme.primary,
                 unfocusedBorderColor = MaterialTheme.colorScheme.outline

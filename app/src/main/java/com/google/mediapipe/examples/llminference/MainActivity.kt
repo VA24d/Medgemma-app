@@ -231,7 +231,22 @@ class MainActivity : ComponentActivity() {
                                     },
                                     onEdit = { id ->
                                         navController.navigate("edit_patient/$id")
+                                    },
+                                    onDelete = {
+                                        navController.popBackStack()
                                     }
+                                )
+                            }
+
+                            // ── Entry Detail ──
+                            composable(
+                                "entry_detail/{entryId}",
+                                arguments = listOf(navArgument("entryId") { type = NavType.LongType })
+                            ) { backStackEntry ->
+                                val entryId = backStackEntry.arguments?.getLong("entryId") ?: return@composable
+                                EntryDetailScreen(
+                                    entryId = entryId,
+                                    onBack = { navController.popBackStack() }
                                 )
                             }
 

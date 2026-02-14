@@ -80,6 +80,7 @@ fun AddPatientScreen(
                             isSaving = true
                             scope.launch {
                                 val id = withContext(Dispatchers.IO) {
+                                    val currentTime = System.currentTimeMillis()
                                     val patient = PatientEntity(
                                         id = patientIdToEdit ?: 0, // 0 for insert
                                         name = name.trim(),
@@ -90,7 +91,16 @@ fun AddPatientScreen(
                                         email = email.trim(),
                                         bloodGroup = bloodGroup.trim(),
                                         allergies = allergies.trim(),
-                                        createdAt = if (patientIdToEdit != null) System.currentTimeMillis() else System.currentTimeMillis() // preserve createdAt if we read it, but here we just simplify
+                                        createdAt = if (patientIdToEdit != null) {
+                                            // Ideally we should fetch and preserve original createdAt, but for now we'll just not overwrite it if we could.
+                                            // Since we don't have the original object here easily without re-fetching, 
+                                            // we rely on the DAO's behavior or just accept slight inaccuracy if we don't fetch.
+                                            // Actually, we did fetch it in LaunchedEffect. Enhancing state to hold it would be better.
+                                            // For now, let's just use current time for updated, and try to preserve creation if possible.
+                                            // A better way is:
+                                            db.patientDao().getPatientSync(patientIdToEdit)?.createdAt ?: currentTime
+                                        } else currentTime,
+                                        updatedAt = currentTime
                                     )
                                     val dao = db.patientDao()
                                     if (patientIdToEdit != null) {
@@ -104,7 +114,7 @@ fun AddPatientScreen(
                                 onPatientAdded(id)
                             }
                         },
-                        enabled = !isSaving && name.isNotBlank() && gender.isNotBlank()
+                        enabled = !isSaving && name.isNotBlank() && dob.isNotBlank() && gender.isNotBlank()
                     ) {
                         if (isSaving) {
                             CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp)
