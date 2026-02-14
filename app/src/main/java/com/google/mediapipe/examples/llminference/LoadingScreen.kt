@@ -3,6 +3,9 @@ package com.google.mediapipe.examples.llminference
 import android.content.Context
 import android.content.Intent
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -16,6 +19,7 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import java.io.File
 import java.io.FileOutputStream
+import com.google.mediapipe.examples.llminference.settings.TokenManager
 
 private class MissingAccessTokenException :
     Exception("Please try again after sign in")
@@ -108,7 +112,7 @@ internal fun LoadingRoute(
     }
 }
 
-private fun downloadModel(
+internal fun downloadModel(
     context: Context,
     model: Model,
     client: OkHttpClient,
@@ -117,14 +121,23 @@ private fun downloadModel(
     val requestBuilder = Request.Builder().url(model.url)
 
     if (model.needsAuth) {
-        val accessToken = SecureStorage.getToken(context)
-        if (accessToken.isNullOrEmpty()) {
+        val tokenManager = TokenManager(context)
+        val savedToken = tokenManager.getToken()
+
+        val accessToken = if (!savedToken.isNullOrBlank()) {
+            // Use saved token
+            savedToken
+        } else {
+            // Fall back to OAuth
+            SecureStorage.getToken(context) // Assuming getAccessToken(context) refers to this
+        }
+
+        if (accessToken.isNullOrBlank()) {
             // Trigger LoginActivity if no access token is found
             val intent = Intent(context, LoginActivity::class.java).apply {
                 flags = Intent.FLAG_ACTIVITY_NEW_TASK
             }
             context.startActivity(intent)
-
             throw MissingAccessTokenException()
         } else {
             requestBuilder.addHeader("Authorization", "Bearer $accessToken")
@@ -182,16 +195,75 @@ private suspend fun deleteDownloadedFile(context: Context) {
 fun DownloadIndicator(progress: Int, onCancel: () -> Unit) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+        verticalArrangement = Arrangement.Center,
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(32.dp)
     ) {
-        Text(
-            text = "Downloading Model: $progress%",
-            style = MaterialTheme.typography.titleMedium,
-            modifier = Modifier.padding(bottom = 8.dp)
+        Icon(
+            Icons.Default.CloudDownload,
+            contentDescription = null,
+            modifier = Modifier.size(64.dp),
+            tint = MaterialTheme.colorScheme.primary
         )
-        CircularProgressIndicator(progress = { progress / 100f })
-        Button(onClick = onCancel, modifier = Modifier.padding(top = 8.dp)) {
-            Text("Cancel")
+        Spacer(modifier = Modifier.height(24.dp))
+        Text(
+            text = "Downloading Model",
+            style = MaterialTheme.typography.headlineSmall,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            text = "This may take a few minutes depending on your connection",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center
+        )
+        Spacer(modifier = Modifier.height(32.dp))
+
+        // Progress card
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceVariant
+            )
+        ) {
+            Column(
+                modifier = Modifier.padding(20.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        "Progress",
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Text(
+                        "$progress%",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
+                Spacer(modifier = Modifier.height(12.dp))
+                LinearProgressIndicator(
+                    progress = { progress / 100f },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(8.dp),
+                    trackColor = MaterialTheme.colorScheme.surfaceVariant,
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
+        OutlinedButton(onClick = onCancel) {
+            Icon(Icons.Default.Close, null, modifier = Modifier.size(18.dp))
+            Spacer(modifier = Modifier.width(8.dp))
+            Text("Cancel Download")
         }
     }
 }
@@ -200,15 +272,35 @@ fun DownloadIndicator(progress: Int, onCancel: () -> Unit) {
 fun LoadingIndicator() {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+        verticalArrangement = Arrangement.Center,
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(32.dp)
     ) {
+        Icon(
+            Icons.Default.AutoAwesome,
+            contentDescription = null,
+            modifier = Modifier.size(64.dp),
+            tint = MaterialTheme.colorScheme.primary
+        )
+        Spacer(modifier = Modifier.height(24.dp))
         Text(
             text = stringResource(R.string.loading_model),
-            style = MaterialTheme.typography.titleMedium,
-            modifier = Modifier
-                .padding(bottom = 8.dp)
+            style = MaterialTheme.typography.headlineSmall,
+            color = MaterialTheme.colorScheme.onSurface
         )
-        CircularProgressIndicator()
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            text = "Preparing the AI model for analysis…",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center
+        )
+        Spacer(modifier = Modifier.height(32.dp))
+        CircularProgressIndicator(
+            modifier = Modifier.size(48.dp),
+            strokeWidth = 4.dp
+        )
     }
 }
 
@@ -220,15 +312,41 @@ fun ErrorMessage(
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(32.dp)
     ) {
-        Text(
-            text = errorMessage,
-            color = MaterialTheme.colorScheme.error,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.padding(16.dp)
+        Icon(
+            Icons.Default.ErrorOutline,
+            contentDescription = null,
+            modifier = Modifier.size(64.dp),
+            tint = MaterialTheme.colorScheme.error
         )
-        Button(onClick = onGoBack, modifier = Modifier.padding(top = 16.dp)) {
+        Spacer(modifier = Modifier.height(24.dp))
+        Text(
+            text = "Something went wrong",
+            style = MaterialTheme.typography.headlineSmall,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.errorContainer
+            )
+        ) {
+            Text(
+                text = errorMessage,
+                color = MaterialTheme.colorScheme.onErrorContainer,
+                textAlign = TextAlign.Center,
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.padding(16.dp)
+            )
+        }
+        Spacer(modifier = Modifier.height(24.dp))
+        Button(onClick = onGoBack) {
+            Icon(Icons.AutoMirrored.Filled.ArrowBack, null, modifier = Modifier.size(18.dp))
+            Spacer(modifier = Modifier.width(8.dp))
             Text("Go Back")
         }
     }

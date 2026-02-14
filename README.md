@@ -1,60 +1,48 @@
-# MediaPipe LLM Inference Android Demo
+# MediPro Chronicler
 
 ### Overview
 
-This is a sample app that demonstrates how to use the LLM Inference API to run common text-to-text generation tasks like information retrieval, email drafting, and document summarization.
+This is a sample app that demonstrates how to build a multimodal AI assistant for medical professionals to help them maintain a longitudinal history of their patients. The app uses a large language model (LLM) to understand and respond to text and image inputs, making it a powerful tool for healthcare providers.
 
 This application must be run on a physical Android device to take advantage of the device GPU.
 
-![LLM Inference Demo](llm_inference.png)
+![MediPro Chronicler](llm_inference.png)
 
 ## How to Build the Demo App
 
-### 1. Download the Code
+### 1. Prerequisites
 
-To download the demo code, clone the git repository using the following command:
+*   The **[Android Studio](https://developer.android.com/studio)** IDE. This demo has been tested on Android Studio Hedgehog.
 
-```
-git clone https://github.com/google-ai-edge/mediapipe-samples
-```
+*   A physical Android device with a minimum OS version of SDK 24 (Android 7.0 - Nougat) with developer mode enabled.
 
-After downloading the demo code, you can import the project into Android Studio and run the app with the following instructions.
-
-### 2. Prerequisites
-
-*   The **[Android Studio](https://developer.android.com/studio)**
-    IDE. This demo has been tested on Android Studio Hedgehog.
-
-*   A physical Android device with a minimum OS version of SDK 24 (Android 7.0 -
-    Nougat) with developer mode enabled.
-
-### 3. Build and Run
+### 2. Build and Run
 
 To import and build the demo app:
 
-1. Download [Android Studio](https://developer.android.com/studio) and install.
+1.  Download [Android Studio](https://developer.android.com/studio) and install.
 
-2. From the Android Studio, select **File > New > Import Project**.
+2.  From the Android Studio, select **File > New > Import Project**.
 
-3. Navigate to the demo app `android` directory and select that directory, for example: `.../mediapipe-samples/examples/llm_inference/android`
+3.  Navigate to the demo app `android` directory and select that directory.
 
-4. If Android Studio requests a Gradle Sync, choose **OK**.
+4.  If Android Studio requests a Gradle Sync, choose **OK**.
 
-5. Build the project by selecting **Build > Make Project**.
+5.  Build the project by selecting **Build > Make Project**.
 
-   When the build completes, the Android Studio displays a `BUILD SUCCESSFUL` message in the Build Output status panel.
+    When the build completes, the Android Studio displays a `BUILD SUCCESSFUL` message in the Build Output status panel.
 
 To run the demo app:
 
-1. Ensure that your Android device is connected to your computer and developer mode is enabled.
+1.  Ensure that your Android device is connected to your computer and developer mode is enabled.
 
-2. From Android Studio, run the app by selecting **Run > Run 'app'**.
+2.  From Android Studio, run the app by selecting **Run > Run 'app'**.
 
 ## How to Use the Demo App
 
 ### 1. Select Model
 
-The user first selects a model (e.g. `DEEPSEEK_CPU` for the DeepSeek model) from the model selection screen.
+The user first selects a backend (CPU or GPU) for the model from the model selection screen.
 
 ### 2. Download Model
 
@@ -64,7 +52,8 @@ If authentication and license acknowledgment are required to access the model, t
 
 ### 3. Chat with Model
 
-Once the model is downloaded, the user can interact with it by entering prompts and receiving responses.
+Once the model is downloaded, the user can interact with it by entering prompts and uploading images to receive responses.
 
 ## Reference
+
 For more details, see the [LLM Inference guide for Android](https://developers.google.com/mediapipe/solutions/genai/llm_inference/android).

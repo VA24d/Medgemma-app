@@ -1,5 +1,6 @@
 package com.google.mediapipe.examples.llminference
 
+import android.graphics.Bitmap
 import java.util.UUID
 
 /**
@@ -9,13 +10,14 @@ data class ChatMessage(
     val id: String = UUID.randomUUID().toString(),
     val rawMessage: String = "",
     val author: String,
+    val images: List<Bitmap> = emptyList(),
     val isLoading: Boolean = false,
-    val isThinking: Boolean = false,
+    val isThinking: Boolean = false
 ) {
-    val isEmpty: Boolean
-        get() = rawMessage.trim().isEmpty()
+    val message: String
+        get() = rawMessage
     val isFromUser: Boolean
         get() = author == USER_PREFIX
-    val message: String
-        get() = rawMessage.trim()
+    val isEmpty: Boolean
+        get() = rawMessage.isEmpty()
 }

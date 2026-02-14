@@ -1,10 +1,12 @@
 package com.google.mediapipe.examples.llminference
 
 import android.content.Context
+import android.graphics.Bitmap
 import android.net.Uri
 import android.util.Log
 import com.google.common.util.concurrent.ListenableFuture
 import com.google.mediapipe.tasks.genai.llminference.LlmInference
+import com.google.mediapipe.tasks.genai.llminference.LlmInference.Backend
 import com.google.mediapipe.tasks.genai.llminference.LlmInferenceSession
 import com.google.mediapipe.tasks.genai.llminference.LlmInferenceSession.LlmInferenceSessionOptions
 import com.google.mediapipe.tasks.genai.llminference.ProgressListener
@@ -62,7 +64,24 @@ class InferenceModel private constructor(context: Context) {
         try {
             llmInference = LlmInference.createFromOptions(context, inferenceOptions)
         } catch (e: Exception) {
-            Log.e(TAG, "Load model error: ${e.message}", e)
+            Log.e(TAG, "Load model error (${model.preferredBackend}): ${e.message}", e)
+
+            // Fallback: if GPU/NPU fails, retry with CPU
+            if (model.preferredBackend != Backend.CPU) {
+                Log.w(TAG, "Retrying with CPU backend as fallback…")
+                val cpuOptions = LlmInference.LlmInferenceOptions.builder()
+                    .setModelPath(modelPath(context))
+                    .setMaxTokens(MAX_TOKENS)
+                    .setPreferredBackend(Backend.CPU)
+                    .build()
+                try {
+                    llmInference = LlmInference.createFromOptions(context, cpuOptions)
+                    Log.i(TAG, "Successfully loaded model with CPU fallback")
+                    return
+                } catch (cpuError: Exception) {
+                    Log.e(TAG, "CPU fallback also failed: ${cpuError.message}", cpuError)
+                }
+            }
             throw ModelLoadFailException()
         }
     }
@@ -83,14 +102,36 @@ class InferenceModel private constructor(context: Context) {
         }
     }
 
-    fun generateResponseAsync(prompt: String, progressListener: ProgressListener<String>) : ListenableFuture<String> {
+    fun generateResponseAsync(
+        prompt: String,
+        images: List<Bitmap>,
+        progressListener: ProgressListener<String>
+    ) : ListenableFuture<String> {
         llmInferenceSession.addQueryChunk(prompt)
         return llmInferenceSession.generateResponseAsync(progressListener)
     }
 
+    suspend fun generateResponse(prompt: String): String = kotlinx.coroutines.suspendCancellableCoroutine { continuation ->
+        llmInferenceSession.addQueryChunk(prompt)
+        val future = llmInferenceSession.generateResponseAsync { _, _ -> /* progress ignored for sync */ }
+        
+        future.addListener(
+            {
+                try {
+                    continuation.resumeWith(Result.success(future.get()))
+                } catch (e: Exception) {
+                    continuation.resumeWith(Result.failure(e))
+                }
+            },
+            { command -> command.run() } // Direct executor
+        )
+        
+        continuation.invokeOnCancellation { future.cancel(true) }
+    }
+
     fun estimateTokensRemaining(prompt: String): Int {
-        val context = uiState.messages.joinToString { it.rawMessage } + prompt
-        if (context.isEmpty()) return -1 // Specia marker if no content has been added
+        val context = uiState.messages.joinToString { it.message } + prompt
+        if (context.isEmpty()) return -1 // Special marker if no content has been added
 
         val sizeOfAllMessages = llmInferenceSession.sizeInTokens(context)
         val approximateControlTokens = uiState.messages.size * 3

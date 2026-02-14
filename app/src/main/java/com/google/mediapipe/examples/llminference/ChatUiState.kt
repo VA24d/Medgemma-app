@@ -73,10 +73,11 @@ class UiState(
     }
 
     /** Creates a new message with the specified text and author. */
-    fun addMessage(text: String, author: String) {
+    fun addMessage(text: String, author: String, images: List<android.graphics.Bitmap> = emptyList()) {
         val chatMessage = ChatMessage(
             rawMessage = text,
-            author = author
+            author = author,
+            images = images
         )
         _messages.add(chatMessage)
         _currentMessageId = chatMessage.id
