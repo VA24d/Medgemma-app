@@ -2,9 +2,13 @@ package com.google.mediapipe.examples.llminference.ui.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.SuggestionChip
+import androidx.compose.material3.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
@@ -387,6 +391,34 @@ fun NavigationSidebar(
                         label = { Text("City / Region / Country") },
                         modifier = Modifier.fillMaxWidth()
                     )
+                    
+                    val allLocations = remember {
+                        listOf(
+                            "New York, USA", "San Francisco, USA", "London, UK", 
+                            "Paris, France", "Berlin, Germany", "Mumbai, India", 
+                            "Tokyo, Japan", "Sydney, Australia", "Toronto, Canada", 
+                            "Singapore", "Dubai, UAE"
+                        )
+                    }
+                    val filteredLocations = remember(location) {
+                        if (location.isBlank()) allLocations
+                        else allLocations.filter { it.contains(location, ignoreCase = true) }
+                    }
+
+                    if (filteredLocations.isNotEmpty()) {
+                        Spacer(modifier = Modifier.height(8.dp))
+                        LazyRow(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            contentPadding = PaddingValues(vertical = 4.dp)
+                        ) {
+                            items(filteredLocations) { suggestion ->
+                                SuggestionChip(
+                                    onClick = { location = suggestion },
+                                    label = { Text(suggestion) }
+                                )
+                            }
+                        }
+                    }
                 }
             },
             confirmButton = {

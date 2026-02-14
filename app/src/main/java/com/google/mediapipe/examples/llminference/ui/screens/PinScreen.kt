@@ -29,7 +29,8 @@ import kotlinx.coroutines.delay
 
 @Composable
 fun PinScreen(
-    onPinVerified: () -> Unit
+    onPinVerified: () -> Unit,
+    onCancel: (() -> Unit)? = null
 ) {
     val context = LocalContext.current
     val view = LocalView.current
@@ -240,6 +241,13 @@ fun PinScreen(
                             modifier = Modifier.size(28.dp)
                         )
                     }
+                }
+            }
+
+            // Cancel button
+            if (onCancel != null) {
+                TextButton(onClick = onCancel) {
+                    Text("Cancel", color = MaterialTheme.colorScheme.secondary)
                 }
             }
         }

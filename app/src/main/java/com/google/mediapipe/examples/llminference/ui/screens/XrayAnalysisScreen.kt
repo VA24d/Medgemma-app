@@ -52,6 +52,27 @@ fun XrayAnalysisScreen(
 
     val typeName = if (analysisType == "HISTOPATHOLOGY") "Histopathology" else "X-ray / MRI"
 
+            // Camera logic
+    var tempCameraUri by remember { mutableStateOf<Uri?>(null) }
+    
+    val cameraLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.TakePicture()
+    ) { success ->
+        if (success && tempCameraUri != null) {
+            selectedImageUri = tempCameraUri
+        }
+    }
+
+    fun createImageUri(): Uri {
+        val storageDir = java.io.File(context.filesDir, "medical_images").apply { mkdirs() }
+        val file = java.io.File(storageDir, "camera_capture_${System.currentTimeMillis()}.jpg")
+        return androidx.core.content.FileProvider.getUriForFile(
+            context,
+            "${context.packageName}.provider",
+            file
+        )
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -111,7 +132,6 @@ fun XrayAnalysisScreen(
         ) {
             // Image upload area
             Card(
-                onClick = { imagePickerLauncher.launch("image/*") },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(200.dp),
@@ -133,8 +153,17 @@ fun XrayAnalysisScreen(
                             )
                             Spacer(modifier = Modifier.height(8.dp))
                             Text("Image selected", style = MaterialTheme.typography.bodyMedium)
-                            TextButton(onClick = { imagePickerLauncher.launch("image/*") }) {
-                                Text("Change image")
+                            Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                                TextButton(onClick = { imagePickerLauncher.launch("image/*") }) {
+                                    Text("Gallery")
+                                }
+                                TextButton(onClick = {
+                                    val uri = createImageUri()
+                                    tempCameraUri = uri
+                                    cameraLauncher.launch(uri)
+                                }) {
+                                    Text("Camera")
+                                }
                             }
                         }
                     } else {
@@ -148,10 +177,27 @@ fun XrayAnalysisScreen(
                             )
                             Spacer(modifier = Modifier.height(8.dp))
                             Text(
-                                "Tap to upload $typeName image",
+                                "Add $typeName Image",
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                                Button(onClick = { imagePickerLauncher.launch("image/*") }) {
+                                    Icon(Icons.Default.PhotoLibrary, null)
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Text("Gallery")
+                                }
+                                OutlinedButton(onClick = {
+                                    val uri = createImageUri()
+                                    tempCameraUri = uri
+                                    cameraLauncher.launch(uri)
+                                }) {
+                                    Icon(Icons.Default.PhotoCamera, null)
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Text("Camera")
+                                }
+                            }
                         }
                     }
                 }

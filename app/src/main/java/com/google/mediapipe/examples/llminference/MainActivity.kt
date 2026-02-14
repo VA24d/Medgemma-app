@@ -90,9 +90,9 @@ class MainActivity : ComponentActivity() {
                                     }
                                 },
                                 onChangePin = {
-                                    prefs.isPinSet = false // Reset PIN state
+                                    prefs.isPinSet = false // Reset PIN state to force UI to show "Create PIN"
                                     scope.launch { drawerState.close() }
-                                    navController.navigate(PIN_SCREEN) {
+                                    navController.navigate("pin?changeMode=true") {
                                         popUpTo(0) { inclusive = true }
                                     }
                                 },
@@ -140,12 +140,26 @@ class MainActivity : ComponentActivity() {
                             }
 
                             // ── PIN ──
-                            composable(PIN_SCREEN) {
-                                PinScreen(onPinVerified = {
-                                    navController.navigate(PATIENTS_SCREEN) {
-                                        popUpTo(PIN_SCREEN) { inclusive = true }
-                                    }
-                                })
+                            composable(
+                                "pin?changeMode={changeMode}",
+                                arguments = listOf(navArgument("changeMode") { defaultValue = false })
+                            ) { backStackEntry ->
+                                val isChangeMode = backStackEntry.arguments?.getBoolean("changeMode") ?: false
+
+                                PinScreen(
+                                    onPinVerified = {
+                                        navController.navigate(PATIENTS_SCREEN) {
+                                            popUpTo(PIN_SCREEN) { inclusive = true }
+                                        }
+                                    },
+                                    onCancel = if (isChangeMode) {
+                                        {
+                                            // Restore PIN state and go back
+                                            prefs.isPinSet = true
+                                            navController.popBackStack()
+                                        }
+                                    } else null
+                                )
                             }
 
                             // ── Patients List ──

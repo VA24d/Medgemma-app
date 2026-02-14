@@ -15,6 +15,10 @@ import java.util.Locale
 
 import kotlinx.coroutines.flow.first
 
+import android.content.ContentValues
+import android.os.Build
+import android.provider.MediaStore
+
 class FhirExportManager(private val context: Context) {
 
     private val db = MedicalDatabase.getDatabase(context)
@@ -28,6 +32,7 @@ class FhirExportManager(private val context: Context) {
             try {
                 // 1. Fetch all data
                 val patients = db.patientDao().getAllPatients().first()
+
                 if (patients.isEmpty()) {
                     withContext(Dispatchers.Main) {
                         Toast.makeText(context, "No patients to export", Toast.LENGTH_SHORT).show()
@@ -57,7 +62,9 @@ class FhirExportManager(private val context: Context) {
                         Address: ${patient.address}
                     """.trimIndent()
 
-                    onProgress("Converting patient ${index + 1}/$total: ${patient.name}...")
+                    withContext(Dispatchers.Main) {
+                        onProgress("Converting patient ${index + 1}/$total: ${patient.name}...")
+                    }
                     
                     // Suspend generation for export
                     val fhirJson = try {
@@ -85,17 +92,30 @@ class FhirExportManager(private val context: Context) {
 
                 fhirBundle.append("\n  ]\n}")
 
-                // 3. Save to file
+                // 3. Save to file using MediaStore (Scoped Storage compliant)
                 val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
                 val fileName = "medgemma_fhir_export_$timestamp.json"
-                val downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
-                val file = File(downloadsDir, fileName)
-                
-                file.writeText(fhirBundle.toString())
-                
+                val content = fhirBundle.toString()
+
+                val resolver = context.contentResolver
+                val contentValues = ContentValues().apply {
+                    put(MediaStore.MediaColumns.DISPLAY_NAME, fileName)
+                    put(MediaStore.MediaColumns.MIME_TYPE, "application/json")
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                        put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS)
+                    }
+                }
+
+                val uri = resolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, contentValues)
+                    ?: throw Exception("Failed to create file in Downloads")
+
+                resolver.openOutputStream(uri)?.use { outputStream ->
+                    outputStream.write(content.toByteArray())
+                }
+
                 withContext(Dispatchers.Main) {
                     Toast.makeText(context, "Export saved to Downloads: $fileName", Toast.LENGTH_LONG).show()
-                    onComplete(file)
+                    onComplete(File(Environment.DIRECTORY_DOWNLOADS, fileName)) // Return mock file path
                 }
 
             } catch (e: Exception) {

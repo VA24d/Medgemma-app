@@ -44,40 +44,20 @@ fun RecordingScreen(
     val view = LocalView.current
     val db = remember { MedicalDatabase.getDatabase(context) }
     val scope = rememberCoroutineScope()
-    val voiceManager = remember { VoiceRecognitionManager(context) }
-
-    var hasPermission by remember {
-        mutableStateOf(
-            ContextCompat.checkSelfPermission(
-                context,
-                Manifest.permission.RECORD_AUDIO
-            ) == PackageManager.PERMISSION_GRANTED
-        )
-    }
-
-    val permissionLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestPermission(),
-        onResult = { isGranted -> hasPermission = isGranted }
-    )
-
-    val recognizedText by voiceManager.recognizedText.collectAsState()
-    val isListening by voiceManager.isListening.collectAsState()
-    val error by voiceManager.error.collectAsState()
 
     var title by remember { mutableStateOf("") }
     var fullText by remember { mutableStateOf("") }
     var isSaving by remember { mutableStateOf(false) }
 
-    // Update full text when new recognition comes in
-    LaunchedEffect(recognizedText) {
-        if (recognizedText.isNotBlank()) {
-            fullText = if (fullText.isBlank()) recognizedText else "$fullText $recognizedText"
-        }
-    }
-
-    DisposableEffect(Unit) {
-        onDispose {
-            voiceManager.destroy()
+    val speechRecognizerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == android.app.Activity.RESULT_OK) {
+            val results = result.data?.getStringArrayListExtra(android.speech.RecognizerIntent.EXTRA_RESULTS)
+            val spokenText = results?.get(0)
+            if (!spokenText.isNullOrBlank()) {
+                fullText = if (fullText.isBlank()) spokenText else "$fullText $spokenText"
+            }
         }
     }
 
@@ -135,69 +115,39 @@ fun RecordingScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            if (!hasPermission) {
-                Card(
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.errorContainer
-                    ),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Column(
-                        modifier = Modifier.padding(16.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Text(
-                            "Microphone permission required",
-                            color = MaterialTheme.colorScheme.onErrorContainer
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Button(onClick = { permissionLauncher.launch(Manifest.permission.RECORD_AUDIO) }) {
-                            Text("Grant Permission")
-                        }
-                    }
-                }
-            }
-
-            // Recording Controls
+            // Recording Controls (System Intent)
             Box(
                 modifier = Modifier
                     .size(120.dp)
                     .clip(CircleShape)
-                    .background(
-                        if (isListening) MaterialTheme.colorScheme.errorContainer
-                        else MaterialTheme.colorScheme.primaryContainer
-                    )
-                    .clickable(enabled = hasPermission) {
-                        view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
-                        if (isListening) {
-                            voiceManager.stopListening()
-                        } else {
-                            voiceManager.startListening()
+                    .background(MaterialTheme.colorScheme.primaryContainer)
+                    .clickable {
+                        view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
+                        val intent = android.content.Intent(android.speech.RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
+                            putExtra(android.speech.RecognizerIntent.EXTRA_LANGUAGE_MODEL, android.speech.RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
+                            putExtra(android.speech.RecognizerIntent.EXTRA_PROMPT, "Speak now...")
+                        }
+                        try {
+                            speechRecognizerLauncher.launch(intent)
+                        } catch (e: Exception) {
+                            // Handle case where no voice recognizer is present
+                            // Toast.makeText(context, "No speech recognizer found", Toast.LENGTH_SHORT).show()
                         }
                     },
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
-                    if (isListening) Icons.Default.Stop else Icons.Default.Mic,
-                    contentDescription = if (isListening) "Stop" else "Record",
+                    Icons.Default.Mic,
+                    contentDescription = "Record",
                     modifier = Modifier.size(48.dp),
-                    tint = if (isListening) MaterialTheme.colorScheme.error
-                    else MaterialTheme.colorScheme.primary
+                    tint = MaterialTheme.colorScheme.primary
                 )
             }
 
             Text(
-                if (isListening) "Listening..." else "Tap to Record",
+                "Tap to Dictate",
                 style = MaterialTheme.typography.labelLarge
             )
-
-            if (error != null) {
-                Text(
-                    text = error!!,
-                    color = MaterialTheme.colorScheme.error,
-                    style = MaterialTheme.typography.bodySmall
-                )
-            }
 
             OutlinedTextField(
                 value = title,
