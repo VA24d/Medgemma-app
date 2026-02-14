@@ -1,66 +1,326 @@
 package com.google.mediapipe.examples.llminference
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.runtime.Composable
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.platform.LocalContext
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import okhttp3.OkHttpClient
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
+import com.google.mediapipe.examples.llminference.settings.AppPreferences
+import com.google.mediapipe.examples.llminference.ui.screens.*
+import com.google.mediapipe.examples.llminference.ui.components.NavigationSidebar
 import com.google.mediapipe.examples.llminference.ui.theme.LLMInferenceTheme
 
+// Navigation routes
+const val SPLASH_SCREEN = "splash"
+const val PIN_SCREEN = "pin"
+const val PATIENTS_SCREEN = "patients"
+const val ADD_PATIENT_SCREEN = "add_patient"
+const val PATIENT_DETAIL_SCREEN = "patient_detail/{patientId}"
+const val NEW_ENTRY_SCREEN = "new_entry/{patientId}"
+const val XRAY_ANALYSIS_SCREEN = "xray_analysis/{patientId}/{analysisType}"
+const val MANUAL_NOTES_SCREEN = "manual_notes/{patientId}"
+const val HISTORY_SCREEN = "history/{patientId}"
+const val DIAGNOSIS_SCREEN = "diagnosis/{patientId}"
+const val QUICK_ANALYSIS_SCREEN = "quick_analysis"
+
+// Keep old routes for model loading / chat
 const val START_SCREEN = "start_screen"
+const val WAITING_SCREEN = "waiting_screen"
 const val LOAD_SCREEN = "load_screen"
 const val CHAT_SCREEN = "chat_screen"
 
 class MainActivity : ComponentActivity() {
+    @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContent {
-            LLMInferenceTheme {
-                Scaffold(
-                    topBar = { AppBar() }
-                ) { innerPadding ->
-                    // A surface container using the 'background' color from the theme
-                    Surface(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(innerPadding),
-                        color = MaterialTheme.colorScheme.background,
-                    ) {
-                        val navController = rememberNavController()
-                        val startDestination = intent.getStringExtra("NAVIGATE_TO") ?: START_SCREEN
 
+        setContent {
+            val prefs = remember { AppPreferences(applicationContext) }
+            prefs.initTheme()
+
+            LLMInferenceTheme {
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background,
+                ) {
+                    val navController = rememberNavController()
+                    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+                    val scope = rememberCoroutineScope()
+
+                    // Background model pre-download on app boot
+                    val appContext = LocalContext.current.applicationContext
+                    LaunchedEffect(Unit) {
+                        launch(Dispatchers.IO) {
+                            try {
+                                if (!InferenceModel.modelExists(appContext) && InferenceModel.model.url.isNotEmpty()) {
+                                    Log.d("MainActivity", "Starting background model pre-download…")
+                                    val client = OkHttpClient()
+                                    downloadModel(appContext, InferenceModel.model, client) { /* silent */ }
+                                    Log.d("MainActivity", "Background model pre-download complete")
+                                }
+                            } catch (e: Exception) {
+                                Log.w("MainActivity", "Background pre-download skipped: ${e.message}")
+                            }
+                        }
+                    }
+
+                    // Sidebar as modal drawer
+                    ModalNavigationDrawer(
+                        drawerState = drawerState,
+                        drawerContent = {
+                            NavigationSidebar(
+                                isOpen = true,
+                                onClose = { scope.launch { drawerState.close() } },
+                                onSignOut = {
+                                    scope.launch { drawerState.close() }
+                                    navController.navigate(PIN_SCREEN) {
+                                        popUpTo(0) { inclusive = true }
+                                    }
+                                },
+                                onChangePin = {
+                                    prefs.isPinSet = false // Reset PIN state
+                                    scope.launch { drawerState.close() }
+                                    navController.navigate(PIN_SCREEN) {
+                                        popUpTo(0) { inclusive = true }
+                                    }
+                                },
+                                onExportFhir = {
+                                    val exportManager = com.google.mediapipe.examples.llminference.data.FhirExportManager(appContext)
+                                    val inferenceModel = InferenceModel.getInstance(appContext)
+                                    scope.launch {
+                                        exportManager.exportAllPatientsToFhir(
+                                            inferenceModel = inferenceModel,
+                                            onProgress = { /* Optional: show progress notification */ },
+                                            onComplete = { /* Toast handled in manager */ }
+                                        )
+                                    }
+                                },
+                                onDeleteAllData = {
+                                    scope.launch(Dispatchers.IO) {
+                                        val db = com.google.mediapipe.examples.llminference.data.MedicalDatabase.getDatabase(appContext)
+                                        db.patientDao().deleteAllPatients()
+                                        db.medicalImageDao().deleteAllImages()
+                                        db.consultationDao().deleteAllConsultations()
+                                        db.medicalEntryDao().deleteAllEntries()
+                                        
+                                        // Clear images from disk
+                                        val imagesDir = java.io.File(appContext.filesDir, "medical_images")
+                                        if (imagesDir.exists()) {
+                                            imagesDir.deleteRecursively()
+                                        }
+                                    }
+                                }
+                            )
+                        },
+                        gesturesEnabled = drawerState.isOpen
+                    ) {
                         NavHost(
                             navController = navController,
-                            startDestination = startDestination
+                            startDestination = SPLASH_SCREEN
                         ) {
-                            composable(START_SCREEN) {
-                                SelectionRoute(
-                                    onModelSelected = {
-                                        navController.navigate(LOAD_SCREEN) {
-                                            popUpTo(START_SCREEN) { inclusive = true }
-                                            launchSingleTop = true
+                            // ── Splash ──
+                            composable(SPLASH_SCREEN) {
+                                SplashScreen(onFinished = {
+                                    navController.navigate(PIN_SCREEN) {
+                                        popUpTo(SPLASH_SCREEN) { inclusive = true }
+                                    }
+                                })
+                            }
+
+                            // ── PIN ──
+                            composable(PIN_SCREEN) {
+                                PinScreen(onPinVerified = {
+                                    navController.navigate(PATIENTS_SCREEN) {
+                                        popUpTo(PIN_SCREEN) { inclusive = true }
+                                    }
+                                })
+                            }
+
+                            // ── Patients List ──
+                            composable(PATIENTS_SCREEN) {
+                                PatientsScreen(
+                                    onPatientClick = { patientId ->
+                                        navController.navigate("patient_detail/$patientId")
+                                    },
+                                    onNewPatient = {
+                                        navController.navigate(ADD_PATIENT_SCREEN)
+                                    },
+                                    onQuickAnalysis = {
+                                        // Quick analysis goes to model loading then chat
+                                        navController.navigate(START_SCREEN)
+                                    },
+                                    onOpenSidebar = {
+                                        scope.launch { drawerState.open() }
+                                    }
+                                )
+                            }
+
+                            // ── Add Patient ──
+                            composable(ADD_PATIENT_SCREEN) {
+                                AddPatientScreen(
+                                    onBack = { navController.popBackStack() },
+                                    onPatientAdded = { patientId ->
+                                        navController.navigate("patient_detail/$patientId") {
+                                            popUpTo(ADD_PATIENT_SCREEN) { inclusive = true }
                                         }
                                     }
                                 )
+                            }
+                            
+                            // ── Edit Patient ──
+                            composable(
+                                "edit_patient/{patientId}",
+                                arguments = listOf(navArgument("patientId") { type = NavType.LongType })
+                            ) { backStackEntry ->
+                                val patientId = backStackEntry.arguments?.getLong("patientId") ?: return@composable
+                                AddPatientScreen(
+                                    onBack = { navController.popBackStack() },
+                                    onPatientAdded = { _ ->
+                                        navController.popBackStack() // Go back to detail
+                                    },
+                                    patientIdToEdit = patientId
+                                )
+                            }
+
+                            // ── Patient Detail ──
+                            composable(
+                                PATIENT_DETAIL_SCREEN,
+                                arguments = listOf(navArgument("patientId") { type = NavType.LongType })
+                            ) { backStackEntry ->
+                                val patientId = backStackEntry.arguments?.getLong("patientId") ?: return@composable
+                                PatientDetailScreen(
+                                    patientId = patientId,
+                                    onBack = { navController.popBackStack() },
+                                    onNewEntry = { id ->
+                                        navController.navigate("new_entry/$id")
+                                    },
+                                    onViewHistory = { id ->
+                                        navController.navigate("history/$id")
+                                    },
+                                    onViewDiagnosis = { id ->
+                                        navController.navigate("diagnosis/$id")
+                                    },
+                                    onEntryClick = { /* TODO: Entry detail view */ },
+                                    onEdit = { id ->
+                                        navController.navigate("edit_patient/$id")
+                                    }
+                                )
+                            }
+
+                            // ── New Entry (type selection) ──
+                            composable(
+                                NEW_ENTRY_SCREEN,
+                                arguments = listOf(navArgument("patientId") { type = NavType.LongType })
+                            ) { backStackEntry ->
+                                val patientId = backStackEntry.arguments?.getLong("patientId") ?: return@composable
+                                NewEntryScreen(
+                                    patientId = patientId,
+                                    onBack = { navController.popBackStack() },
+                                    onSelectType = { id, type ->
+                                        when (type) {
+                                            "MANUAL" -> navController.navigate("manual_notes/$id")
+                                            "XRAY", "HISTOPATHOLOGY" -> navController.navigate("xray_analysis/$id/$type")
+                                            "RECORDING" -> {
+                                                // TODO: Recording screen
+                                                navController.navigate("manual_notes/$id")
+                                            }
+                                        }
+                                    }
+                                )
+                            }
+
+                            // ── X-ray / Histopathology Analysis ──
+                            composable(
+                                XRAY_ANALYSIS_SCREEN,
+                                arguments = listOf(
+                                    navArgument("patientId") { type = NavType.LongType },
+                                    navArgument("analysisType") { type = NavType.StringType }
+                                )
+                            ) { backStackEntry ->
+                                val patientId = backStackEntry.arguments?.getLong("patientId") ?: return@composable
+                                val analysisType = backStackEntry.arguments?.getString("analysisType") ?: "XRAY"
+                                XrayAnalysisScreen(
+                                    patientId = patientId,
+                                    analysisType = analysisType,
+                                    onBack = { navController.popBackStack() },
+                                    onSaved = {
+                                        navController.navigate("patient_detail/$patientId") {
+                                            popUpTo("new_entry/$patientId") { inclusive = true }
+                                        }
+                                    }
+                                )
+                            }
+
+                            // ── Manual Notes ──
+                            composable(
+                                MANUAL_NOTES_SCREEN,
+                                arguments = listOf(navArgument("patientId") { type = NavType.LongType })
+                            ) { backStackEntry ->
+                                val patientId = backStackEntry.arguments?.getLong("patientId") ?: return@composable
+                                ManualNotesScreen(
+                                    patientId = patientId,
+                                    onBack = { navController.popBackStack() },
+                                    onSaved = {
+                                        navController.navigate("patient_detail/$patientId") {
+                                            popUpTo("new_entry/$patientId") { inclusive = true }
+                                        }
+                                    }
+                                )
+                            }
+
+                            // ── Longitudinal History ──
+                            composable(
+                                HISTORY_SCREEN,
+                                arguments = listOf(navArgument("patientId") { type = NavType.LongType })
+                            ) { backStackEntry ->
+                                val patientId = backStackEntry.arguments?.getLong("patientId") ?: return@composable
+                                LongitudinalHistoryScreen(
+                                    patientId = patientId,
+                                    onBack = { navController.popBackStack() }
+                                )
+                            }
+
+                            // ── Diagnosis ──
+                            composable(
+                                DIAGNOSIS_SCREEN,
+                                arguments = listOf(navArgument("patientId") { type = NavType.LongType })
+                            ) { backStackEntry ->
+                                val patientId = backStackEntry.arguments?.getLong("patientId") ?: return@composable
+                                DiagnosisScreen(
+                                    patientId = patientId,
+                                    onBack = { navController.popBackStack() }
+                                )
+                            }
+
+                            // ── Legacy: Model Selection (for Quick Analysis) ──
+                            composable(START_SCREEN) {
+                                SelectionRoute(
+                                    onModelSelected = {
+                                        navController.navigate(WAITING_SCREEN) {
+                                            popUpTo(START_SCREEN) { inclusive = true }
+                                        }
+                                    }
+                                )
+                            }
+
+                            composable(WAITING_SCREEN) {
+                                WaitingScreen(onFinished = {
+                                    navController.navigate(LOAD_SCREEN) {
+                                        popUpTo(WAITING_SCREEN) { inclusive = true }
+                                    }
+                                })
                             }
 
                             composable(LOAD_SCREEN) {
@@ -68,13 +328,11 @@ class MainActivity : ComponentActivity() {
                                     onModelLoaded = {
                                         navController.navigate(CHAT_SCREEN) {
                                             popUpTo(LOAD_SCREEN) { inclusive = true }
-                                            launchSingleTop = true
                                         }
                                     },
                                     onGoBack = {
-                                        navController.navigate(START_SCREEN) {
+                                        navController.navigate(PATIENTS_SCREEN) {
                                             popUpTo(LOAD_SCREEN) { inclusive = true }
-                                            launchSingleTop = true
                                         }
                                     }
                                 )
@@ -83,43 +341,15 @@ class MainActivity : ComponentActivity() {
                             composable(CHAT_SCREEN) {
                                 ChatRoute(
                                     onClose = {
-                                        navController.navigate(START_SCREEN) {
-                                            popUpTo(LOAD_SCREEN) { inclusive = true }
-                                            launchSingleTop = true
+                                        navController.navigate(PATIENTS_SCREEN) {
+                                            popUpTo(CHAT_SCREEN) { inclusive = true }
                                         }
-                                    })
+                                    }
+                                )
                             }
                         }
                     }
                 }
-            }
-        }
-    }
-
-    // TopAppBar is marked as experimental in Material 3
-    @OptIn(ExperimentalMaterial3Api::class)
-    @Composable
-    fun AppBar() {
-        Column(
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            TopAppBar(
-                title = { Text(stringResource(R.string.app_name)) },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.primary,
-                ),
-            )
-            Box(
-                modifier = Modifier.background(MaterialTheme.colorScheme.surfaceContainer)
-            ) {
-                Text(
-                    text = stringResource(R.string.disclaimer),
-                    textAlign = TextAlign.Center,
-                    style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier.fillMaxWidth()
-                        .padding(8.dp)
-                )
             }
         }
     }
