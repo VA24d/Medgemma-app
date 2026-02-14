@@ -189,10 +189,17 @@ fun XrayAnalysisScreen(
                     onClick = {
                         view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
                         isAnalyzing = true
-                        // TODO: Integrate with MedGemma inference
-                        analysisResult = "AI analysis will be generated when MedGemma model is loaded. " +
-                                "Upload saved for future analysis."
-                        isAnalyzing = false
+                        scope.launch {
+                            try {
+                                val inferenceModel = com.google.mediapipe.examples.llminference.InferenceModel.getInstance(context)
+                                val prompt = "Analyze this $typeName image. Title: $title. Body Part: $bodyPart. Context: $clinicalContext. Provide a concise radiological report or histopathological assessment."
+                                analysisResult = inferenceModel.generateResponse(prompt)
+                            } catch (e: Exception) {
+                                analysisResult = "Error generating analysis: ${e.message}"
+                            } finally {
+                                isAnalyzing = false
+                            }
+                        }
                     },
                     modifier = Modifier.fillMaxWidth(),
                     enabled = !isAnalyzing

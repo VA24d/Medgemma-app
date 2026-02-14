@@ -1,5 +1,6 @@
 package com.google.mediapipe.examples.llminference.ui.screens
 
+import kotlinx.coroutines.launch
 import android.graphics.Bitmap
 import android.view.HapticFeedbackConstants
 import androidx.compose.foundation.Image
@@ -35,6 +36,7 @@ fun DiagnosisScreen(
     var diagnosisResult by remember { mutableStateOf<String?>(null) }
     var isGenerating by remember { mutableStateOf(false) }
     var showQrDialog by remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
 
     LaunchedEffect(patientId) {
         db.medicalEntryDao().getEntriesForPatient(patientId).collect { list ->
@@ -128,27 +130,21 @@ fun DiagnosisScreen(
                     onClick = {
                         view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
                         isGenerating = true
-                        // TODO: Integrate with MedGemma inference
-                        diagnosisResult = buildString {
-                            appendLine("## AI-Generated Diagnosis Summary")
-                            appendLine()
-                            appendLine("Based on ${entries.size} medical entries analyzed:")
-                            appendLine()
-                            appendLine("### Key Findings")
-                            appendLine("• Analysis of available medical data indicates further evaluation may be needed")
-                            appendLine("• Historical patterns suggest monitoring recommended")
-                            appendLine()
-                            appendLine("### Suggested Actions")
-                            appendLine("1. Schedule follow-up consultation")
-                            appendLine("2. Consider additional imaging if symptoms persist")
-                            appendLine("3. Monitor vital signs regularly")
-                            appendLine()
-                            appendLine("### Prognosis")
-                            appendLine("Further data collection recommended for definitive assessment.")
-                            appendLine()
-                            appendLine("⚠️ This is an AI-generated analysis and should be reviewed by a qualified medical professional.")
+                        isGenerating = true
+                        scope.launch {
+                            try {
+                                val inferenceModel = com.google.mediapipe.examples.llminference.InferenceModel.getInstance(context)
+                                val patientSummary = entries.joinToString("\n") { 
+                                    "- [${it.entryType}] ${it.title}: ${it.content.take(100)}..." 
+                                }
+                                val prompt = "Patient ID: $patientId. Medical Entries:\n$patientSummary\n\nBased on these entries, provide a comprehensive diagnosis summary, key findings, and suggested next steps. Format in Markdown."
+                                diagnosisResult = inferenceModel.generateResponse(prompt)
+                            } catch (e: Exception) {
+                                diagnosisResult = "Error generating diagnosis: ${e.message}"
+                            } finally {
+                                isGenerating = false
+                            }
                         }
-                        isGenerating = false
                     },
                     modifier = Modifier.fillMaxWidth(),
                     enabled = !isGenerating

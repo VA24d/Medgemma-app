@@ -1,10 +1,10 @@
 <resources>
-    <string name="app_name">MediPro Chronicler</string>
+    <string name="app_name">MedGemma</string>
     <string name="loading_model">Loading model</string>
     <string name="chat_label">Enter your message</string>
     <string name="action_send">Send</string>
     <string name="user_label">You</string>
-    <string name="model_label">MediPro Chronicler</string>
+    <string name="model_label">MedGemma</string>
     <string name="thinking_label">Thinking…</string>
     <string name="disclaimer">AI-generated responses for medical professionals</string>
     <string name="tokens_remaining">tokens remaining</string>

@@ -116,6 +116,7 @@ internal fun downloadModel(
     context: Context,
     model: Model,
     client: OkHttpClient,
+    triggerAuth: Boolean = true,
     onProgressUpdate: (Int) -> Unit
 ) {
     val requestBuilder = Request.Builder().url(model.url)
@@ -133,11 +134,13 @@ internal fun downloadModel(
         }
 
         if (accessToken.isNullOrBlank()) {
-            // Trigger LoginActivity if no access token is found
-            val intent = Intent(context, LoginActivity::class.java).apply {
-                flags = Intent.FLAG_ACTIVITY_NEW_TASK
+            if (triggerAuth) {
+                // Trigger LoginActivity if no access token is found
+                val intent = Intent(context, LoginActivity::class.java).apply {
+                    flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                }
+                context.startActivity(intent)
             }
-            context.startActivity(intent)
             throw MissingAccessTokenException()
         } else {
             requestBuilder.addHeader("Authorization", "Bearer $accessToken")

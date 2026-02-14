@@ -67,7 +67,7 @@ class MainActivity : ComponentActivity() {
                                 if (!InferenceModel.modelExists(appContext) && InferenceModel.model.url.isNotEmpty()) {
                                     Log.d("MainActivity", "Starting background model pre-download…")
                                     val client = OkHttpClient()
-                                    downloadModel(appContext, InferenceModel.model, client) { /* silent */ }
+                                    downloadModel(appContext, InferenceModel.model, client, triggerAuth = false) { /* silent */ }
                                     Log.d("MainActivity", "Background model pre-download complete")
                                 }
                             } catch (e: Exception) {
@@ -212,7 +212,9 @@ class MainActivity : ComponentActivity() {
                                     onViewDiagnosis = { id ->
                                         navController.navigate("diagnosis/$id")
                                     },
-                                    onEntryClick = { /* TODO: Entry detail view */ },
+                                    onEntryClick = { id ->
+                                        navController.navigate("entry_detail/$id")
+                                    },
                                     onEdit = { id ->
                                         navController.navigate("edit_patient/$id")
                                     }
@@ -232,10 +234,24 @@ class MainActivity : ComponentActivity() {
                                         when (type) {
                                             "MANUAL" -> navController.navigate("manual_notes/$id")
                                             "XRAY", "HISTOPATHOLOGY" -> navController.navigate("xray_analysis/$id/$type")
-                                            "RECORDING" -> {
-                                                // TODO: Recording screen
-                                                navController.navigate("manual_notes/$id")
-                                            }
+                                            "RECORDING" -> navController.navigate("recording/$id")
+                                        }
+                                    }
+                                )
+                            }
+                            
+                            // ── Recording Screen ──
+                            composable(
+                                "recording/{patientId}",
+                                arguments = listOf(navArgument("patientId") { type = NavType.LongType })
+                            ) { backStackEntry ->
+                                val patientId = backStackEntry.arguments?.getLong("patientId") ?: return@composable
+                                RecordingScreen(
+                                    patientId = patientId,
+                                    onBack = { navController.popBackStack() },
+                                    onSaved = {
+                                        navController.navigate("patient_detail/$patientId") {
+                                            popUpTo("new_entry/$patientId") { inclusive = true }
                                         }
                                     }
                                 )

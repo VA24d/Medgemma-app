@@ -11,8 +11,14 @@ import com.google.mediapipe.examples.llminference.ui.theme.ThemeManager
  */
 class AppPreferences(context: Context) {
 
-    private val prefs: SharedPreferences = context.getSharedPreferences(
-        "medgemma_prefs", Context.MODE_PRIVATE
+    private val masterKeyAlias = androidx.security.crypto.MasterKeys.getOrCreate(androidx.security.crypto.MasterKeys.AES256_GCM_SPEC)
+    
+    private val prefs: SharedPreferences = androidx.security.crypto.EncryptedSharedPreferences.create(
+        "medgemma_prefs",
+        masterKeyAlias,
+        context,
+        androidx.security.crypto.EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+        androidx.security.crypto.EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
     )
 
     companion object {
