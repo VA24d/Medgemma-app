@@ -167,59 +167,15 @@ fun AddPatientScreen(
                 value = dob,
                 onValueChange = { },
                 readOnly = true,
-                label = { Text("Date of Birth") },
-                placeholder = { Text("YYYY-MM-DD") },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable { showDatePicker = true },
-                enabled = false, // Disable typing, but clickable modifier handles clicks? No, enabling false disables click too.
-                // Better approach:
-                // Make it readOnly = true, and use interaction source or simple clickable on a Box wrapping it, or trailing icon click.
-                // Let's use trailing icon + readOnly + interaction source or just trailing icon.
-                // Actually, simplest is readOnly = true and trailing icon acts as trigger, OR use a Box/clickable.
-                // Material3 guidelines suggest readOnly + clickable on the field.
-                // But Modifier.clickable on OutlinedTextField might not work well if it consumes touches.
-                // Let's attach clickable to the trailing icon AND make the field readOnly.
-                // Or better: use a Box wrapping the TextField to capture clicks if we want the whole field to be clickable.
-                // Let's try: readOnly = true, interactionSource...
-                // Simpler: Just trailing icon click.
-                leadingIcon = { Icon(Icons.Default.DateRange, null) },
-                trailingIcon = { 
-                    IconButton(onClick = { showDatePicker = true }) {
-                        Icon(Icons.Default.EditCalendar, contentDescription = "Select Date")
-                    }
-                },
-                colors = OutlinedTextFieldDefaults.colors(
-                    disabledTextColor = MaterialTheme.colorScheme.onSurface,
-                    disabledBorderColor = MaterialTheme.colorScheme.outline,
-                    disabledLeadingIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                    disabledTrailingIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                    disabledLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                    disabledPlaceholderColor = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-             )
-             // Actually, to make the whole field clickable is better UX.
-             // I will wrap it in a Box with clickable, and disable the TextField's hit testing?
-             // Or just Use `interactionSource`.
-             // For now, I will enable it but make it readOnly, and opening dialog on focus is tricky.
-             // I'll stick to a robust solution: Trailing Icon opens it. And I'll make the field clickable if I can.
-             // Let's go with: readOnly = true. modifier.clickable { showDatePicker = true } DOES work on OutlinedTextField if enabled=true.
-             // So:
-            OutlinedTextField(
-                value = dob,
-                onValueChange = { },
-                readOnly = true,
                 label = { Text("Date of Birth *") },
                 placeholder = { Text("YYYY-MM-DD") },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable { showDatePicker = true }, // This might be intercepted by internal text logic.
-                // To be safe, rely on Trailing Icon mostly, but try InteractionSource if I had more time.
-                // I will use TrailingIcon for the action.
+                    .clickable { showDatePicker = true },
                 leadingIcon = { Icon(Icons.Default.DateRange, null) },
                 trailingIcon = { 
                     IconButton(onClick = { showDatePicker = true }) {
-                        Icon(Icons.Default.Event, contentDescription = "Select Date")
+                        Icon(Icons.Default.EditCalendar, contentDescription = "Select Date")
                     }
                 }
             )

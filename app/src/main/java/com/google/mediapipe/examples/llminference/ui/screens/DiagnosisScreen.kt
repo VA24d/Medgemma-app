@@ -130,7 +130,6 @@ fun DiagnosisScreen(
                     onClick = {
                         view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
                         isGenerating = true
-                        isGenerating = true
                         scope.launch {
                             try {
                                 val inferenceModel = com.google.mediapipe.examples.llminference.InferenceModel.getInstance(context)

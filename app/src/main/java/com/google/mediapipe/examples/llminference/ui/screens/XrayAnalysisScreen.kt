@@ -52,7 +52,7 @@ fun XrayAnalysisScreen(
 
     val typeName = if (analysisType == "HISTOPATHOLOGY") "Histopathology" else "X-ray / MRI"
 
-            // Camera logic
+    // Camera logic
     var tempCameraUri by remember { mutableStateOf<Uri?>(null) }
     
     val cameraLauncher = rememberLauncherForActivityResult(
