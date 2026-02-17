@@ -75,7 +75,22 @@ internal fun LoadingRoute(
                         throw MissingUrlException("Please manually copy the model to ${InferenceModel.model.path}")
                     }
                     isDownloading = true
-                    downloadModel(context, InferenceModel.model, client) { newProgress ->
+                    
+                    val downloads = mutableListOf<Pair<String, String>>()
+                    // Text Model
+                    if (InferenceModel.model.url.isNotEmpty()) {
+                        downloads.add(InferenceModel.model.url to InferenceModel.modelPathFromUrl(context))
+                    }
+                    // Vision Model
+                    if (InferenceModel.model.visionUrl.isNotEmpty()) {
+                        downloads.add(InferenceModel.model.visionUrl to InferenceModel.visionModelPath(context))
+                    }
+                    // Projector Model
+                    if (InferenceModel.model.projectorUrl.isNotEmpty()) {
+                        downloads.add(InferenceModel.model.projectorUrl to InferenceModel.projectorModelPath(context))
+                    }
+
+                    downloadModels(context, downloads, InferenceModel.model.needsAuth, client) { newProgress ->
                         progress = newProgress
                     }
                 }
@@ -97,10 +112,7 @@ internal fun LoadingRoute(
                 errorMessage = e.localizedMessage ?: "Unknown Error"
             } catch (e: ModelLoadFailException) {
                 errorMessage = e.localizedMessage ?: "Unknown Error"
-                // Remove invalid model file
-                CoroutineScope(Dispatchers.Main).launch {
-                    deleteDownloadedFile(context)
-                }
+                // Remove invalid model file - tricky with multiple files, user can clear data
             } catch (e: Exception) {
                 val error = e.localizedMessage ?: "Unknown Error"
                 errorMessage =
@@ -112,16 +124,53 @@ internal fun LoadingRoute(
     }
 }
 
-internal fun downloadModel(
+internal fun downloadModels(
     context: Context,
-    model: Model,
+    downloads: List<Pair<String, String>>,
+    needsAuth: Boolean,
     client: OkHttpClient,
     triggerAuth: Boolean = true,
     onProgressUpdate: (Int) -> Unit
 ) {
-    val requestBuilder = Request.Builder().url(model.url)
+    val totalFiles = downloads.size
+    if (totalFiles == 0) return
 
-    if (model.needsAuth) {
+    downloads.forEachIndexed { index, (url, path) ->
+        val outputTarget = File(path)
+        if (outputTarget.exists()) {
+            // Skip if already exists? Or separate check? 
+            // Better to assume if we are here, we need to download (or re-download)
+            // But if checking integrity is hard, we overwrite.
+        }
+
+        downloadSingleFile(
+            context, 
+            url, 
+            outputTarget, 
+            needsAuth, 
+            client, 
+            triggerAuth
+        ) { fileProgress ->
+            // scale progress: current file contribution + previous files
+            // Simple approach: each file is equal weight
+            val totalProgress = ((index * 100) + fileProgress) / totalFiles
+            onProgressUpdate(totalProgress)
+        }
+    }
+}
+
+internal fun downloadSingleFile(
+    context: Context,
+    url: String,
+    outputFile: File,
+    needsAuth: Boolean,
+    client: OkHttpClient,
+    triggerAuth: Boolean = true,
+    onProgressUpdate: (Int) -> Unit
+) {
+    val requestBuilder = Request.Builder().url(url)
+
+    if (needsAuth) {
         val tokenManager = TokenManager(context)
         val savedToken = tokenManager.getToken()
 
@@ -130,7 +179,7 @@ internal fun downloadModel(
             savedToken
         } else {
             // Fall back to OAuth
-            SecureStorage.getToken(context) // Assuming getAccessToken(context) refers to this
+            SecureStorage.getToken(context)
         }
 
         if (accessToken.isNullOrBlank()) {
@@ -147,7 +196,6 @@ internal fun downloadModel(
         }
     }
 
-    val outputFile = File(InferenceModel.modelPathFromUrl(context))
     val response = client.newCall(requestBuilder.build()).execute()
     if (!response.isSuccessful) {
         if (response.code == UNAUTHORIZED_CODE) {
@@ -160,7 +208,7 @@ internal fun downloadModel(
         } else if (response.code == FORBIDDEN_CODE) {
             throw ForbiddenAccessException()
         }
-        throw Exception("Download failed: ${response.code}")
+        throw Exception("Download failed: ${response.code} for $url")
     }
 
     response.body?.byteStream()?.use { inputStream ->

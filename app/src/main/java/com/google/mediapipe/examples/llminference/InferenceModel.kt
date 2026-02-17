@@ -177,8 +177,33 @@ class InferenceModel private constructor(context: Context) {
                     return File(context.filesDir, urlFileName).absolutePath
                 }
             }
-
             return ""
+        }
+
+        fun visionModelPath(context: Context): String {
+             if (model.visionPath.isNotEmpty()) {
+                 return File(context.filesDir, model.visionPath).absolutePath
+             }
+             if (model.visionUrl.isNotEmpty()) {
+                 val fileName = Uri.parse(model.visionUrl).lastPathSegment
+                 if (!fileName.isNullOrEmpty()) {
+                     return File(context.filesDir, fileName).absolutePath
+                 }
+             }
+             return ""
+        }
+
+        fun projectorModelPath(context: Context): String {
+             if (model.projectorPath.isNotEmpty()) {
+                 return File(context.filesDir, model.projectorPath).absolutePath
+             }
+             if (model.projectorUrl.isNotEmpty()) {
+                 val fileName = Uri.parse(model.projectorUrl).lastPathSegment
+                 if (!fileName.isNullOrEmpty()) {
+                     return File(context.filesDir, fileName).absolutePath
+                 }
+             }
+             return ""
         }
 
         fun modelPath(context: Context): String {
@@ -186,12 +211,14 @@ class InferenceModel private constructor(context: Context) {
             if (modelFile.exists()) {
                 return model.path
             }
-
             return modelPathFromUrl(context)
         }
 
         fun modelExists(context: Context): Boolean {
-            return File(modelPath(context)).exists()
+            val mainExists = File(modelPath(context)).exists()
+            val visionExists = if (model.visionUrl.isNotEmpty()) File(visionModelPath(context)).exists() else true
+            val projectorExists = if (model.projectorUrl.isNotEmpty()) File(projectorModelPath(context)).exists() else true
+            return mainExists && visionExists && projectorExists
         }
     }
 }

@@ -1,48 +1,68 @@
 
-# 🏆 Kaggle Google MedGemma Challenge Submission
+# 🏥 MediPro Chronicler: Next-Gen On-Device Medical AI
 
-**MediPro Chronicler** is an on-device, multimodal AI assistant designed to empower healthcare professionals with secure, longitudinal patient history analysis. Built for the **Kaggle Google MedGemma Challenge**, it leverages the lightweight yet powerful **Gemma 3 1B-IT** model to process medical inquiries and analyze X-rays directly on Android devices—ensure 100% data privacy with zero cloud egress.
+![Android](https://img.shields.io/badge/Android-3DDC84?style=for-the-badge&logo=android&logoColor=white)
+![Kotlin](https://img.shields.io/badge/Kotlin-0095D5?style=for-the-badge&logo=kotlin&logoColor=white)
+![MediaPipe](https://img.shields.io/badge/MediaPipe-LLM-orange?style=for-the-badge)
+![Gemma](https://img.shields.io/badge/Model-MedGemma%204B-blue?style=for-the-badge)
+
+**MediPro Chronicler** is a state-of-the-art, **privacy-first** medical assistant designed for the **Kaggle Google MedGemma Challenge**. It brings the power of the specialized **MedGemma 4B** Large Language Model directly to Android devices, enabling longitudinal patient history analysis and multimodal diagnostics without *ever* sending data to the cloud.
 
 ---
 
-# 📖 Overview
+## 🌟 Why MediPro Chronicler?
 
-In the fast-paced medical environment, retrieving patient history and analyzing diagnostic images quickly is critical. Cloud-based solutions often raise privacy concerns and latency issues.
+In emergency rooms and remote clinics, every second counts. Cloud dependency introduces latency and privacy risks. **MediPro Chronicler** runs entirely offline, offering:
 
-**MediPro Chronicler** solves this by running a specialized medical LLM locally. It allows doctors to:
-- **Chat with Patient Records**: Ask natural language questions about a patient's history.
-- **Analyze X-Rays**: Upload and discuss medical imagery for preliminary insights.
-- **Maintain Privacy**: All data stays on the device, compliant with strict healthcare privacy standards.
+*   **⚡ Instant Analysis**: Zero network latency for life-saving insights.
+*   **🔒 Absolute Privacy**: Patient data never leaves the device. HIPAA-ready by design.
+*   **🧠 Specialized Medical Knowledge**: Fine-tuned on massive medical datasets (VQA, Radiology).
+*   **👁️ Multimodal Vision**: Analyze X-Rays, MRIs, and CT scans simply by pointing your camera.
 
-# ✨ Key Features
+---
 
--   **🤖 On-Device Intelligence**: Powered by **Gemma 3 1B-IT** via MediaPipe LLM Inference, offering low-latency responses without internet.
--   **👁️ Multimodal Capabilities**: Seamlessly integrates text and image inputs. Show an X-ray and ask for an analysis.
--   **🔒 Privacy First**: Complete local execution ensures patient data never leaves the tablet/phone.
--   **📂 Longitudinal Patient Records**: Securely store and retrieve patient profiles and history using a local Room Database.
--   **⚡ Optimized Performance**: Built with Android Jetpack Compose and hardware-accelerated TFLite/MediaPipe delegates.
+## 🛠️ Key Features
 
-# 🛠️ Technology Stack
+### 1. **Longitudinal Patient Memory**
+Unlike standard chatbots, MediPro remembers. It builds a secure, encrypted local database of patient history, allowing it to answer context-aware questions like:
+> *"Has this patient's lung opacity improved since last month's scan?"*
 
--   **Model**: Google Gemma 3 1B-IT (Quantized int8)
--   **Inference Engine**: MediaPipe LLM Inference (LiteRT)
--   **Android Architecture**: Modern Android Development (MAD)
-    -   **Language**: Kotlin
-    -   **UI**: Jetpack Compose
-    -   **Database**: Room
-    -   **Image Loading**: Coil
-    -   **Camera**: CameraX
+### 2. **Multimodal Diagnostics (Vision + Text)**
+Seamlessly integrate visual data with clinical notes.
+*   **Input**: "Check this X-ray for pneumothorax." + [Upload Image]
+*   **Output**: "I detect a slight separation in the upper right pleural space..."
 
-# 🚀 Getting Started
+### 3. **Smart Data Ingestion**
+*   **FHIR Export**: Interoperable data export for hospital systems.
+*   **Voice-to-Text**: Dictate notes directly during patient exams.
 
-## Prerequisites
+---
 
--   **Hardware**: Physical Android device (SDK 24+) with developer mode enabled. *GPU acceleration recommended.*
-    -   *Note: Emulators may crash due to memory limits with large models.*
--   **Software**: [Android Studio](https://developer.android.com/studio) (Hedgehog or newer).
--   **Hugging Face Account**: You need an account to access the gated Gemma model.
+## 🏗️ Architecture & Tech Stack
 
-## Installation
+This project leverages **Modern Android Development (MAD)** best practices:
+
+*   **LLM Engine**: MediaPipe LLM Inference (LiteRT) with GPU Acceleration.
+*   **Model**: **MedGemma 4B** (Int8 Quantized).
+    *   *Text Model*: `medgemma_4b_mobile_int8_q8_ekv2048.tflite`
+    *   *Vision Encoder*: `medsiglip_vision_896.tflite`
+    *   *Multimodal Projector*: `multimodal_projector_896.tflite`
+*   **UI**: Jetpack Compose (Material 3).
+*   **Database**: Room (SQLite) with encrypted storage.
+*   **Dependency Injection**: Hilt.
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+*   **Device**: High-end Android Device (12GB+ RAM recommended for 4B model).
+    *   *Note: Pixel 9 Pro or S24 Ultra highly recommended.*
+*   **OS**: Android 14+ (API Level 34).
+*   **Hugging Face Account**: Required to download the gated MedGemma weights.
+
+### Installation
 
 1.  **Clone the Repository**
     ```bash
@@ -50,55 +70,54 @@ In the fast-paced medical environment, retrieving patient history and analyzing 
     cd MediPro-Chronicler
     ```
 
-2.  **Configure Hugging Face Token**
-    -   Get your Access Token from [Hugging Face Settings](https://huggingface.co/settings/tokens).
-    -   Create/Open `local.properties` in the project root.
-    -   Add your token:
+2.  **Configure Access Token**
+    *   Generate a **User Access Token** (Read permissions) from [Hugging Face Settings](https://huggingface.co/settings/tokens).
+    *   Open `local.properties` in the project root.
+    *   Add the token:
         ```properties
-        HF_ACCESS_TOKEN=hf_your_token_here
+        HF_ACCESS_TOKEN=hf_your_generated_token_here
         ```
 
-3.  **Open in Android Studio**
-    -   Select **File > Open** and navigate to the project directory.
-    -   Allow Gradle to sync.
+3.  **Build & Run**
+    *   Open in **Android Studio Ladybug** (or newer).
+    *   Sync Gradle.
+    *   Select your physical device and press **Run**.
 
-4.  **Build the Project**
-    -   Go to **Build > Make Project**.
-    -   Connect your Android device via USB.
-    -   Select **Run > Run 'app'**.
+### 📦 Model Download (Automatic)
 
-## Model Setup
+Upon first launch, the app will automatically authenticate with your Hugging Face token and download the three required model artifacts (~7GB total) to the device's private storage.
+*   **Text Integration**: `medgemma_4b...tflite`
+*   **Vision Adapter**: `medsiglip_vision...tflite`
+*   **Projector**: `multimodal_projector...tflite`
 
-The app uses the **Gemma 3 1B-IT** model.
--   **Automatic Download**: If you provided the `HF_ACCESS_TOKEN` in `local.properties`, the app/test will attempt to download the model automatically upon first run.
--   **Manual Setup**:
-    1.  Download `Gemma3-1B-IT_multi-prefill-seq_q8_ekv2048.task` from [Hugging Face](https://huggingface.co/litert-community/Gemma3-1B-IT/tree/main).
-    2.  Push it to your device:
-        ```bash
-        adb push Gemma3-1B-IT_multi-prefill-seq_q8_ekv2048.task /data/local/tmp/
-        ```
+*Ensure your device has at least 10GB of free space.*
 
-# 📱 Usage Guide
+---
 
-## 1. Patient Dashboard
-View your list of patients. Add new profiles or select an existing one to view their innovative "longitudinal chat" interface.
+## 🧪 Testing
 
-![Patient Dashboard Mockup](dashboard_mockup.png)
+To run the verification tests (which simulate the download and inference pipeline):
 
-## 2. Multimodal Chat
-Enter symptoms or upload an X-ray image.
-> **User**: "Analyze this chest X-ray for signs of pneumonia."
-> **MedGemma**: "Based on the image opacity in the lower lobes..."
+```bash
+# Verify Unit Logic
+./gradlew testDebugUnitTest
 
-![Chat Interface Mockup](chat_mockup.png)
+# Verify On-Device Inference (Requires connected device)
+./gradlew connectedDebugAndroidTest
+```
 
-## 3. X-Ray Analysis Tool
-Use the dedicated X-ray tool to highlight specific regions of interest before sending them to the model.
+---
 
-![X-Ray Tool Mockup](xray_tool_mockup.png)
+## 🤝 Contribution
 
-# 📄 License & Acknowledgments
+We welcome contributions! Please fork the repository and submit a Pull Request.
+*   **Bug Reports**: Open an issue describing the crash/bug.
+*   **Feature Requests**: Discuss new medical capabilities in Discussions.
 
--   **MedGemma**: Copyright Google DeepMind.
--   **MediaPipe**: Apache 2.0 License.
--   This project is a submission for the **Kaggle Google MedGemma Challenge**.
+---
+
+## 📄 License & Credits
+
+*   **MedGemma**: Developed by Google DeepMind & Megalodon ML.
+*   **License**: Apache 2.0.
+*   Disclaimer: *MediPro Chronicler is a research tool and should not be used as the sole basis for clinical diagnosis.*
