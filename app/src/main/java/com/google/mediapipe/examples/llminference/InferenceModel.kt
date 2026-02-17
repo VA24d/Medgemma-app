@@ -12,6 +12,8 @@ import com.google.mediapipe.tasks.genai.llminference.LlmInferenceSession.LlmInfe
 import com.google.mediapipe.tasks.genai.llminference.ProgressListener
 import java.io.File
 import kotlin.math.max
+import com.google.mediapipe.framework.image.BitmapImageBuilder
+import com.google.mediapipe.framework.image.MPImage
 
 /** The maximum number of tokens the model can process. */
 var MAX_TOKENS = 1024
@@ -86,6 +88,8 @@ class InferenceModel private constructor(context: Context) {
         }
     }
 
+    private val SYSTEM_PROMPT = "You are a helpful medical data assistant. Provide accurate and concise answers."
+
     private fun createSession() {
         val sessionOptions =  LlmInferenceSessionOptions.builder()
             .setTemperature(model.temperature)
@@ -96,6 +100,8 @@ class InferenceModel private constructor(context: Context) {
         try {
             llmInferenceSession =
                 LlmInferenceSession.createFromOptions(llmInference, sessionOptions)
+            // Inject system prompt at start of session
+            llmInferenceSession.addQueryChunk(SYSTEM_PROMPT)
         } catch (e: Exception) {
             Log.e(TAG, "LlmInferenceSession create error: ${e.message}", e)
             throw ModelSessionCreateFailException()
@@ -108,11 +114,19 @@ class InferenceModel private constructor(context: Context) {
         progressListener: ProgressListener<String>
     ) : ListenableFuture<String> {
         llmInferenceSession.addQueryChunk(prompt)
+        images.forEach { bitmap ->
+            val mpImage = BitmapImageBuilder(bitmap).build()
+            llmInferenceSession.addImage(mpImage)
+        }
         return llmInferenceSession.generateResponseAsync(progressListener)
     }
 
-    suspend fun generateResponse(prompt: String): String = kotlinx.coroutines.suspendCancellableCoroutine { continuation ->
+    suspend fun generateResponse(prompt: String, images: List<Bitmap> = emptyList()): String = kotlinx.coroutines.suspendCancellableCoroutine { continuation ->
         llmInferenceSession.addQueryChunk(prompt)
+        images.forEach { bitmap ->
+            val mpImage = BitmapImageBuilder(bitmap).build()
+            llmInferenceSession.addImage(mpImage)
+        }
         val future = llmInferenceSession.generateResponseAsync { _, _ -> /* progress ignored for sync */ }
         
         future.addListener(
@@ -130,7 +144,7 @@ class InferenceModel private constructor(context: Context) {
     }
 
     fun estimateTokensRemaining(prompt: String): Int {
-        val context = uiState.messages.joinToString { it.message } + prompt
+        val context = SYSTEM_PROMPT + uiState.messages.joinToString { it.message } + prompt
         if (context.isEmpty()) return -1 // Special marker if no content has been added
 
         val sizeOfAllMessages = llmInferenceSession.sizeInTokens(context)
