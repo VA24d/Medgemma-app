@@ -42,11 +42,14 @@ Seamlessly integrate visual data with clinical notes.
 
 This project leverages **Modern Android Development (MAD)** best practices:
 
-*   **LLM Engine**: MediaPipe LLM Inference (LiteRT) with GPU Acceleration.
+*   **LLM Engine**: MediaPipe LLM Inference (LiteRT) with **GPU/NPU Acceleration**.
 *   **Model**: **MedGemma 4B** (Int8 Quantized).
     *   *Text Model*: `medgemma_4b_mobile_int8_q8_ekv2048.tflite`
     *   *Vision Encoder*: `medsiglip_vision_896.tflite`
     *   *Multimodal Projector*: `multimodal_projector_896.tflite`
+*   **Hardware Acceleration**:
+    *   Configured to use **GPU Logic** (`Backend.GPU`).
+    *   Automatically delegates to **NPU** where supported by the Android Neural Networks API (NNAPI) or specific chipset drivers (TensorFlow Lite delegates).
 *   **UI**: Jetpack Compose (Material 3).
 *   **Database**: Room (SQLite) with encrypted storage.
 *   **Dependency Injection**: Hilt.
@@ -102,7 +105,7 @@ To run the verification tests (which simulate the download and inference pipelin
 # Verify Unit Logic
 ./gradlew testDebugUnitTest
 
-# Verify On-Device Inference (Requires connected device)
+# Verify On-Device Inference (Requires connected device/emulator)
 ./gradlew connectedDebugAndroidTest
 ```
 
