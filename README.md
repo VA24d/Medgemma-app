@@ -1,7 +1,7 @@
 
 # 🏆 Kaggle Google MedGemma Challenge Submission
 
-**MediPro Chronicler** is an on-device, multimodal AI assistant designed to empower healthcare professionals with secure, longitudinal patient history analysis. Built for the **Kaggle Google MedGemma Challenge**, it leverages the lightweight yet powerful **MedGemma 2B** model to process medical inquiries and analyze X-rays directly on Android devices—ensure 100% data privacy with zero cloud egress.
+**MediPro Chronicler** is an on-device, multimodal AI assistant designed to empower healthcare professionals with secure, longitudinal patient history analysis. Built for the **Kaggle Google MedGemma Challenge**, it leverages the lightweight yet powerful **Gemma 3 1B-IT** model to process medical inquiries and analyze X-rays directly on Android devices—ensure 100% data privacy with zero cloud egress.
 
 ---
 
@@ -16,7 +16,7 @@ In the fast-paced medical environment, retrieving patient history and analyzing 
 
 # ✨ Key Features
 
--   **🤖 On-Device Intelligence**: Powered by **MedGemma 2B** via MediaPipe LLM Inference, offering low-latency responses without internet.
+-   **🤖 On-Device Intelligence**: Powered by **Gemma 3 1B-IT** via MediaPipe LLM Inference, offering low-latency responses without internet.
 -   **👁️ Multimodal Capabilities**: Seamlessly integrates text and image inputs. Show an X-ray and ask for an analysis.
 -   **🔒 Privacy First**: Complete local execution ensures patient data never leaves the tablet/phone.
 -   **📂 Longitudinal Patient Records**: Securely store and retrieve patient profiles and history using a local Room Database.
@@ -24,7 +24,7 @@ In the fast-paced medical environment, retrieving patient history and analyzing 
 
 # 🛠️ Technology Stack
 
--   **Model**: Google MedGemma 2B (Kaggle Model)
+-   **Model**: Google Gemma 3 1B-IT (Quantized int8)
 -   **Inference Engine**: MediaPipe LLM Inference (LiteRT)
 -   **Android Architecture**: Modern Android Development (MAD)
     -   **Language**: Kotlin
@@ -38,7 +38,9 @@ In the fast-paced medical environment, retrieving patient history and analyzing 
 ## Prerequisites
 
 -   **Hardware**: Physical Android device (SDK 24+) with developer mode enabled. *GPU acceleration recommended.*
+    -   *Note: Emulators may crash due to memory limits with large models.*
 -   **Software**: [Android Studio](https://developer.android.com/studio) (Hedgehog or newer).
+-   **Hugging Face Account**: You need an account to access the gated Gemma model.
 
 ## Installation
 
@@ -48,21 +50,33 @@ In the fast-paced medical environment, retrieving patient history and analyzing 
     cd MediPro-Chronicler
     ```
 
-2.  **Open in Android Studio**
+2.  **Configure Hugging Face Token**
+    -   Get your Access Token from [Hugging Face Settings](https://huggingface.co/settings/tokens).
+    -   Create/Open `local.properties` in the project root.
+    -   Add your token:
+        ```properties
+        HF_ACCESS_TOKEN=hf_your_token_here
+        ```
+
+3.  **Open in Android Studio**
     -   Select **File > Open** and navigate to the project directory.
     -   Allow Gradle to sync.
 
-3.  **Build the Project**
+4.  **Build the Project**
     -   Go to **Build > Make Project**.
     -   Connect your Android device via USB.
     -   Select **Run > Run 'app'**.
 
 ## Model Setup
 
-Upon first launch, the app requires the MedGemma model weights:
-1.  The app will prompt you to download the model from **Hugging Face**.
-2.  Log in with your Hugging Face account if required (ensure you have accepted the MedGemma license terms).
-3.  The model (~2GB) will download directly to the device storage.
+The app uses the **Gemma 3 1B-IT** model.
+-   **Automatic Download**: If you provided the `HF_ACCESS_TOKEN` in `local.properties`, the app/test will attempt to download the model automatically upon first run.
+-   **Manual Setup**:
+    1.  Download `Gemma3-1B-IT_multi-prefill-seq_q8_ekv2048.task` from [Hugging Face](https://huggingface.co/litert-community/Gemma3-1B-IT/tree/main).
+    2.  Push it to your device:
+        ```bash
+        adb push Gemma3-1B-IT_multi-prefill-seq_q8_ekv2048.task /data/local/tmp/
+        ```
 
 # 📱 Usage Guide
 
