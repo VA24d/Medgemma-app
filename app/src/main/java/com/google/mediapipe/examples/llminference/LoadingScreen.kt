@@ -78,27 +78,29 @@ internal fun LoadingRoute(
         job = launch(Dispatchers.IO) {
             try {
                 if (!InferenceModel.modelExists(context)) {
-                    if (InferenceModel.model.url.isEmpty()) {
-                        throw MissingUrlException("Please manually copy the model to ${InferenceModel.model.path}")
-                    }
-                    isDownloading = true
-                    
-                    val downloads = mutableListOf<Pair<String, String>>()
-                    // Text Model
+                    // Try download if URL is available
                     if (InferenceModel.model.url.isNotEmpty()) {
-                        downloads.add(InferenceModel.model.url to InferenceModel.modelPathFromUrl(context))
-                    }
-                    // Vision Model
-                    if (InferenceModel.model.visionUrl.isNotEmpty()) {
-                        downloads.add(InferenceModel.model.visionUrl to InferenceModel.visionModelPath(context))
-                    }
-                    // Projector Model
-                    if (InferenceModel.model.projectorUrl.isNotEmpty()) {
-                        downloads.add(InferenceModel.model.projectorUrl to InferenceModel.projectorModelPath(context))
-                    }
+                        isDownloading = true
+                        
+                        val downloads = mutableListOf<Pair<String, String>>()
+                        if (InferenceModel.model.url.isNotEmpty()) {
+                            downloads.add(InferenceModel.model.url to InferenceModel.modelPathFromUrl(context))
+                        }
+                        if (InferenceModel.model.visionUrl.isNotEmpty()) {
+                            downloads.add(InferenceModel.model.visionUrl to InferenceModel.visionModelPath(context))
+                        }
+                        if (InferenceModel.model.projectorUrl.isNotEmpty()) {
+                            downloads.add(InferenceModel.model.projectorUrl to InferenceModel.projectorModelPath(context))
+                        }
 
-                    downloadModels(context, downloads, InferenceModel.model.needsAuth, client) { newProgress ->
-                        progress = newProgress
+                        downloadModels(context, downloads, InferenceModel.model.needsAuth, client) { newProgress ->
+                            progress = newProgress
+                        }
+                    } else {
+                        throw MissingUrlException(
+                            "Model not found. Push files via ADB:\n" +
+                            "adb push <model_files> /data/local/tmp/medgemma/"
+                        )
                     }
                 }
 
@@ -123,7 +125,7 @@ internal fun LoadingRoute(
             } catch (e: Exception) {
                 val error = e.localizedMessage ?: "Unknown Error"
                 errorMessage =
-                    "${error}, please manually copy the model to ${InferenceModel.model.path}"
+                    "${error}\n\nPush model files via:\nadb push <files> /data/local/tmp/medgemma/"
             } finally {
                 isDownloading = false
             }

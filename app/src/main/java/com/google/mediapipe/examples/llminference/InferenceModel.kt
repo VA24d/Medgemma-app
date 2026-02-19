@@ -178,49 +178,47 @@ class InferenceModel private constructor(context: Context) {
             return InferenceModel(context).also { instance = it }
         }
 
-        fun modelPathFromUrl(context: Context): String {
-            if (model.url.isNotEmpty()) {
-                val urlFileName = Uri.parse(model.url).lastPathSegment
-                if (!urlFileName.isNullOrEmpty()) {
-                    return File(context.filesDir, urlFileName).absolutePath
-                }
+        /** ADB push directory: adb push model_file /data/local/tmp/medgemma/ */
+        private const val ADB_PUSH_DIR = "/data/local/tmp/medgemma"
+
+        /**
+         * Resolve a model file path by checking locations in priority order:
+         * 1. /data/local/tmp/medgemma/ (ADB push from laptop)
+         * 2. App internal storage (downloaded files)
+         */
+        private fun resolveFile(context: Context, path: String, url: String): String {
+            // Derive filename from path or URL
+            val pathFileName = if (path.isNotEmpty()) File(path).name else null
+            val urlFileName = if (url.isNotEmpty()) Uri.parse(url).lastPathSegment else null
+
+            // Check ADB push dir first
+            for (name in listOfNotNull(pathFileName, urlFileName)) {
+                val adbFile = File(ADB_PUSH_DIR, name)
+                if (adbFile.exists()) return adbFile.absolutePath
             }
-            return ""
-        }
 
-        fun visionModelPath(context: Context): String {
-             if (model.visionPath.isNotEmpty()) {
-                 return File(context.filesDir, model.visionPath).absolutePath
-             }
-             if (model.visionUrl.isNotEmpty()) {
-                 val fileName = Uri.parse(model.visionUrl).lastPathSegment
-                 if (!fileName.isNullOrEmpty()) {
-                     return File(context.filesDir, fileName).absolutePath
-                 }
-             }
-             return ""
-        }
-
-        fun projectorModelPath(context: Context): String {
-             if (model.projectorPath.isNotEmpty()) {
-                 return File(context.filesDir, model.projectorPath).absolutePath
-             }
-             if (model.projectorUrl.isNotEmpty()) {
-                 val fileName = Uri.parse(model.projectorUrl).lastPathSegment
-                 if (!fileName.isNullOrEmpty()) {
-                     return File(context.filesDir, fileName).absolutePath
-                 }
-             }
-             return ""
-        }
-
-        fun modelPath(context: Context): String {
-            val modelFile = File(model.path)
-            if (modelFile.exists()) {
-                return model.path
+            // Check app internal storage
+            for (name in listOfNotNull(urlFileName, pathFileName)) {
+                val internalFile = File(context.filesDir, name)
+                if (internalFile.exists()) return internalFile.absolutePath
             }
-            return modelPathFromUrl(context)
+
+            // Return expected internal path (for download target)
+            val preferredName = urlFileName ?: pathFileName ?: return ""
+            return File(context.filesDir, preferredName).absolutePath
         }
+
+        fun modelPathFromUrl(context: Context): String =
+            resolveFile(context, model.path, model.url)
+
+        fun modelPath(context: Context): String =
+            resolveFile(context, model.path, model.url)
+
+        fun visionModelPath(context: Context): String =
+            resolveFile(context, model.visionPath, model.visionUrl)
+
+        fun projectorModelPath(context: Context): String =
+            resolveFile(context, model.projectorPath, model.projectorUrl)
 
         fun modelExists(context: Context): Boolean {
             val mainExists = File(modelPath(context)).exists()
