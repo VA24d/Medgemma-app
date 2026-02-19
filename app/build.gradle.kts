@@ -8,12 +8,12 @@ plugins {
 
 android {
     namespace = "com.google.mediapipe.examples.llminference"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.google.mediapipe.examples.llminference"
         minSdk = 24
-        targetSdk = 34
+        targetSdk = 35
         versionCode = 1
         versionName = "1.0"
 
@@ -85,7 +85,12 @@ dependencies {
     implementation("androidx.compose.material:material-icons-extended")
     implementation("com.google.android.material:material:1.12.0")
 
-    implementation ("com.google.mediapipe:tasks-genai:0.10.32")
+    // LiteRT (TFLite) for direct model inference (1.4.1 = compatible with Kotlin 1.9.x)
+    implementation("com.google.ai.edge.litert:litert:1.4.1")
+    implementation("com.google.ai.edge.litert:litert-gpu:1.4.1")
+
+    // JSON parsing for tokenizer.json
+    implementation("com.google.code.gson:gson:2.10.1")
     
     // MediaPipe Vision for medical image analysis
     implementation("com.google.mediapipe:tasks-vision:0.10.32")
