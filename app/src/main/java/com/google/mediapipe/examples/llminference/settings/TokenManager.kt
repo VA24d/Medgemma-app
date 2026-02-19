@@ -38,11 +38,22 @@ class TokenManager(context: Context) {
      * Get saved Hugging Face token
      */
     fun getToken(): String? {
-        return if (shouldUseToken()) {
-            sharedPreferences.getString(KEY_HF_TOKEN, null)
-        } else {
-            null
+        if (shouldUseToken()) {
+            val prefToken = sharedPreferences.getString(KEY_HF_TOKEN, null)
+            if (!prefToken.isNullOrBlank()) return prefToken
         }
+        
+        // Fallback to BuildConfig if available
+        try {
+            val buildConfigToken = com.google.mediapipe.examples.llminference.BuildConfig.HF_ACCESS_TOKEN
+            if (buildConfigToken.isNotBlank()) {
+                return buildConfigToken
+            }
+        } catch (e: Exception) {
+            // BuildConfig field might not exist in some build variants or if checking fails
+        }
+        
+        return null
     }
 
     /**
