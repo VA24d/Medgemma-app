@@ -43,10 +43,11 @@ Seamlessly integrate visual data with clinical notes.
 This project leverages **Modern Android Development (MAD)** best practices:
 
 *   **LLM Engine**: MediaPipe LLM Inference (LiteRT) with **GPU/NPU Acceleration**.
-*   **Model**: **MedGemma 4B** (Int8 Quantized).
-    *   *Text Model*: `medgemma_4b_mobile_int8_q8_ekv2048.tflite`
-    *   *Vision Encoder*: `medsiglip_vision_896.tflite`
-    *   *Multimodal Projector*: `multimodal_projector_896.tflite`
+*   **Model**: **MedGemma 4B** (Q4 Quantized / Int8 Optional).
+    *   *Primary (Q4)*: `medgemma_4b_tpu_q4_block128_ekv512.tflite` (Faster, ~2GB)
+    *   *Optional (Int8)*: `medgemma_4b_mobile_int8_q8_ekv2048.tflite` (Higher Quality, ~4GB)
+    *   *Vision Encoder*: `siglip_encoder.tflite`
+    *   *Multimodal Projector*: `projector.tflite`
 *   **Hardware Acceleration**:
     *   Configured to use **GPU Logic** (`Backend.GPU`).
     *   Automatically delegates to **NPU** where supported by the Android Neural Networks API (NNAPI) or specific chipset drivers (TensorFlow Lite delegates).
@@ -60,7 +61,9 @@ This project leverages **Modern Android Development (MAD)** best practices:
 
 ### Prerequisites
 
-*   **Device**: High-end Android Device (12GB+ RAM recommended for 4B model).
+*   **Device**: High-end Android Device.
+    *   *8GB RAM+:* Sufficient for Q4 model.
+    *   *12GB RAM+:* Recommended for Int8 model.
     *   *Note: Pixel 9 Pro or S24 Ultra highly recommended.*
 *   **OS**: Android 14+ (API Level 34).
 *   **Hugging Face Account**: Required to download the gated MedGemma weights.
@@ -86,12 +89,24 @@ This project leverages **Modern Android Development (MAD)** best practices:
     *   Sync Gradle.
     *   Select your physical device and press **Run**.
 
+### 📦 Model Deployment (Local ADB)
+
+To push the models manually (faster than downloading on device):
+1.  Download `medgemma_4b_tpu_q4_block128_ekv512.tflite`, `siglip_encoder.tflite`, and `projector.tflite`.
+2.  Push to device:
+    ```bash
+    adb shell mkdir -p /data/local/tmp/medgemma
+    adb push medgemma_4b_tpu_q4_block128_ekv512.tflite /data/local/tmp/medgemma/
+    adb push siglip_encoder.tflite /data/local/tmp/medgemma/
+    adb push projector.tflite /data/local/tmp/medgemma/
+    ```
+
 ### 📦 Model Download (Automatic)
 
-Upon first launch, the app will automatically authenticate with your Hugging Face token and download the three required model artifacts (~7GB total) to the device's private storage.
-*   **Text Integration**: `medgemma_4b...tflite`
-*   **Vision Adapter**: `medsiglip_vision...tflite`
-*   **Projector**: `multimodal_projector...tflite`
+Upon first launch, the app will automatically authenticate with your Hugging Face token and download the three required model artifacts to the device's private storage.
+*   **Text Integration**: `medgemma_4b_tpu_q4...tflite`
+*   **Vision Adapter**: `siglip_encoder.tflite`
+*   **Projector**: `projector.tflite`
 
 *Ensure your device has at least 10GB of free space.*
 

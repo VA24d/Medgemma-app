@@ -39,13 +39,15 @@ internal fun SelectionRoute(
     val tokenManager = remember { com.google.mediapipe.examples.llminference.settings.TokenManager(context) }
     var showTokenDialog by remember { mutableStateOf(false) }
     var hasToken by remember { mutableStateOf(tokenManager.hasToken()) }
+    var useInt8 by remember { mutableStateOf(false) }
 
     // Detect local model files in /data/local/tmp/medgemma/
     val localModelDir = "/data/local/tmp/medgemma"
-    val localFilesFound by remember {
+    val selectedModel = if (useInt8) Model.MEDGEMMA_4B_INT8 else Model.MEDGEMMA_4B
+    val localFilesFound by remember(useInt8) {
         mutableStateOf(
             listOf(
-                java.io.File(localModelDir, "medgemma_text.tflite"),
+                java.io.File(localModelDir, selectedModel.path),
                 java.io.File(localModelDir, "siglip_encoder.tflite"),
                 java.io.File(localModelDir, "projector.tflite")
             ).count { it.exists() }
@@ -73,6 +75,35 @@ internal fun SelectionRoute(
                     Text("MedGemma", style = MaterialTheme.typography.titleLarge)
                     Spacer(modifier = Modifier.height(8.dp))
                     Text("Select a backend to run the model on.", style = MaterialTheme.typography.bodyMedium)
+                }
+            }
+
+            // Model Variant Toggle
+            Card(modifier = Modifier.fillMaxWidth()) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            if (useInt8) "INT8 Model (~4GB)" else "Q4 Model (~2GB)",
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            if (useInt8) "Higher quality, larger, 2048 token context"
+                            else "Smaller & faster, 512 token context (recommended)",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    Switch(
+                        checked = useInt8,
+                        onCheckedChange = { useInt8 = it }
+                    )
                 }
             }
 
@@ -249,7 +280,7 @@ internal fun SelectionRoute(
                 }
             }
 
-            val licenseUrl = Model.MEDGEMMA_4B.licenseUrl
+            val licenseUrl = selectedModel.licenseUrl
             TextButton(onClick = {
                 val intent = Intent(Intent.ACTION_VIEW, Uri.parse(licenseUrl))
                 context.startActivity(intent)
@@ -260,7 +291,7 @@ internal fun SelectionRoute(
             // Load local model button (enabled only if all 3 files found)
             Button(
                 onClick = {
-                    InferenceModel.model = Model.MEDGEMMA_4B
+                    InferenceModel.model = selectedModel
                     onModelSelected()
                 },
                 enabled = hasLocalModel,
@@ -275,7 +306,7 @@ internal fun SelectionRoute(
 
             Button(
                 onClick = {
-                    InferenceModel.model = Model.MEDGEMMA_4B
+                    InferenceModel.model = selectedModel
                     onModelSelected()
                 },
                 modifier = Modifier.fillMaxWidth()

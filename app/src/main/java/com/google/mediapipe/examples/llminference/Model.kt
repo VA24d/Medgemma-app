@@ -21,8 +21,31 @@ enum class Model(
     val kvCacheMaxLen: Int,
     val vocabSize: Int,
 ) {
+    /** Primary model – Q4 quantized, smaller & faster (~2GB) */
     MEDGEMMA_4B(
-        path = "medgemma_text.tflite",
+        path = "medgemma_4b_tpu_q4_block128_ekv512.tflite",
+        url = "https://huggingface.co/megalodon-ml/medgemma_kaggle/resolve/main/models/text/medgemma_4b_tpu_q4_block128_ekv512.tflite",
+        visionPath = "siglip_encoder.tflite",
+        visionUrl = "https://huggingface.co/megalodon-ml/medgemma_kaggle/resolve/main/models/vision/medsiglip_vision_896.tflite",
+        projectorPath = "projector.tflite",
+        projectorUrl = "https://huggingface.co/megalodon-ml/medgemma_kaggle/resolve/main/models/projector/multimodal_projector_896.tflite",
+        tokenizerPath = "tokenizer.json",
+        licenseUrl = "https://huggingface.co/megalodon-ml/medgemma_kaggle",
+        needsAuth = true,
+        thinking = false,
+        temperature = 0.7f,
+        topK = 40,
+        topP = 0.95f,
+        numLayers = 34,
+        numKvHeads = 4,
+        headDim = 256,
+        kvCacheMaxLen = 512,
+        vocabSize = 262208,
+    ),
+
+    /** Optional – INT8 quantized, higher quality but larger (~4GB), 2048 KV cache */
+    MEDGEMMA_4B_INT8(
+        path = "medgemma_4b_mobile_int8_q8_ekv2048.tflite",
         url = "https://huggingface.co/megalodon-ml/medgemma_kaggle/resolve/main/models/text/medgemma_4b_mobile_int8_q8_ekv2048.tflite",
         visionPath = "siglip_encoder.tflite",
         visionUrl = "https://huggingface.co/megalodon-ml/medgemma_kaggle/resolve/main/models/vision/medsiglip_vision_896.tflite",
@@ -35,7 +58,6 @@ enum class Model(
         temperature = 0.7f,
         topK = 40,
         topP = 0.95f,
-        // MedGemma 4B architecture (from conversion notebook)
         numLayers = 34,
         numKvHeads = 4,
         headDim = 256,

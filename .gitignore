@@ -13,3 +13,10 @@
 .externalNativeBuild
 .cxx
 local.properties
+
+# Large model files
+models/
+*.tflite
+
+# Nested git repos
+app/java-llama.cpp/
