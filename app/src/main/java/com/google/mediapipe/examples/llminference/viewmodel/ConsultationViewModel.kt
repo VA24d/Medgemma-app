@@ -164,7 +164,7 @@ class ConsultationViewModel(application: Application) : AndroidViewModel(applica
                     )
                 }
 
-                // Step 3: Generate AI text response with Gemma 3
+                // Step 3: Generate AI text response with MedGemma
                 model.generateResponseAsync(prompt, emptyList()) { partialResult, isDone ->
                     _aiSuggestions.value += partialResult
                 }.get()

@@ -61,6 +61,14 @@ class InferenceModel private constructor(context: Context) {
             .setModelPath(modelPath(context))
             .setMaxTokens(MAX_TOKENS)
             .apply { model.preferredBackend?.let { setPreferredBackend(it) } }
+            .apply {
+                val visionPath = visionModelPath(context)
+                val projectorPath = projectorModelPath(context)
+                if (visionPath.isNotEmpty() && File(visionPath).exists()) {
+                    // Enable vision input for multimodal models like MedGemma
+                    setMaxNumImages(1)
+                }
+            }
             .build()
 
         try {
