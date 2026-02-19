@@ -1,0 +1,945 @@
+--------- beginning of system
+02-19 17:17:06.625  1576  1616 W ActivityTaskManager: callingPackage for (uid=2000, pid=20878) has no WPC
+02-19 17:17:06.625  1576  1616 V WindowManager: DesktopModeLaunchParamsModifier: phase= 0 task=null activity=null desktop mode is not enabled, skipping
+02-19 17:17:06.626  1576  1616 V WindowManager: TaskLaunchParamsModifier:phase=0 task=null activity=null display-area-from-current-params=null display-area-from-default-fallback=DefaultTaskDisplayArea@116544886 display-id=0 task-display-area-windowing-mode=1 suggested-display-area=DefaultTaskDisplayArea@116544886
+--------- beginning of main
+02-19 17:17:06.638  1576  1616 V GrammaticalInflectionUtils: AttributionSource: android.content.AttributionSource@b9ed82a does not have READ_SYSTEM_GRAMMATICAL_GENDER permission.
+02-19 17:17:06.641  1576  1616 V WindowManager: DesktopModeLaunchParamsModifier: phase= 0 task=null activity=ActivityRecord{76164435 u0 com.google.mediapipe.examples.llminference/.MainActivity desktop mode is not enabled, skipping
+02-19 17:17:06.641  1576  1616 V WindowManager: TaskLaunchParamsModifier:phase=0 task=null activity=ActivityRecord{76164435 u0 com.google.mediapipe.examples.llminference/.MainActivity t-1} display-area-from-current-params=null display-area-for-record=DefaultTaskDisplayArea@116544886 display-id=0 task-display-area-windowing-mode=1 suggested-display-area=DefaultTaskDisplayArea@116544886
+02-19 17:17:06.641  1576  1616 V WindowManager: DesktopModeLaunchParamsModifier: phase= 3 task=Task{951400 #8239 type=standard A=10374:com.google.mediapipe.examples.llminference} activity=ActivityRecord{76164435 u0 com.google.mediapipe.examples.llminference/.MainActivity t-1} desktop mode is not enabled, skipping
+02-19 17:17:06.643  1576  1616 V WindowManager: TaskLaunchParamsModifier:phase=3 task=Task{951400 #8239 type=standard A=10374:com.google.mediapipe.examples.llminference} activity=ActivityRecord{76164435 u0 com.google.mediapipe.examples.llminference/.MainActivity t-1} display-from-task=0 display-id=0 task-display-area-windowing-mode=1 suggested-display-area=DefaultTaskDisplayArea@116544886 inherit-from-task=fullscreen non-freeform-task-display-area display-area=DefaultTaskDisplayArea@116544886 default-portrait freeform-size-mismatch=Rect(272, 652 - 809, 1732)
+02-19 17:17:06.644  1576  1616 V WindowManager: DesktopModeLaunchParamsModifier: phase= 3 task=Task{951400 #8239 type=standard A=10374:com.google.mediapipe.examples.llminference} activity=ActivityRecord{76164435 u0 com.google.mediapipe.examples.llminference/.MainActivity t-1} desktop mode is not enabled, skipping
+02-19 17:17:06.645  1576  1616 V WindowManager: TaskLaunchParamsModifier:phase=3 task=Task{951400 #8239 type=standard A=10374:com.google.mediapipe.examples.llminference} activity=ActivityRecord{76164435 u0 com.google.mediapipe.examples.llminference/.MainActivity t-1} display-from-task=0 display-id=0 task-display-area-windowing-mode=1 suggested-display-area=DefaultTaskDisplayArea@116544886 inherit-from-task=fullscreen non-freeform-task-display-area display-area=DefaultTaskDisplayArea@116544886 default-portrait freeform-size-mismatch=Rect(272, 652 - 809, 1732)
+02-19 17:17:06.649  1576  1616 V WindowManager: DesktopModeLaunchParamsModifier: phase= 3 task=Task{951400 #8239 type=standard A=10374:com.google.mediapipe.examples.llminference} activity=ActivityRecord{76164435 u0 com.google.mediapipe.examples.llminference/.MainActivity t-1} desktop mode is not enabled, skipping
+02-19 17:17:06.649  1576  1616 V WindowManager: TaskLaunchParamsModifier:phase=3 task=Task{951400 #8239 type=standard A=10374:com.google.mediapipe.examples.llminference} activity=ActivityRecord{76164435 u0 com.google.mediapipe.examples.llminference/.MainActivity t-1} display-from-task=0 display-id=0 task-display-area-windowing-mode=1 suggested-display-area=DefaultTaskDisplayArea@116544886 inherit-from-task=fullscreen non-freeform-task-display-area display-area=DefaultTaskDisplayArea@116544886 default-portrait freeform-size-mismatch=Rect(272, 652 - 809, 1732)
+02-19 17:17:06.658   600   909 I libbinder.BpBinder: onLastStrongRef automatically unlinking death recipients for descriptor: '(not cached)'
+02-19 17:17:06.660  1576  1616 I ActivityTaskManager: START u0 {flg=0x10000000 xflg=0x5 cmp=com.google.mediapipe.examples.llminference/.MainActivity} with LAUNCH_MULTIPLE from uid 2000 (com.android.shell) (BAL_ALLOW_PERMISSION) result code=0
+02-19 17:17:06.660  2193  2218 V WindowManagerShell: Transition requested (#887): android.os.BinderProxy@413ec32 TransitionRequestInfo { type = OPEN, triggerTask = TaskInfo{userId=0 taskId=8239 effectiveUid=10374 displayId=0 isRunning=true baseIntent=Intent { act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] flg=0x10200000 cmp=com.google.mediapipe.examples.llminference/.MainActivity } baseActivity=ComponentInfo{com.google.mediapipe.examples.llminference/com.google.mediapipe.examples.llminference.MainActivity} topActivity=ComponentInfo{com.google.mediapipe.examples.llminference/com.google.mediapipe.examples.llminference.MainActivity} origActivity=null realActivity=ComponentInfo{com.google.mediapipe.examples.llminference/com.google.mediapipe.examples.llminference.MainActivity} numActivities=2 lastActiveTime=17562771 supportsMultiWindow=true resizeMode=1 isResizeable=true minWidth=-1 minHeight=-1 defaultMinSize=220 token=WCT{android.os.BinderProxy@8310acb} topActivityType=1 pictureInPictureParams=null shouldDockBigOverlays=false launchIntoPipHostTaskId=-1 lastParentTaskIdBeforePip=-1 displayCutoutSafeInsets=Rect(0, 0 - 0, 0) topActivityInfo=ActivityInfo{f1efd83 com.google.mediapipe.examples.llminference.MainActivity} launchCookies=[android.os.BinderProxy@aeda1c1] positionInParent=Point(0, 0) parentTaskId=-1 isFocused=true isVisible=true isVisibleRequested=true isTopActivityNoDisplay=false isSleeping=false locusId=null displayAreaFeatureId=1 isTopActivityTransparent=false isActivityStackTransparent=false lastNonFullscreenBounds=Rect(272, 652 - 809, 1732) capturedLink=null capturedLinkTimestamp=0 requestedVisibleTypes=503 topActivityRequestOpenInBrowserEducationTimestamp=0 appCompatTaskInfo=AppCompatTaskInfo { topActivityInSizeCompat=false isLeafTask= true eligibleForLetterboxEducation= false isLetterboxEducationEnabled= false isLetterboxDoubleTapEnabled= false eligibleForUserAspectRatioButton= false topActivityBoundsLetterboxed= false isFromLetterboxDoubleTap= false topActivityLetterboxVerticalPosition= -1 topActivityLetterboxHorizontalPosition= -1 topActivityLetterboxWidth=-1 topActivityLetterboxHeight=-1 topActivityAppBounds=Rect(0, 0 - 1080, 2340) isUserFullscreenOverrideEnabled=false isSystemFullscreenOverrideEnabled=false hasMinAspectRatioOverride=false topActivityLetterboxBounds=null cameraCompatTaskInfo=CameraCompatTaskInfo { cameraCompatMode=undefinedundefined} topNonResizableActivityAspectRatio=-1.0} topActivityMainWindowFrame=null isAppBubble=false}, pipChange = null, remoteTransition = null, displayChange = null, requestedLocation = null, userChange = null, windowingLayerChange = null, flags = 0, debugId = 887 }
+02-19 17:17:06.661  2193  2218 D ShellSplitScreen: logExit: no-op, mLoggerSessionId is null
+02-19 17:17:06.668  1576  2155 D BackgroundInstallControlService: Package event received: 0
+02-19 17:17:06.673  1576  2155 D BackgroundInstallControlService: Package event received: 0
+02-19 17:17:06.673  1576  2155 D BackgroundInstallControlService: Package event received: 0
+02-19 17:17:06.687  1597  1597 I pixel-thermal: cellular-emergency:44.8304 raw data: VIRTUAL-GNSS-DISP:44830.4 VIRTUAL-NEUTRAL-QUIET:42283.8 VIRTUAL-QUIET-USB2:40174 VIRTUAL-SKIN:44830.4 VIRTUAL-USB2-QUIET:39749.9 cellular-emergency:44830.4 disp_therm:40746 gnss_tcxo_therm:48564 neutral_therm:45032 quiet_therm:41342 usb_pwr_therm2:41662 
+02-19 17:17:06.687  1597  1597 I pixel-thermal: VIRTUAL-SKIN-CHARGE:43.4118 raw data: VIRTUAL-SKIN-CHARGE:43411.8 qi_therm:49113 quiet_therm:41342 
+02-19 17:17:06.687  1597  1597 I pixel-thermal: USB-MINUS-NEUTRAL:-4.034 raw data: USB-MINUS-NEUTRAL:-4034 neutral_therm:45032 usb_pwr_therm:40998 
+02-19 17:17:06.687  1597  1597 I pixel-thermal: VIRTUAL-SKIN:44.8304 raw data: VIRTUAL-SKIN:44830.4 
+02-19 17:17:06.687  1597  1597 I pixel-thermal: VIRTUAL-USB-THROTTLING:0 raw data: USB-MINUS-NEUTRAL:-4034 USB-MINUS-USB2:-664 VIRTUAL-USB-THROTTLING:0 usb_pwr_therm:40998 usb_pwr_therm2:41662 
+02-19 17:17:06.688  1597  1597 I pixel-thermal: usb_pwr_therm:40.998 raw data: usb_pwr_therm:40998 
+02-19 17:17:06.688  1597  1597 I pixel-thermal: VIRTUAL-USB-UI:0 raw data: USB-MINUS-NEUTRAL:-4034 USB-MINUS-USB2:-664 VIRTUAL-USB-UI:0 usb_pwr_therm:40998 
+02-19 17:17:06.688  1597  1597 I pixel-thermal: USB-MINUS-USB2:-0.664 raw data: USB-MINUS-USB2:-664 
+02-19 17:17:06.688  1597  1597 I pixel-thermal: quiet_therm:41.342 raw data: quiet_therm:41342 
+02-19 17:17:06.773 18992 18992 D b/417220811: invalidateLoadedTasks - previous requestLoadId: -1
+02-19 17:17:06.778   602  1851 E hwc-display: [PrimaryDisplay,pid=990,blob#218,chan#0] HistogramDevice::checkQueryResult: BAD_HIST_DATA, no event is handled
+02-19 17:17:06.780   990  1796 D usf_sensor_hal: [p0]Histogram API error:BAD_HIST_DATA
+02-19 17:17:06.868 20725 20725 I es.llminference: Waiting for a blocking GC NativeAlloc
+02-19 17:17:07.047  2332  2694 W BluetoothRemoteDevices: Address type mismatch for XX:XX:XX:XX:C1:3C, new type: 1
+02-19 17:17:07.047  2332  2694 W BluetoothRemoteDevices: Address type mismatch for XX:XX:XX:XX:C1:3C, new type: 1
+02-19 17:17:07.051  3094  5052 I NearbyDiscovery: (REDACTED) BloomFilterAdvManager: Detected bloom filter but too far away, ignoring. %sm, %s
+02-19 17:17:07.465 20725 20731 I es.llminference: NativeAlloc concurrent mark compact GC freed 30MB AllocSpace bytes, 3(59MB) LOS objects, 69% free, 41MB/137MB, paused 2.157ms,2.270ms total 598.459ms
+02-19 17:17:07.465 20725 20725 I es.llminference: WaitForGcToComplete blocked NativeAlloc on NativeAlloc for 600.996ms
+02-19 17:17:07.476 20725 20725 I ContentCaptureHelper: Setting logging level to OFF
+02-19 17:17:07.493 20725 20725 I Choreographer: Skipped 48 frames!  The application may be doing too much work on its main thread.
+02-19 17:17:07.984 20725 20725 D VRI[MainActivity]: WindowInsets changed: 1080x2340 statusBars:[0,108,0,0] navigationBars:[0,0,0,63] mandatorySystemGestures:[0,140,0,84] 
+02-19 17:17:07.984 20725 20725 D WindowOnBackDispatcher: setTopOnBackInvokedCallback (unwrapped): android.view.ViewRootImpl$$ExternalSyntheticLambda12@9f91599
+02-19 17:17:07.985  1576  4809 D CoreBackPreview: Window{a004baf u0 com.google.mediapipe.examples.llminference/com.google.mediapipe.examples.llminference.MainActivity}: Setting back callback OnBackInvokedCallbackInfo{mCallback=android.window.IOnBackInvokedCallback$Stub$Proxy@5412e9a, mPriority=0, mIsAnimationCallback=false, mOverrideBehavior=0}
+02-19 17:17:08.262   693  2285 W powerhal-libperfmgr: The actual duration is way far from the target (768671957 >> 11620000)
+02-19 17:17:08.266   693  2285 W powerhal-libperfmgr: The actual duration is way far from the target (772939820 >> 11620000)
+02-19 17:17:08.270 20725 20725 I Choreographer: Skipped 46 frames!  The application may be doing too much work on its main thread.
+02-19 17:17:08.275  1576  1629 I ActivityTaskManager: Displayed com.google.mediapipe.examples.llminference/.MainActivity for user 0: +1s644ms
+02-19 17:17:08.276  1576  1629 V WindowManager: Sent Transition (#887) createdAt=02-19 17:17:06.640 via request=TransitionRequestInfo { type = OPEN, triggerTask = TaskInfo{userId=0 taskId=8239 effectiveUid=10374 displayId=0 isRunning=true baseIntent=Intent { act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] flg=0x10200000 cmp=com.google.mediapipe.examples.llminference/.MainActivity } baseActivity=ComponentInfo{com.google.mediapipe.examples.llminference/com.google.mediapipe.examples.llminference.MainActivity} topActivity=ComponentInfo{com.google.mediapipe.examples.llminference/com.google.mediapipe.examples.llminference.MainActivity} origActivity=null realActivity=ComponentInfo{com.google.mediapipe.examples.llminference/com.google.mediapipe.examples.llminference.MainActivity} numActivities=2 lastActiveTime=17562771 supportsMultiWindow=true resizeMode=1 isResizeable=true minWidth=-1 minHeight=-1 defaultMinSize=220 token=WCT{RemoteToken{18d1a73 Task{951400 #8239 type=standard A=10374:com.google.mediapipe.examples.llminference}}} topActivityType=1 pictureInPictureParams=null shouldDockBigOverlays=false launchIntoPipHostTaskId=-1 lastParentTaskIdBeforePip=-1 displayCutoutSafeInsets=Rect(0, 0 - 0, 0) topActivityInfo=ActivityInfo{eb0f3c0 com.google.mediapipe.examples.llminference.MainActivity} launchCookies=[android.os.BinderProxy@b6b1da9] positionInParent=Point(0, 0) parentTaskId=-1 isFocused=true isVisible=true isVisibleRequested=true isTopActivityNoDisplay=false isSleeping=false locusId=null displayAreaFeatureId=1 isTopActivityTransparent=false isActivityStackTransparent=false lastNonFullscreenBounds=Rect(272, 652 - 809, 1732) capturedLink=null capturedLinkTimestamp=0 requestedVisibleTypes=503 topActivityRequestOpenInBrowserEducationTimestamp=0 appCompatTaskInfo=AppCompatTaskInfo { topActivityInSizeCompat=false isLeafTask= true eligibleForLetterboxEducation= false isLetterboxEducationEnabled= false isLetterboxDoubleTapEnabled= false eligibleForUserAspectRatioButton= false topActivityBoundsLetterboxed= false isFromLetterboxDoubleTap= false topActivityLetterboxVerticalPosition= -1 topActivityLetterboxHorizontalPosition= -1 topActivityLetterboxWidth=-1 topActivityLetterboxHeight=-1 topActivityAppBounds=Rect(0, 0 - 1080, 2340) isUserFullscreenOverrideEnabled=false isSystemFullscreenOverrideEnabled=false hasMinAspectRatioOverride=false topActivityLetterboxBounds=null cameraCompatTaskInfo=CameraCompatTaskInfo { cameraCompatMode=undefinedundefined} topNonResizableActivityAspectRatio=-1.0} topActivityMainWindowFrame=null isAppBubble=false}, pipChange = null, remoteTransition = null, displayChange = null, requestedLocation = null, userChange = null, windowingLayerChange = null, flags = 0, debugId = 887 }
+02-19 17:17:08.276  1576  1629 V WindowManager:     startWCT=WindowContainerTransaction { changes= {} hops= [] errorCallbackToken=null taskFragmentOrganizer=null }
+02-19 17:17:08.276  1576  1629 V WindowManager:     info={id=887 t=OPEN f=0x0 trk=0 r=[0@Point(0, 0)] c=[
+02-19 17:17:08.276  1576  1629 V WindowManager:         {m=OPEN f=FILLS_TASK leash=Surface(name=ActivityRecord{76164435 u0 com.google.mediapipe.examples.llminference/.MainActivity t8239}#8164)/@0x30ef6f2 sb=Rect(0, 0 - 0, 0) eb=Rect(0, 0 - 1080, 2340) epz=Point(1080, 2340) d=-1->0 r=-1->0:-1 bc=ff191919 activity=ActivityTransitionInfo { component = ComponentInfo{com.google.mediapipe.examples.llminference/com.google.mediapipe.examples.llminference.MainActivity}, taskId = 8239, appCompatTransitionInfo = null } opt={t=FROM_STYLE mUserId=0}},
+02-19 17:17:08.276  1576  1629 V WindowManager:         {m=TO_BACK f=FILLS_TASK leash=Surface(name=ActivityRecord{77892227 u0 com.google.mediapipe.examples.llminference/.MainActivity t8239}#8147)/@0xef139fd sb=Rect(0, 0 - 1080, 2340) eb=Rect(0, 0 - 1080, 2340) epz=Point(1080, 2340) d=0 bc=ff191919 activity=ActivityTransitionInfo { component = ComponentInfo{com.google.mediapipe.examples.llminference/com.google.mediapipe.examples.llminference.MainActivity}, taskId = 8239, appCompatTransitionInfo = null } opt={t=FROM_STYLE mUserId=0}}
+02-19 17:17:08.276  1576  1629 V WindowManager:     ]}
+02-19 17:17:08.276  2193 19345 V WindowManagerShell: onTransitionReady(transaction=6768868537577)
+02-19 17:17:08.277  2193  2218 V WindowManagerShell: onTransitionReady (#887) android.os.BinderProxy@413ec32: {id=887 t=OPEN f=0x0 trk=0 r=[0@Point(0, 0)] c=[
+02-19 17:17:08.277  2193  2218 V WindowManagerShell:         {m=OPEN f=FILLS_TASK leash=Surface(name=ActivityRecord{76164435 u0 com.google.mediapipe.examples.llminference/.MainActivity t8239}#8164)/@0x7c20b00 sb=Rect(0, 0 - 0, 0) eb=Rect(0, 0 - 1080, 2340) epz=Point(1080, 2340) d=-1->0 r=-1->0:-1 bc=ff191919 activity=ActivityTransitionInfo { component = ComponentInfo{com.google.mediapipe.examples.llminference/com.google.mediapipe.examples.llminference.MainActivity}, taskId = 8239, appCompatTransitionInfo = null } opt={t=FROM_STYLE mUserId=0}},
+02-19 17:17:08.277  2193  2218 V WindowManagerShell:         {m=TO_BACK f=FILLS_TASK leash=Surface(name=ActivityRecord{77892227 u0 com.google.mediapipe.examples.llminference/.MainActivity t8239}#8147)/@0xef8df39 sb=Rect(0, 0 - 1080, 2340) eb=Rect(0, 0 - 1080, 2340) epz=Point(1080, 2340) d=0 bc=ff191919 activity=ActivityTransitionInfo { component = ComponentInfo{com.google.mediapipe.examples.llminference/com.google.mediapipe.examples.llminference.MainActivity}, taskId = 8239, appCompatTransitionInfo = null } opt={t=FROM_STYLE mUserId=0}}
+02-19 17:17:08.277  2193  2218 V WindowManagerShell:     ]}
+02-19 17:17:08.277  2193  2218 V WindowManagerShell: Playing animation for (#887) android.os.BinderProxy@413ec32@0
+02-19 17:17:08.277  2193  2218 V ShellRecents: RecentsTransitionHandler.startAnimation: no controller found
+02-19 17:17:08.277  2193  2218 V WindowManagerShell: Transition doesn't have explicit remote, search filters for match for {id=887 t=OPEN f=0x0 trk=0 r=[0@Point(0, 0)] c=[{m=OPEN f=FILLS_TASK leash=Surface(name=ActivityRecord{76164435 u0 com.google.mediapipe.examples.llminference/.MainActivity t8239}#8164)/@0x7c20b00 sb=Rect(0, 0 - 0, 0) eb=Rect(0, 0 - 1080, 2340) epz=Point(1080, 2340) d=-1->0 r=-1->0:-1 bc=ff191919 activity=ActivityTransitionInfo { component = ComponentInfo{com.google.mediapipe.examples.llminference/com.google.mediapipe.examples.llminference.MainActivity}, taskId = 8239, appCompatTransitionInfo = null } opt={t=FROM_STYLE mUserId=0}},{m=TO_BACK f=FILLS_TASK leash=Surface(name=ActivityRecord{77892227 u0 com.google.mediapipe.examples.llminference/.MainActivity t8239}#8147)/@0xef8df39 sb=Rect(0, 0 - 1080, 2340) eb=Rect(0, 0 - 1080, 2340) epz=Point(1080, 2340) d=0 bc=ff191919 activity=ActivityTransitionInfo { component = ComponentInfo{com.google.mediapipe.examples.llminference/com.google.mediapipe.examples.llminference.MainActivity}, taskId = 8239, appCompatTransitionInfo = null } opt={t=FROM_STYLE mUserId=0}}]}
+02-19 17:17:08.277  2193  2218 V WindowManagerShell:  Checking filter Pair{{types=[] flags=0x0] notFlags=0x0 checks=[{atype=undefined independent=true modes=[CLOSE,TO_BACK] flags=IN_TASK_WITH_EMBEDDED_ACTIVITY mustBeTask=false order=ANY topActivity=null launchCookie=null taskFragmentToken=android.os.BinderProxy@d42ef08 windowingMode=undefined isCrossDisplayMove=false}]} RemoteTransition { remoteTransition = android.window.IRemoteTransition$Stub$Proxy@28466a1, appThread = android.app.IApplicationThread$Stub$Proxy@b2af0c6, debugName = overlayBackTransition }}
+02-19 17:17:08.277  2193  2218 V WindowManagerShell:  Checking filter Pair{{types=[] flags=0x0] notFlags=0x0 checks=[{atype=dream independent=true modes=[OPEN,TO_FRONT] flags=NONE mustBeTask=false order=ANY topActivity=null launchCookie=null windowingMode=undefined isCrossDisplayMove=false},{atype=home independent=true modes=[CLOSE,TO_BACK] flags=NONE mustBeTask=false order=ANY topActivity=null launchCookie=null windowingMode=undefined isCrossDisplayMove=false}]} RemoteTransition { remoteTransition = android.window.IRemoteTransition$Stub$Proxy@5c90887, appThread = android.app.IApplicationThread$Stub$Proxy@69bf3b4, debugName = LauncherToDream }}
+02-19 17:17:08.277  2193  2218 V WindowManagerShell:  Checking filter Pair{{types=[] flags=0x0] notFlags=0x100 checks=[{atype=home independent=true modes=[OPEN,TO_FRONT] flags=NONE mustBeTask=false order=TOP topActivity=ComponentInfo{com.google.android.apps.nexuslauncher/com.google.android.apps.nexuslauncher.NexusLauncherActivity} launchCookie=null windowingMode=undefined isCrossDisplayMove=false},{atype=standard independent=true modes=[CLOSE,TO_BACK] flags=NONE mustBeTask=false order=ANY topActivity=null launchCookie=null windowingMode=undefined isCrossDisplayMove=false},{NOT atype=undefined independent=true modes=[] flags=NONE mustBeTask=true order=ANY topActivity=null launchCookie=null customAnim=true windowingMode=undefined isCrossDisplayMove=false}]} RemoteTransition { remoteTransition = android.window.IRemoteTransition$Stub$Proxy@5dfcbdd, appThread = android.app.IApplicationThread$Stub$Proxy@a555352, debugName = QuickstepLaunchHome }}
+02-19 17:17:08.277  2193  2218 V WindowManagerShell:  Delegate animation for (#887) to null
+02-19 17:17:08.277  2193  2218 V WindowManagerShell: start default transition animation, info = {id=887 t=OPEN f=0x0 trk=0 r=[0@Point(0, 0)] c=[{m=OPEN f=FILLS_TASK leash=Surface(name=ActivityRecord{76164435 u0 com.google.mediapipe.examples.llminference/.MainActivity t8239}#8164)/@0x7c20b00 sb=Rect(0, 0 - 0, 0) eb=Rect(0, 0 - 1080, 2340) epz=Point(1080, 2340) d=-1->0 r=-1->0:-1 bc=ff191919 activity=ActivityTransitionInfo { component = ComponentInfo{com.google.mediapipe.examples.llminference/com.google.mediapipe.examples.llminference.MainActivity}, taskId = 8239, appCompatTransitionInfo = null } opt={t=FROM_STYLE mUserId=0}},{m=TO_BACK f=FILLS_TASK leash=Surface(name=ActivityRecord{77892227 u0 com.google.mediapipe.examples.llminference/.MainActivity t8239}#8147)/@0xef8df39 sb=Rect(0, 0 - 1080, 2340) eb=Rect(0, 0 - 1080, 2340) epz=Point(1080, 2340) d=0 bc=ff191919 activity=ActivityTransitionInfo { component = ComponentInfo{com.google.mediapipe.examples.llminference/com.google.mediapipe.examples.llminference.MainActivity}, taskId = 8239, appCompatTransitionInfo = null } opt={t=FROM_STYLE mUserId=0}}]}
+02-19 17:17:08.285  2193  2218 V WindowManagerShell: loadAnimation: anim=android.view.animation.AnimationSet@398cf8a animAttr=0x5 type=OPEN isEntrance=false
+02-19 17:17:08.286  2193  2218 V WindowManagerShell: loadAnimation: anim=android.view.animation.AnimationSet@da3c71 animAttr=0x4 type=OPEN isEntrance=true
+02-19 17:17:08.287  2193  2218 V WindowManagerShell:  animated by com.android.wm.shell.transition.DefaultTransitionHandler@29ac88c
+02-19 17:17:08.289 20725 20764 I HWUI    : Davey! duration=1585ms; Flags=1, FrameTimelineVsyncId=3757128, IntendedVsync=14577078194423, Vsync=14577861226361, InputEventId=0, HandleInputStart=14577894395545, AnimationStart=14577894396887, PerformTraversalsStart=14577895274654, DrawStart=14578630640906, FrameDeadline=14577094794423, FrameStartTime=14577894169674, FrameInterval=16660254, WorkloadTarget=16600000, SyncQueued=14578653948768, SyncStart=14578653992184, IssueDrawCommandsStart=14578654974443, SwapBuffers=14578662387000, FrameCompleted=14578663357703, DequeueBufferDuration=11718, QueueBufferDuration=220296, GpuCompleted=14578663357703, SwapBuffersCompleted=14578662640377, DisplayPresentTime=3832904342842980656, CommandSubmissionCompleted=14578662387000, 
+02-19 17:17:08.289 20725 20764 I HWUI    : Davey! duration=1589ms; Flags=1, FrameTimelineVsyncId=3757128, IntendedVsync=14577078194423, Vsync=14577861226361, InputEventId=0, HandleInputStart=14577894395545, AnimationStart=14577894396887, PerformTraversalsStart=14577895274654, DrawStart=14578665478512, FrameDeadline=14577117432410, FrameStartTime=14577894169674, FrameInterval=16660254, WorkloadTarget=16600000, SyncQueued=14578665927812, SyncStart=14578666011430, IssueDrawCommandsStart=14578666154293, SwapBuffers=14578666887570, FrameCompleted=14578667333696, DequeueBufferDuration=11881, QueueBufferDuration=149740, GpuCompleted=14578667333696, SwapBuffersCompleted=14578667098222, DisplayPresentTime=14575128323237, CommandSubmissionCompleted=14578666887570, 
+02-19 17:17:08.291   602  1851 E hwc-display: [PrimaryDisplay] resetColorMappingInfoForClientComp:: resetColorMappingInfo() idx=0 error(-22)
+02-19 17:17:08.295   602   602 W binder:602_5: type=1400 audit(0.0:12961): avc:  denied  { search } for  name="log" dev="dm-61" ino=315 scontext=u:r:hal_graphics_composer_default:s0 tcontext=u:object_r:vendor_log_file:s0 tclass=dir permissive=0
+02-19 17:17:08.299   602   602 W binder:602_5: type=1400 audit(0.0:12962): avc:  denied  { search } for  name="log" dev="dm-61" ino=315 scontext=u:r:hal_graphics_composer_default:s0 tcontext=u:object_r:vendor_log_file:s0 tclass=dir permissive=0
+02-19 17:17:08.306   602  1851 E hwc-display: Fail to open file /data/vendor/log/hwc/PrimaryDisplay_hwc_error_log0.txt, error: Permission denied
+02-19 17:17:08.306   602  1851 E hwc-display: Fail to open file /data/log/PrimaryDisplay_hwc_error_log0.txt, error: No such file or directory
+02-19 17:17:08.306   602  1851 E hwc-display: Unable to open log file for PrimaryDisplay_hwc_error_log0.txt
+02-19 17:17:08.354  2524  2688 D SatelliteController: iisInCarrierRoamingNbIotNtn: satellite is disabled
+02-19 17:17:08.355  2467  2467 I SHANNON_IMS: 9748 [PROX] Received onSignalStrengthsChanged [CellSignalStrengthLte: rssi=-81 rsrp=-109 rsrq=-8 rssnr=11 cqiTableIndex=1 cqi=13 ta=0 level=2 parametersUseForLevel=0] [SLID:0 APM:false] (ImsConnectivityProxyListener$ImsPhoneStateListener%onSignalStrengthsChanged:413)
+02-19 17:17:08.355  5392  5392 D CellularQualityMonitor-0: Signal Strength Changed : SignalStrength:{mCdma=CellSignalStrengthCdma: cdmaDbm=2147483647 cdmaEcio=2147483647 evdoDbm=2147483647 evdoEcio=2147483647 evdoSnr=2147483647 level=0,mGsm=CellSignalStrengthGsm: rssi=2147483647 ber=2147483647 mTa=2147483647 mLevel=0,mWcdma=CellSignalStrengthWcdma: ss=2147483647 ber=2147483647 rscp=2147483647 ecno=2147483647 level=0,mTdscdma=CellSignalStrengthTdscdma: rssi=2147483647 ber=2147483647 rscp=2147483647 level=0,mLte=CellSignalStrengthLte: rssi=-81 rsrp=-109 rsrq=-8 rssnr=11 cqiTableIndex=1 cqi=13 ta=0 level=2 parametersUseForLevel=0,mNr=CellSignalStrengthNr:{ csiRsrp = 2147483647 csiRsrq = 2147483647 csiCqiTableIndex = 2147483647 csiCqiReport = [] ssRsrp = 2147483647 ssRsrq = 2147483647 ssSinr = 2147483647 level = 0 parametersUseForLevel = 0 timingAdvance = 2147483647 },primary=CellSignalStrengthLte}
+02-19 17:17:08.355  5392  5392 D CellularQualityMonitor-0: CellSignalStrength Changed: CellSignalStrengthLte: rssi=-81 rsrp=-109 rsrq=-8 rssnr=11 cqiTableIndex=1 cqi=13 ta=0 level=2 parametersUseForLevel=0
+02-19 17:17:08.360  2524  2688 D SatelliteController: getCarrierRoamingNtnConnectType: Falling back to global carrier config connect type: 0
+02-19 17:17:08.372  1032  1032 I WifiHAL : Creating message to get link statistics; iface = 48
+02-19 17:17:08.383   602   602 W binder:602_1: type=1400 audit(0.0:12963): avc:  denied  { search } for  name="log" dev="dm-61" ino=315 scontext=u:r:hal_graphics_composer_default:s0 tcontext=u:object_r:vendor_log_file:s0 tclass=dir permissive=0
+02-19 17:17:08.391   602   651 E hwc-display: [PrimaryDisplay] resetColorMappingInfoForClientComp:: resetColorMappingInfo() idx=1 error(-22)
+02-19 17:17:08.391   602   651 E hwc-display: Fail to open file /data/vendor/log/hwc/PrimaryDisplay_hwc_error_log0.txt, error: Permission denied
+02-19 17:17:08.391   602   651 E hwc-display: Fail to open file /data/log/PrimaryDisplay_hwc_error_log0.txt, error: No such file or directory
+02-19 17:17:08.391   602   651 E hwc-display: Unable to open log file for PrimaryDisplay_hwc_error_log0.txt
+02-19 17:17:08.383   602   602 W binder:602_1: type=1400 audit(0.0:12964): avc:  denied  { search } for  name="log" dev="dm-61" ino=315 scontext=u:r:hal_graphics_composer_default:s0 tcontext=u:object_r:vendor_log_file:s0 tclass=dir permissive=0
+02-19 17:17:08.400  1576  2057 I ImeTracker: com.google.mediapipe.examples.llminference:b17a3b5b: onRequestHide at ORIGIN_SERVER reason HIDE_UNSPECIFIED_WINDOW fromUser false
+02-19 17:17:08.400 20725 20725 D InsetsController: hide(ime())
+02-19 17:17:08.400 20725 20725 I ImeTracker: com.google.mediapipe.examples.llminference:b17a3b5b: onCancelled at PHASE_CLIENT_ALREADY_HIDDEN
+02-19 17:17:08.418  1576  4809 I ImeTracker: system_server:fdc2ce64: onRequestHide at ORIGIN_SERVER reason IME_REQUESTED_CHANGED_LISTENER fromUser false
+02-19 17:17:08.419  1576  1632 I ImeTracker: system_server:fdc2ce64: onCancelled at PHASE_SERVER_SHOULD_HIDE
+02-19 17:17:08.432 19383 19383 I GoogleInputMethodService: GoogleInputMethodService.onFinishInput():2113 
+02-19 17:17:08.448 19383 19383 I Module  : DeviceLockedStatusModuleProvider$Module.updateDeviceLockedStatus():103 repeatCheckTimes = 0, locked = false
+02-19 17:17:08.490 19383 19383 I GoogleInputMethodService: GoogleInputMethodService.onStartInput():1384 onStartInput(EditorInfo{EditorInfo{packageName=com.google.mediapipe.examples.llminference, inputType=0, inputTypeString=NULL, enableLearning=false, autoCorrection=false, autoComplete=false, imeOptions=0, privateImeOptions=null, actionName=UNSPECIFIED, actionLabel=null, initialSelStart=-1, initialSelEnd=-1, initialCapsMode=0, label=null, fieldId=0, fieldName=null, extras=null, hintText=null, hintLocales=[]}}, false)
+02-19 17:17:08.648  1576  2091 D ConnectivityService: NetReassign [no changes] [c 1] [a 2] [i 4]
+02-19 17:17:08.652 19383 19383 I Module  : DeviceLockedStatusModuleProvider$Module.updateDeviceLockedStatus():103 repeatCheckTimes = 1, locked = false
+02-19 17:17:08.673 19383 19383 W NotificationCenter: NotificationCenter$NotificationQueue.notifyPendingNotificationsOnExecutor():877 Heavy notify work detected on UI thread: [mul->glg, mul->kpu, mul->kpu, mul->lxh, mul->kpu, mul->mte, mul->kpu, mul->oyp, mul->god, mul->kpu, mul->kpu, mul->okf, mul->kpu, mul->kpu, mul->krx, mul->kpu, mul->kpu, mul->mtn, mul->hmz, mul->kpu, mul->kpu, mul->kpu] takes 175ms
+02-19 17:17:08.676  1576  4809 W PackageConfigPersister: App-specific configuration not found for packageName: com.google.mediapipe.examples.llminference and userId: 0
+02-19 17:17:08.772  2193  2218 V WindowManagerShell: Transition animation finished (aborted=false), notifying core (#887) android.os.BinderProxy@413ec32@0
+02-19 17:17:08.775  1576  1629 V WindowManager: Finish Transition (#887): created at 02-19 17:17:06.640 collect-started=0.173ms request-sent=18.617ms started=24.284ms ready=31.087ms sent=1629.48ms commit=19.912ms finished=2134.464ms
+02-19 17:17:08.778  2193  2218 V WindowManagerShell: Track 0 became idle
+02-19 17:17:08.778  2193  2218 V WindowManagerShell: All active transition animations finished
+02-19 17:17:08.781 20725 20725 D VRI[MainActivity]: visibilityChanged oldVisibility=true newVisibility=false
+02-19 17:17:08.806   963  1021 D CHRE    : @ 17566.410: [ActivityPlatform] type 4, confidence 95
+02-19 17:17:08.810  1576  2155 D BackgroundInstallControlService: Package event received: 0
+02-19 17:17:09.183  2332  2694 W BluetoothRemoteDevices: Address type mismatch for XX:XX:XX:XX:C1:3C, new type: 1
+02-19 17:17:09.183  2332  2694 W BluetoothRemoteDevices: Address type mismatch for XX:XX:XX:XX:C1:3C, new type: 1
+02-19 17:17:09.186  3094  5052 I NearbyDiscovery: (REDACTED) BloomFilterAdvManager: Detected bloom filter but too far away, ignoring. %sm, %s
+02-19 17:17:10.195  1597  1618 I pixel-thermal: USB-MINUS-USB2:-0.687 raw data: USB-MINUS-USB2:-687 usb_pwr_therm:40998 usb_pwr_therm2:41685 
+02-19 17:17:10.195  1597  1618 I pixel-thermal: VIRTUAL-USB-UI:0 raw data: USB-MINUS-NEUTRAL:-3413 USB-MINUS-USB2:-687 VIRTUAL-USB-UI:0 neutral_therm:44411 usb_pwr_therm:40998 
+02-19 17:17:10.196  1597  1618 I pixel-thermal: VIRTUAL-USB-THROTTLING:0 raw data: USB-MINUS-NEUTRAL:-3413 USB-MINUS-USB2:-687 VIRTUAL-USB-THROTTLING:0 usb_pwr_therm:40998 
+02-19 17:17:10.201  1597  1618 I pixel-thermal: USB-MINUS-NEUTRAL:-3.413 raw data: USB-MINUS-NEUTRAL:-3413 
+02-19 17:17:10.201  1597  1618 I pixel-thermal: usb_pwr_therm:40.998 raw data: usb_pwr_therm:40998 
+02-19 17:17:10.539  1597  1618 I pixel-thermal: quiet_therm:41.296 raw data: quiet_therm:41296 
+02-19 17:17:10.540  1597  1618 I pixel-thermal: VIRTUAL-SKIN-CPU:45.1114 raw data: VIRTUAL-GNSS-DISP:45111.4 VIRTUAL-NEUTRAL-QUIET:42020.5 VIRTUAL-QUIET-USB2:40134.9 VIRTUAL-SKIN:45111.4 VIRTUAL-SKIN-CPU:45111.4 VIRTUAL-USB2-QUIET:39742.5 disp_therm:40723 gnss_tcxo_therm:49065 neutral_therm:44411 quiet_therm:41296 usb_pwr_therm2:41685 
+02-19 17:17:10.540  1597  1618 I pixel-thermal: VIRTUAL-SKIN-CPU power_budget=800 err=-4.11136 s_power=800 time_elapsed_ms=7022 p=-1644.54 i=184.219 d=-0 dt_per_min=nan compensation=0 budget transient=0 control target=3 excluded power budget=0
+02-19 17:17:10.540  1597  1618 I pixel-thermal: VIRTUAL-SKIN-CPU binded power rails: (S4M_VDD_CPUCL0: 256.28 mW)(S2M_VDD_CPUCL2: 437.22 mW)(S3M_VDD_CPUCL1: 199.10 mW)
+02-19 17:17:10.540  1597  1618 I pixel-thermal: VIRTUAL-SKIN:45.1114 raw data: VIRTUAL-SKIN:45111.4 
+02-19 17:17:10.540  1597  1618 I pixel-thermal: VIRTUAL-SKIN-CHARGE:43.5825 raw data: VIRTUAL-SKIN-CHARGE:43582.5 qi_therm:49686 quiet_therm:41296 
+02-19 17:17:10.540  1597  1618 I pixel-thermal: VIRTUAL-SKIN-CHARGE power_budget=641.943 err=-2.5825 s_power=2383 time_elapsed_ms=7022 p=-550.073 i=-870.016 d=-0 dt_per_min=nan compensation=0 budget transient=0 control target=2 excluded power budget=320.969 (PARTIAL_SYSTEM_POWER: 1528.42 mW, cdev_weight: 0.210000)
+02-19 17:17:10.540  1597  1618 I pixel-thermal: VIRTUAL-SKIN-HINT:45.1114 raw data: VIRTUAL-SKIN:45111.4 VIRTUAL-SKIN-HINT:45111.4 
+02-19 17:17:10.541  1597  1618 I pixel-thermal: VIRTUAL-SKIN-CPU-GPU:45.1114 raw data: VIRTUAL-SKIN:45111.4 VIRTUAL-SKIN-CPU-GPU:45111.4 
+02-19 17:17:10.541  1597  1618 I pixel-thermal: VIRTUAL-SKIN-CPU-GPU power_budget=1014.66 err=-0.111362 s_power=800 time_elapsed_ms=7022 p=-33.4087 i=248.072 d=-0 dt_per_min=nan compensation=0 budget transient=0 control target=3 excluded power budget=0
+02-19 17:17:10.541  1597  1618 I pixel-thermal: VIRTUAL-SKIN-CPU-GPU binded power rails: (S2S_VDD_G3D: 65.41 mW)(S4M_VDD_CPUCL0: 256.28 mW)(S2M_VDD_CPUCL2: 437.22 mW)(S3M_VDD_CPUCL1: 199.10 mW)
+02-19 17:17:10.541  1597  1618 I pixel-thermal: cellular-emergency:45.1114 raw data: VIRTUAL-SKIN:45111.4 cellular-emergency:45111.4 
+02-19 17:17:10.541  1597  1618 I pixel-thermal: Successfully update cdev thermal-cpufreq-1 sysfs to 2
+02-19 17:17:10.541  1597  1618 I pixel-thermal: Successfully update cdev thermal-cpufreq-2 sysfs to 11
+02-19 17:17:10.997  3094  3094 D BoundBrokerSvc: onUnbind: Intent { act=com.google.android.gms.libs.gmscorelogger.service.START dat=chimera-action:/... xflg=0x4 cmp=com.google.android.gms/.chimera.PersistentDirectBootAwareApiService }
+02-19 17:17:11.641  1032  1032 I WifiHAL : Creating message to get link statistics; iface = 48
+02-19 17:17:11.747  1576  2091 D ConnectivityService: NetReassign [no changes] [c 3] [a 8] [i 6]
+02-19 17:17:11.784  3094 20869 I AlarmManager: setExactAndAllowWhileIdle [name: GCM_HB_ALARM type: 2 triggerAtMillis: 18167899]
+02-19 17:17:11.983   963  1021 D CHRE    : @ 17569.587: [ActivityPlatform] type 4, confidence 95
+02-19 17:17:11.990  3094 20817 I AlarmManager: setExactAndAllowWhileIdle [name: FcmRetry type: 2 triggerAtMillis: 17688079]
+02-19 17:17:12.175  2332  2694 W BluetoothRemoteDevices: Address type mismatch for XX:XX:XX:XX:C1:3C, new type: 1
+02-19 17:17:12.175  2332  2694 W BluetoothRemoteDevices: Address type mismatch for XX:XX:XX:XX:C1:3C, new type: 1
+02-19 17:17:12.180  3094  5052 I NearbyDiscovery: (REDACTED) BloomFilterAdvManager: Detected bloom filter but too far away, ignoring. %sm, %s
+02-19 17:17:12.201  3094 20869 I AlarmManager: setExactAndAllowWhileIdle [name: GCM_HB_ALARM type: 2 triggerAtMillis: 18168316]
+02-19 17:17:12.227  1576  2155 D BackgroundInstallControlService: Package event received: 0
+02-19 17:17:12.748 20725 20760 I LiteRTEngine: Engine ready
+02-19 17:17:12.748 20725 20760 I com.google.mediapipe.examples.llminference.InferenceModel: Engine created successfully
+02-19 17:17:12.830  1576  4809 I ActivityManager: Background started FGS: Allowed [callingPackage: com.whatsapp; callingUid: 10255; uidState: SVC ; uidBFSL: n/a; intent: Intent { xflg=0x4 cmp=com.whatsapp/.messaging.service.GcmFGService }; code:PUSH_MESSAGING; tempAllowListReason:<8ef00a2 com.google.android.c2dm.intent.RECEIVE/u0,reasonCode:PUSH_MESSAGING,duration:20000,callingUid:10131>; allowWiu:-1; targetSdkVersion:35; callerTargetSdkVersion:35; startForegroundCount:0; bindFromPackage:null: isBindService:false]
+02-19 17:17:12.835  2332  2694 W BluetoothRemoteDevices: Address type mismatch for XX:XX:XX:XX:C1:3C, new type: 1
+02-19 17:17:12.841  3094  5052 I NearbyDiscovery: (REDACTED) BloomFilterAdvManager: Detected bloom filter but too far away, ignoring. %sm, %s
+02-19 17:17:12.842  2332  2694 W BluetoothRemoteDevices: Address type mismatch for XX:XX:XX:XX:C1:3C, new type: 1
+02-19 17:17:12.854  1576  2155 D BackgroundInstallControlService: Package event received: 0
+02-19 17:17:12.859 18987 19043 I ehof    : (REDACTED) appOpsListener %s %s
+02-19 17:17:12.874 18987 19043 I ehof    : (REDACTED) Ignoring irrelevant audio permission changes for package %s
+02-19 17:17:12.887  1576  4809 W ActivityManager: Foreground service started from background can not have location/camera/microphone access: service com.whatsapp/.messaging.service.GcmFGService
+02-19 17:17:12.887  1576  4809 I ActivityManager: Background started FGS: Allowed [callingPackage: com.whatsapp; callingUid: 10255; uidState: FGS ; uidBFSL: [BFSL]; intent: Intent { cmp=com.whatsapp/.messaging.service.GcmFGService }; code:PROC_STATE_FGS; tempAllowListReason:<8ef00a2 com.google.android.c2dm.intent.RECEIVE/u0,reasonCode:PUSH_MESSAGING,duration:20000,callingUid:10131>; allowWiu:-1; targetSdkVersion:35; callerTargetSdkVersion:35; startForegroundCount:0; bindFromPackage:null: isBindService:false]
+02-19 17:17:12.888  1576  4809 W ForegroundServiceTypeLoggerModule: Foreground service start for UID: 10255 does not have any types
+02-19 17:17:12.888  1576  2155 D BackgroundInstallControlService: Package event received: 0
+02-19 17:17:12.904  1576  4681 D ConnectivityService: Returning UNBLOCKED NetworkInfo to uid=10255
+02-19 17:17:12.912  1576  2155 D BackgroundInstallControlService: Package event received: 0
+02-19 17:17:12.926 18983 19502 E msys    : E[N mns]_OnDiskCacheGetData(632)=>Start post callback cache refresh DNS resolution
+02-19 17:17:12.930 18983 19502 E msys    : E[ADNSUCTIMH WAJMNSDNSResolver]_MNSDNSResolutionSuccess(35)=>[LogLevel:I] DNS Resolution Successful with 2 IPs, Persistent Cache Hit: 1, secondary resolver used: 0
+02-19 17:17:12.930 18983 19502 E msys    : E[ADNSUCTIMH WAJMNSDNSResolver]_MNSDNSResolutionSuccess(55)=>[LogLevel:I] Resolved IP Address: 2a03:2880:f349:121:face:b00c:0:7260
+02-19 17:17:12.930 18983 19502 E msys    : E[ADNSUCTIMH WAJMNSDNSResolver]_MNSDNSResolutionSuccess(55)=>[LogLevel:I] Resolved IP Address: 57.144.147.33
+02-19 17:17:12.962 18983 19502 E msys    : E[N mns]_OnSystemDNSSuccessCallback(340)=>Cache refresh succeeded with system DNS resolver. IP count: 2
+02-19 17:17:13.121  1576  2155 D BackgroundInstallControlService: Package event received: 0
+02-19 17:17:13.123  1576  1576 V NotificationHistory: Attempted to add notif for locked/gone/disabled user 0
+02-19 17:17:13.137 16929 17371 I AiAiEcho: SmartspaceNotificationPredictor no parser can handle this notification or notification is invalid
+02-19 17:17:13.303  2193  2279 I PluginActionManager[com.android.systemui.action.PLUGIN_NOTIFICATION_MENU_ROW]: Found 0 plugins
+02-19 17:17:13.305  1576  1726 I ActivityManager: Test idle passed
+02-19 17:17:13.401  3094 20863 I NearbyMediums: This GATT advertisement BleAdvertisement { version=2, socketVersion=2, isFast=true, serviceIdHash=null, data=[ 0x23 0x55 0x4b 0x43 0x32 0x11 0x32 0x32 0x54 0xa9 0x8d 0x93 0x68 0x2b 0x47 0xae 0x72 0x62 0xf2 0x2c 0xeb 0x52 0x99 ], deviceToken=[ 0x12 0xd8 ], rxAdvertisement=null } is a Fast Advertisement and matched UUID 0000fef3-0000-1000-8000-00805f9b34fb in fastAdvertisementServiceUuids map with serviceID NearbySharing
+02-19 17:17:13.417  3094 20892 I NearbyConnections: Found BleAdvertisement [ 0x23 0x55 0x4b 0x43 0x32 0x11 0x32 0x32 0x54 0xa9 0x8d 0x93 0x68 0x2b 0x47 0xae 0x72 0x62 0xf2 0x2c 0xeb 0x52 0x99 ] (with EndpointId UKC2 and EndpointInfo [ 0x32 0x32 0x54 0xa9 0x8d 0x93 0x68 0x2b 0x47 0xae 0x72 0x62 0xf2 0x2c 0xeb 0x52 0x99 ])
+02-19 17:17:13.434  3094 20892 I NearbyConnections: ClientProxy(173654343 0p:com.google.android.gms.nearby.sharing) reporting onEndpointFound(UKC2)
+02-19 17:17:13.435  3094 20892 I NearbyConnections: ClientProxy(173654343) reporting onEndpointDistanceChanged(UKC2, UNKNOWN)
+02-19 17:17:13.442  3094 20893 I NearbySharing: NearbySharing Internal event EndpointDiscovered(endpointId=UKC2)
+02-19 17:17:13.497  2332  2694 W BluetoothRemoteDevices: Address type mismatch for XX:XX:XX:XX:C1:3C, new type: 1
+02-19 17:17:13.497  2332  2694 W BluetoothRemoteDevices: Address type mismatch for XX:XX:XX:XX:C1:3C, new type: 1
+02-19 17:17:13.499  3094  5052 I NearbyDiscovery: (REDACTED) BloomFilterAdvManager: Detected bloom filter but too far away, ignoring. %sm, %s
+02-19 17:17:13.637  3094 20894 I NearbyMediums: Triggered instant on lost for service id : NearbySharing with hash [ 0xdf 0x5c 0xc2 0x88 ]
+02-19 17:17:13.640  3094 20892 I NearbyConnections: Processing instant lost on BlePeripheral BlePeripheral{advertisement=BleAdvertisement { version=2, socketVersion=2, isFast=true, serviceIdHash=null, data=[ 0x23 0x50 0x45 0x50 0x30 0x11 0x32 0xf9 0x18 0x8b 0x4b 0x66 0x2b 0x83 0x94 0x42 0x35 0x58 0xe3 0xbb 0x0d 0xb1 0xca ], deviceToken=[ 0x12 0xd8 ], rxAdvertisement=[ 0xa0 0x17 0xec 0x37 0x3e 0x8c 0x31 0x97 0x55 0xe6 0x4a 0xbd 0xf7 0x6b 0x31 0xff 0x30 0x08 0xf2 0x81 0xb9 0xd1 0x6d 0x0a 0x5f 0xc4 0x1f 0xc2 0x96 0x29 0x25 0xc1 0x0f 0x5a 0x84 0x15 0x05 0x61 0x00 0x00 0x84 0x15 0x06 0x61 0x00 0x00 0x84 0x15 0x04 0x7f 0x00 0x00 0x84 0x15 0x07 0x61 0x00 0x00 0x83 0x15 0x01 0xff 0xff ] }, dctAdvertisement=null, address=null, psm=0, deviceToken=<ByteString@12bb800 size=2 contents="\022\330">, isSecondProfile=false, rxInstantConnectionAdv=[-96, 23, -20, 55, 62, -116, 49, -105, 85, -26, 74, -67, -9, 107, 49, -1, 48, 8, -14, -127, -71, -47, 109, 10, 95, -60, 31, -62, -106, 41, 37, -63, 15, 90, -124, 21, 5, 97, 0, 0, -124, 21, 6, 97, 0, 0, -124, 21, 4, 127, 0, 0, -124, 21, 7, 97, 0, 0, -125, 21, 1, -1, -1]}.
+02-19 17:17:13.641  3094 20892 I NearbyConnections: Remove entry from BleAdvertisementProcessor bleEndpoints.
+02-19 17:17:13.648  3094 20892 I NearbyConnections: ClientProxy(173654343) reporting onEndpointLost(PEP0)
+02-19 17:17:13.651  3094 20893 I NearbySharing: NearbySharing Internal event EndpointLost(endpointId=PEP0)
+02-19 17:17:13.651  3094 20863 I NearbySharing: [NS_DISCOVERY] DiscoveryController reported Lost(endpointId=PEP0)
+02-19 17:17:13.981  3094 20895 I NearbyConnections: Found BleAdvertisement [ 0x23 0x45 0x4b 0x55 0x41 0x11 0x32 0xd4 0x16 0x62 0x4b 0x0e 0x5a 0x89 0x3d 0xc9 0x78 0xce 0x41 0x90 0xa7 0x8c 0x51 ] (with EndpointId EKUA and EndpointInfo [ 0x32 0xd4 0x16 0x62 0x4b 0x0e 0x5a 0x89 0x3d 0xc9 0x78 0xce 0x41 0x90 0xa7 0x8c 0x51 ])
+02-19 17:17:13.982  3094 20895 I NearbyConnections: ClientProxy(173654343 0p:com.google.android.gms.nearby.sharing) reporting onEndpointFound(EKUA)
+02-19 17:17:13.982  3094 20895 I NearbyConnections: ClientProxy(173654343) reporting onEndpointDistanceChanged(EKUA, UNKNOWN)
+02-19 17:17:13.983  3094 20895 I NearbySharing: NearbySharing Internal event EndpointDiscovered(endpointId=EKUA)
+02-19 17:17:14.018 18983 20860 W SQLiteLog: (28) double-quoted string literal: "101"
+02-19 17:17:14.018 18983 20860 W SQLiteLog: (28) double-quoted string literal: "102"
+02-19 17:17:14.018 18983 20860 W SQLiteLog: (28) double-quoted string literal: "103"
+02-19 17:17:14.018 18983 20860 W SQLiteLog: (28) double-quoted string literal: "104"
+02-19 17:17:14.018 18983 20860 W SQLiteLog: (28) double-quoted string literal: "401"
+02-19 17:17:14.018 18983 20860 W SQLiteLog: (28) double-quoted string literal: "402"
+02-19 17:17:14.018 18983 20860 W SQLiteLog: (28) double-quoted string literal: "403"
+02-19 17:17:14.018 18983 20860 W SQLiteLog: (28) double-quoted string literal: "404"
+02-19 17:17:14.018 18983 20860 W SQLiteLog: (28) double-quoted string literal: "410"
+02-19 17:17:14.018 18983 20860 W SQLiteLog: (28) double-quoted string literal: "411"
+02-19 17:17:14.018 18983 20860 W SQLiteLog: (28) double-quoted string literal: "413"
+02-19 17:17:14.018 18983 20860 W SQLiteLog: (28) double-quoted string literal: "601"
+02-19 17:17:14.018 18983 20860 W SQLiteLog: (28) double-quoted string literal: "602"
+02-19 17:17:14.018 18983 20860 W SQLiteLog: (28) double-quoted string literal: "603"
+02-19 17:17:14.018 18983 20860 W SQLiteLog: (28) double-quoted string literal: "425"
+02-19 17:17:14.018 18983 20860 W SQLiteLog: (28) double-quoted string literal: "11"
+02-19 17:17:14.018 18983 20860 W SQLiteLog: (28) double-quoted string literal: "12"
+02-19 17:17:14.018 18983 20860 W SQLiteLog: (28) double-quoted string literal: "608"
+02-19 17:17:14.018 18983 20860 W SQLiteLog: (28) double-quoted string literal: "2"
+02-19 17:17:14.018 18983 20860 W SQLiteLog: (28) double-quoted string literal: "1"
+02-19 17:17:14.018 18983 20860 W SQLiteLog: (28) double-quoted string literal: "200"
+02-19 17:17:14.018 18983 20860 W SQLiteLog: (28) double-quoted string literal: "100"
+02-19 17:17:14.018 18983 20860 W SQLiteLog: (28) double-quoted string literal: "20"
+02-19 17:17:14.018 18983 20860 W SQLiteLog: (28) double-quoted string literal: "10"
+02-19 17:17:14.018 18983 20860 W SQLiteLog: (28) double-quoted string literal: "6"
+02-19 17:17:14.018 18983 20860 W SQLiteLog: (28) double-quoted string literal: "7"
+02-19 17:17:14.018 18983 20860 W SQLiteLog: (28) double-quoted string literal: "8"
+02-19 17:17:14.155  3094 20894 I NearbySharing: [NS_CONTROL] DiscoveryStateManager emitted ReportLost(id=1).
+02-19 17:17:14.156  3094 20894 I NearbySharing: NearbySharing Internal event ReceiverLost(receiverId=1)
+02-19 17:17:14.158  3094 20895 I NearbySharing: SendManager event Lost(receiverId=1)
+02-19 17:17:14.183  3094  3094 I NearbySharing: ShortcutInfoManager removed shortcut Arihant's Pixel 6a
+02-19 17:17:14.184  1576  1725 W NotificationHistory: Attempted to remove conversation for locked/gone/disabled user 0
+02-19 17:17:14.439  1576  4809 W JobInfo : Job 'com.whatsapp/.infra.push.RegistrationIntentService#4' has a deadline with no functional constraints. The deadline won't improve job execution latency. Consider removing the deadline.
+02-19 17:17:14.717  1032  1032 I WifiHAL : Creating message to get link statistics; iface = 48
+02-19 17:17:14.820  1576  2091 D ConnectivityService: NetReassign [no changes] [c 2] [a 2] [i 5]
+02-19 17:17:15.062  1576  2032 D ActivityManager: freezing 20639 .ShannonImsService
+02-19 17:17:15.073  3094 20895 I NearbyMediums: Found Fast Ble Advertisements :
+02-19 17:17:15.073  3094 20895 I NearbyMediums: BleAdvertisement { version=2, socketVersion=2, isFast=true, serviceIdHash=null, data=[ 0x23 0x37 0x38 0x5a 0x50 0x11 0x32 0x0b 0x53 0x43 0x38 0x83 0x6c 0x89 0x0d 0x45 0x57 0xc6 0xf4 0x76 0x2f 0xaa 0xa9 ], deviceToken=[ 0x1d 0x1d ], rxAdvertisement=null } : 8 times.
+02-19 17:17:15.073  3094 20895 I NearbyMediums: BleAdvertisement { version=2, socketVersion=2, isFast=true, serviceIdHash=null, data=[ 0x23 0x50 0x45 0x50 0x30 0x11 0x32 0xf9 0x18 0x8b 0x4b 0x66 0x2b 0x83 0x94 0x42 0x35 0x58 0xe3 0xbb 0x0d 0xb1 0xca ], deviceToken=[ 0x12 0xd8 ], rxAdvertisement=null } : 9 times.
+02-19 17:17:15.073  3094 20895 I NearbyMediums: BleAdvertisement { version=2, socketVersion=2, isFast=true, serviceIdHash=null, data=[ 0x23 0x45 0x4b 0x55 0x41 0x11 0x32 0xd4 0x16 0x62 0x4b 0x0e 0x5a 0x89 0x3d 0xc9 0x78 0xce 0x41 0x90 0xa7 0x8c 0x51 ], deviceToken=[ 0xb7 0xfb ], rxAdvertisement=null } : 1 times.
+02-19 17:17:15.073  3094 20895 I NearbyMediums: Total 18 fast advertisements from 3 unique advertisers.
+02-19 17:17:15.073  3094 20895 I NearbyMediums: Current Tracked Scanning Clients are : {NearbyConnections.EnvironmentMonitor, NearbySharing, NearbyConnections.TxAdvertisement}
+02-19 17:17:15.084  3094 20863 I NearbyConnections: Processing lost BlePeripheral BlePeripheral{advertisement=BleAdvertisement { version=2, socketVersion=2, isFast=true, serviceIdHash=null, data=[ 0x23 0x4b 0x30 0x4c 0x30 0x11 0x32 0x43 0x8f 0x80 0xf3 0x0d 0xe6 0xf4 0xf9 0xe5 0xae 0xc7 0xc5 0x1b 0xbe 0x87 0xda ], deviceToken=[ 0x12 0xd8 ], rxAdvertisement=null }, dctAdvertisement=null, address=null, psm=0, deviceToken=<ByteString@1088718 size=2 contents="\022\330">, isSecondProfile=false, rxInstantConnectionAdv=null}.
+02-19 17:17:15.085  3094 20863 I NearbyConnections: Processing lost BlePeripheral BlePeripheral{advertisement=BleAdvertisement { version=2, socketVersion=2, isFast=true, serviceIdHash=null, data=[ 0x23 0x45 0x53 0x37 0x56 0x11 0x32 0xd0 0xf6 0x8c 0xa0 0x8c 0x31 0x3e 0xbe 0x10 0x58 0x48 0x1e 0xbf 0xbc 0x2f 0x74 ], deviceToken=[ 0x12 0xd8 ], rxAdvertisement=null }, dctAdvertisement=null, address=null, psm=0, deviceToken=<ByteString@e5b0571 size=2 contents="\022\330">, isSecondProfile=false, rxInstantConnectionAdv=null}.
+02-19 17:17:15.201   963  1021 D CHRE    : @ 17572.800: [ActivityPlatform] type 4, confidence 95
+02-19 17:17:15.333  2346  2567 D ImpulseConnection: timeout didn't happen: com.google.android.apps.turbo
+02-19 17:17:15.344  2346  2468 D TemperatureStateSource: sequence=1389 actualDelay=10001
+02-19 17:17:15.345  2346  2468 D TemperatureStateSource: Reading temperature: sequence=1390
+02-19 17:17:15.353  1597  1597 I pixel-thermal: VIRTUAL-SKIN:45.4218 raw data: VIRTUAL-GNSS-DISP:45421.8 VIRTUAL-NEUTRAL-QUIET:41984.9 VIRTUAL-QUIET-USB2:40193.8 VIRTUAL-SKIN:45421.8 VIRTUAL-USB2-QUIET:39759.6 disp_therm:40769 gnss_tcxo_therm:49567 neutral_therm:44205 quiet_therm:41364 usb_pwr_therm2:41662 
+02-19 17:17:15.354  2346  2468 D TemperatureStateSource: getDeviceTemperatures: sequence=1390 deviceTemperatureType=3 temperatureSource=0 temperatures=[45.421837]
+02-19 17:17:15.354  2346  2468 D BusinessScope: Enqueuing the block
+02-19 17:17:15.354  2346  2468 D TemperatureStateSource: sequence=1390 waitTime=10000
+02-19 17:17:15.354  2346  2468 D BusinessScope: Start running the #2854 block
+02-19 17:17:15.361  1597  1597 I pixel-thermal: VIRTUAL-SKIN:45.4218 raw data: VIRTUAL-SKIN:45421.8 
+02-19 17:17:15.362  2346  2468 I TemperatureStateSource: temperature was set
+02-19 17:17:15.363  2346  2468 D BusinessScope: Enqueuing the block
+02-19 17:17:15.364  2346  2468 D ImpulseStateSource: Notify clients: 1426
+02-19 17:17:15.365  2346  2468 D BusinessScope: Finish running the #2854 block
+02-19 17:17:15.369  2346  2468 D BusinessScope: Start running the #2855 block
+02-19 17:17:15.391  2346  2567 D BusinessScope: Finish running the #2855 block
+02-19 17:17:15.452 18833 18930 W Turbo.DeviceHealthLeversManagerImpl: applyLeversWithMaintenanceWindow: ignore the same request
+02-19 17:17:15.588  1032  1032 I WifiHAL : Creating message to get link statistics; iface = 48
+02-19 17:17:16.253 18983 20898 I SQLiteConnection: Long db operation: /data/user/0/com.whatsapp/databases/msgstore.db
+02-19 17:17:16.309  2332  2694 W BluetoothRemoteDevices: Address type mismatch for XX:XX:XX:XX:C1:3C, new type: 1
+02-19 17:17:16.310  2332  2694 W BluetoothRemoteDevices: Address type mismatch for XX:XX:XX:XX:C1:3C, new type: 1
+02-19 17:17:16.319  3094  5052 I NearbyDiscovery: (REDACTED) BloomFilterAdvManager: Detected bloom filter but too far away, ignoring. %sm, %s
+02-19 17:17:16.413  1576  4081 D ActivityManager: Stop FGS timeout: ServiceRecord{16ec25 u0 com.whatsapp/.messaging.service.GcmFGService c:com.whatsapp}
+02-19 17:17:16.416  1576  4081 W ForegroundServiceTypeLoggerModule: FGS stop call for: 10255 has no types!
+02-19 17:17:16.417  1576  2155 D BackgroundInstallControlService: Package event received: 0
+02-19 17:17:16.447  1576  1616 D ConnectivityService: Returning BLOCKED NetworkInfo to uid=10255
+02-19 17:17:16.464  2524  2688 D SatelliteController: evaluateESOSProfilesPrioritization: allSubInfos.size()=3
+02-19 17:17:16.521  2524  2688 D SatelliteController: evaluateESOSProfilesPrioritization: newSubsInfoListPerPriority.size()=0
+02-19 17:17:16.521  2524  2688 D SatelliteController: evaluateESOSProfilesPrioritization: no satellite subscription available
+02-19 17:17:17.221  1597  1618 I pixel-thermal: USB-MINUS-USB2:-0.71 raw data: USB-MINUS-USB2:-710 usb_pwr_therm:40952 usb_pwr_therm2:41662 
+02-19 17:17:17.222  1597  1618 I pixel-thermal: VIRTUAL-USB-UI:0 raw data: USB-MINUS-NEUTRAL:-3253 USB-MINUS-USB2:-710 VIRTUAL-USB-UI:0 neutral_therm:44205 usb_pwr_therm:40952 
+02-19 17:17:17.222  1597  1618 I pixel-thermal: VIRTUAL-USB-THROTTLING:0 raw data: USB-MINUS-NEUTRAL:-3253 USB-MINUS-USB2:-710 VIRTUAL-USB-THROTTLING:0 usb_pwr_therm:40952 
+02-19 17:17:17.222  1597  1618 I pixel-thermal: USB-MINUS-NEUTRAL:-3.253 raw data: USB-MINUS-NEUTRAL:-3253 
+02-19 17:17:17.223  1597  1618 I pixel-thermal: usb_pwr_therm:40.952 raw data: usb_pwr_therm:40952 
+02-19 17:17:17.229  1597  1618 I pixel-thermal: Power rails total power: 2201.99 mW for 63219 ms
+02-19 17:17:17.230  1597  1618 I pixel-thermal: Power rails [S6M_LLDO1: 163.85 mW] [L7S_SENSORS: 5.22 mW] [S10M_VDD_TPU: 0.00 mW] [S5M_VDD_INT: 42.51 mW] [S2M_VDD_CPUCL2: 289.52 mW] [S1M_VDD_MIF: 131.57 mW] 
+02-19 17:17:17.230  1597  1618 I pixel-thermal: Power rails [S4M_VDD_CPUCL0: 207.48 mW] [VSYS_PWR_WLAN_BT: 116.77 mW] [VSYS_PWR_RFFE: 2.00 mW] [VSYS_PWR_MODEM: 257.22 mW] [VSYS_PWR_MMWAVE: 14.84 mW] [S3M_VDD_CPUCL1: 203.88 mW] 
+02-19 17:17:17.230  1597  1618 I pixel-thermal: Power rails [L2S_PLL_MIPI_UFS: 142.88 mW] [L14S_ALIVE: 1.09 mW] [S9S_VDD_AOC: 11.08 mW] [S4S_VDD2H_MEM: 88.06 mW] [L9S_GNSS_CORE: 2.93 mW] [S8S_VDD_G3D_L2: 20.62 mW] 
+02-19 17:17:17.230  1597  1618 I pixel-thermal: Power rails [S5S_VDDQ_MEM: 18.86 mW] [S2S_VDD_G3D: 47.77 mW] [S1S_VDD_CAM: 22.82 mW] [S8M_LLDO2: 55.70 mW] [L15M_VDD_SLC_M: 37.35 mW] [VSYS_PWR_DISPLAY: 317.97 mW] 
+02-19 17:17:17.230  1597  1618 I pixel-thermal: CDEV log gxp-cooling state:0 tpu_cooling state:4 usbc-port state:0 thermal-cpufreq-1 state:2 chg_mdis state:25 thermal-gpufreq-0 state:0 thermal-cpufreq-2 state:11 thermal-cpufreq-0 state:2 
+02-19 17:17:17.572  1597  1618 I pixel-thermal: quiet_therm:41.364 raw data: quiet_therm:41364 
+02-19 17:17:17.574  1597  1618 I pixel-thermal: VIRTUAL-SKIN-CPU:45.4218 raw data: VIRTUAL-GNSS-DISP:45421.8 VIRTUAL-NEUTRAL-QUIET:41984.9 VIRTUAL-QUIET-USB2:40193.8 VIRTUAL-SKIN:45421.8 VIRTUAL-SKIN-CPU:45421.8 VIRTUAL-USB2-QUIET:39759.6 disp_therm:40769 gnss_tcxo_therm:49567 neutral_therm:44205 quiet_therm:41364 usb_pwr_therm2:41662 
+02-19 17:17:17.574  1597  1618 I pixel-thermal: VIRTUAL-SKIN-CPU power_budget=800 err=-4.42184 s_power=800 time_elapsed_ms=7027 p=-1768.73 i=184.219 d=-0 dt_per_min=nan compensation=0 budget transient=0 control target=3 excluded power budget=0
+02-19 17:17:17.574  1597  1618 I pixel-thermal: VIRTUAL-SKIN-CPU binded power rails: (S4M_VDD_CPUCL0: 149.22 mW)(S2M_VDD_CPUCL2: 62.60 mW)(S3M_VDD_CPUCL1: 133.19 mW)
+02-19 17:17:17.575  1597  1618 I pixel-thermal: VIRTUAL-SKIN:45.4218 raw data: VIRTUAL-SKIN:45421.8 
+02-19 17:17:17.577  1597  1618 I pixel-thermal: VIRTUAL-SKIN-CHARGE:43.6607 raw data: VIRTUAL-SKIN-CHARGE:43660.6 qi_therm:49783 quiet_therm:41364 
+02-19 17:17:17.577  1597  1618 I pixel-thermal: VIRTUAL-SKIN-CHARGE power_budget=652.405 err=-2.66065 s_power=2383 time_elapsed_ms=7027 p=-566.719 i=-870.016 d=-0 dt_per_min=nan compensation=0 budget transient=0 control target=2 excluded power budget=293.86 (PARTIAL_SYSTEM_POWER: 1399.34 mW, cdev_weight: 0.210000)
+02-19 17:17:17.578  1597  1618 I pixel-thermal: VIRTUAL-SKIN-HINT:45.4218 raw data: VIRTUAL-SKIN:45421.8 VIRTUAL-SKIN-HINT:45421.8 
+02-19 17:17:17.578  1597  1618 I pixel-thermal: VIRTUAL-SKIN-CPU-GPU:45.4218 raw data: VIRTUAL-SKIN:45421.8 VIRTUAL-SKIN-CPU-GPU:45421.8 
+02-19 17:17:17.578  1597  1618 I pixel-thermal: VIRTUAL-SKIN-CPU-GPU power_budget=919.412 err=-0.421837 s_power=800 time_elapsed_ms=7027 p=-126.551 i=245.963 d=-0 dt_per_min=nan compensation=0 budget transient=0 control target=3 excluded power budget=0
+02-19 17:17:17.578  1597  1618 I pixel-thermal: VIRTUAL-SKIN-CPU-GPU binded power rails: (S4M_VDD_CPUCL0: 149.22 mW)(S2S_VDD_G3D: 19.93 mW)(S2M_VDD_CPUCL2: 62.60 mW)(S3M_VDD_CPUCL1: 133.19 mW)
+02-19 17:17:17.578  1597  1618 I pixel-thermal: cellular-emergency:45.4218 raw data: VIRTUAL-SKIN:45421.8 cellular-emergency:45421.8 
+02-19 17:17:17.580  1597  1618 I pixel-thermal: Successfully update cdev thermal-cpufreq-2 sysfs to 10
+02-19 17:17:17.581  1597  1618 I pixel-thermal: Successfully update cdev thermal-cpufreq-0 sysfs to 1
+02-19 17:17:17.812  1032  1032 I WifiHAL : Creating message to get link statistics; iface = 48
+02-19 17:17:17.915  1032  1032 E libbinder.IPCThreadState: binder thread pool (1 threads) starved for 103 ms
+02-19 17:17:17.975  1576  2091 D ConnectivityService: NetReassign [no changes] [c 5] [a 7] [i 12]
+02-19 17:17:18.281  2321 27126 D IpClient/wlan1: interfaceLinkStateChanged: ifindex 48 up
+02-19 17:17:18.300  2332  2694 W BluetoothRemoteDevices: Address type mismatch for XX:XX:XX:XX:C1:3C, new type: 1
+02-19 17:17:18.305  2332  2694 W BluetoothRemoteDevices: Address type mismatch for XX:XX:XX:XX:C1:3C, new type: 1
+02-19 17:17:18.314  3094  5052 I NearbyDiscovery: (REDACTED) BloomFilterAdvManager: Detected bloom filter but too far away, ignoring. %sm, %s
+02-19 17:17:18.316  1576  1726 I ActivityManager: Test idle passed
+02-19 17:17:18.370   963  1021 I CHRE    : @ 17575.971: [AR] ON => IDLE
+02-19 17:17:18.376   963  1021 D CHRE    : @ 17575.974: [ActivityPlatform] type 4, confidence 95
+02-19 17:17:18.380  1197  1197 D AOC     : A3:MSG: usf_sensor.cc, 1705: USF: Received start sampling request for LSM6DSV Accelerometer (active:5).
+02-19 17:17:18.950  2332  2694 W BluetoothRemoteDevices: Address type mismatch for XX:XX:XX:XX:C1:3C, new type: 1
+02-19 17:17:18.954  2332  2694 W BluetoothRemoteDevices: Address type mismatch for XX:XX:XX:XX:C1:3C, new type: 1
+02-19 17:17:18.966  3094  5052 I NearbyDiscovery: (REDACTED) BloomFilterAdvManager: Detected bloom filter but too far away, ignoring. %sm, %s
+02-19 17:17:19.117  2332  2694 W BluetoothRemoteDevices: Address type mismatch for XX:XX:XX:XX:C1:3C, new type: 1
+02-19 17:17:19.121  2332  2694 W BluetoothRemoteDevices: Address type mismatch for XX:XX:XX:XX:C1:3C, new type: 1
+02-19 17:17:19.129  3094  5052 I NearbyDiscovery: (REDACTED) BloomFilterAdvManager: Detected bloom filter but too far away, ignoring. %sm, %s
+02-19 17:17:19.954  2332  2694 W BluetoothRemoteDevices: Address type mismatch for XX:XX:XX:XX:C1:3C, new type: 1
+02-19 17:17:19.954  2332  2694 W BluetoothRemoteDevices: Address type mismatch for XX:XX:XX:XX:C1:3C, new type: 1
+02-19 17:17:19.959  3094  5052 I NearbyDiscovery: (REDACTED) BloomFilterAdvManager: Detected bloom filter but too far away, ignoring. %sm, %s
+02-19 17:17:20.668  2193  2260 D CachedBluetoothDevice: Acquired battery info from metadata for untethered device XX:XX:XX:XX:3B:95 left earbud battery: -1 right earbud battery: 30 case battery: -1 overall battery: 30
+02-19 17:17:20.693  2193  2260 D CachedBluetoothDevice: Acquired battery info from metadata for untethered device XX:XX:XX:XX:3B:95 left earbud battery: -1 right earbud battery: 30 case battery: -1 overall battery: 30
+02-19 17:17:20.953  1032  1032 I WifiHAL : Creating message to get link statistics; iface = 48
+02-19 17:17:21.022   950  2685 I bthal.activity: bt_power: LeAdvStat: 17:17:05:691 - 17:17:21:022, duration: 15330, le_adv_count: 114, total_le_adv_count: 42332, total_event_count: 114
+02-19 17:17:21.079  1032  1032 E libbinder.IPCThreadState: binder thread pool (1 threads) starved for 125 ms
+02-19 17:17:21.176  1576  2091 D ConnectivityService: NetReassign [no changes] [c 8] [a 7] [i 20]
+02-19 17:17:21.180  2193  2260 D ControlsListingControllerImpl: Subscribing callback, service count: 1
+02-19 17:17:21.190  2193  2260 D ControlsListingControllerImpl: Unsubscribing callback
+02-19 17:17:21.214  1597  1597 I pixel-thermal: VIRTUAL-SKIN:45.0531 raw data: VIRTUAL-GNSS-DISP:45053.1 VIRTUAL-NEUTRAL-QUIET:42010.4 VIRTUAL-QUIET-USB2:40244.5 VIRTUAL-SKIN:45053.1 VIRTUAL-USB2-QUIET:39726.3 disp_therm:40815 gnss_tcxo_therm:48898 neutral_therm:44159 quiet_therm:41433 usb_pwr_therm2:41548 
+02-19 17:17:21.383   592 20881 I keystore2: system/security/keystore2/watchdog/src/lib.rs:371 - Watchdog thread idle -> terminating. Have a great day.
+02-19 17:17:21.450  2332  2694 W BluetoothRemoteDevices: Address type mismatch for XX:XX:XX:XX:C1:3C, new type: 1
+02-19 17:17:21.452  2332  2694 W BluetoothRemoteDevices: Address type mismatch for XX:XX:XX:XX:C1:3C, new type: 1
+02-19 17:17:21.453 18987 19043 I ehof    : (REDACTED) appOpsListener %s %s
+02-19 17:17:21.454 18987 19043 I ehof    : (REDACTED) Ignoring irrelevant audio permission changes for package %s
+02-19 17:17:21.461  3094  5052 I NearbyDiscovery: (REDACTED) BloomFilterAdvManager: Detected bloom filter but too far away, ignoring. %sm, %s
+02-19 17:17:21.793  2332  2694 W BluetoothRemoteDevices: Address type mismatch for XX:XX:XX:XX:C1:3C, new type: 1
+02-19 17:17:21.795  2332  2694 W BluetoothRemoteDevices: Address type mismatch for XX:XX:XX:XX:C1:3C, new type: 1
+02-19 17:17:21.802  3094  5052 I NearbyDiscovery: (REDACTED) BloomFilterAdvManager: Detected bloom filter but too far away, ignoring. %sm, %s
+02-19 17:17:22.137  3094  3094 D BoundBrokerSvc: onRebind: Intent { act=com.google.android.gms.libs.gmscorelogger.service.START dat=chimera-action:/... xflg=0x4 cmp=com.google.android.gms/.chimera.PersistentDirectBootAwareApiService }
+02-19 17:17:22.438  2332  2694 W BluetoothRemoteDevices: Address type mismatch for XX:XX:XX:XX:C1:3C, new type: 1
+02-19 17:17:22.444  2332  2694 W BluetoothRemoteDevices: Address type mismatch for XX:XX:XX:XX:C1:3C, new type: 1
+02-19 17:17:22.449  3094  5052 I NearbyDiscovery: (REDACTED) BloomFilterAdvManager: Detected bloom filter but too far away, ignoring. %sm, %s
+02-19 17:17:23.322  1576  1726 I ActivityManager: Test idle passed
+02-19 17:17:24.142  1032  1032 I WifiHAL : Creating message to get link statistics; iface = 48
+02-19 17:17:24.254  1597  1618 I pixel-thermal: USB-MINUS-USB2:-0.619 raw data: USB-MINUS-USB2:-619 usb_pwr_therm:40929 usb_pwr_therm2:41548 
+02-19 17:17:24.255  1597  1618 I pixel-thermal: VIRTUAL-USB-UI:0 raw data: USB-MINUS-NEUTRAL:-3230 USB-MINUS-USB2:-619 VIRTUAL-USB-UI:0 neutral_therm:44159 usb_pwr_therm:40929 
+02-19 17:17:24.256  1597  1618 I pixel-thermal: VIRTUAL-USB-THROTTLING:0 raw data: USB-MINUS-NEUTRAL:-3230 USB-MINUS-USB2:-619 VIRTUAL-USB-THROTTLING:0 usb_pwr_therm:40929 
+02-19 17:17:24.256  1597  1618 I pixel-thermal: USB-MINUS-NEUTRAL:-3.23 raw data: USB-MINUS-NEUTRAL:-3230 
+02-19 17:17:24.256  1597  1618 I pixel-thermal: usb_pwr_therm:40.929 raw data: usb_pwr_therm:40929 
+02-19 17:17:24.273  1032  1032 E libbinder.IPCThreadState: binder thread pool (1 threads) starved for 131 ms
+02-19 17:17:24.376  1576  2091 D ConnectivityService: NetReassign [no changes] [c 6] [a 9] [i 20]
+02-19 17:17:24.584  2332  2694 W BluetoothRemoteDevices: Address type mismatch for XX:XX:XX:XX:C1:3C, new type: 1
+02-19 17:17:24.585  2332  2694 W BluetoothRemoteDevices: Address type mismatch for XX:XX:XX:XX:C1:3C, new type: 1
+02-19 17:17:24.588  1597  1618 I pixel-thermal: quiet_therm:41.433 raw data: quiet_therm:41433 
+02-19 17:17:24.590  1597  1618 I pixel-thermal: VIRTUAL-SKIN-CPU:45.0531 raw data: VIRTUAL-GNSS-DISP:45053.1 VIRTUAL-NEUTRAL-QUIET:42010.4 VIRTUAL-QUIET-USB2:40244.5 VIRTUAL-SKIN:45053.1 VIRTUAL-SKIN-CPU:45053.1 VIRTUAL-USB2-QUIET:39726.3 disp_therm:40815 gnss_tcxo_therm:48898 neutral_therm:44159 quiet_therm:41433 usb_pwr_therm2:41548 
+02-19 17:17:24.591  1597  1618 I pixel-thermal: VIRTUAL-SKIN-CPU power_budget=800 err=-4.05314 s_power=800 time_elapsed_ms=7018 p=-1621.26 i=184.219 d=0 dt_per_min=nan compensation=0 budget transient=0 control target=3 excluded power budget=0
+02-19 17:17:24.591  1597  1618 I pixel-thermal: VIRTUAL-SKIN-CPU binded power rails: (S4M_VDD_CPUCL0: 36.30 mW)(S2M_VDD_CPUCL2: 0.26 mW)(S3M_VDD_CPUCL1: 4.23 mW)
+02-19 17:17:24.593  1597  1618 I pixel-thermal: VIRTUAL-SKIN:45.0531 raw data: VIRTUAL-SKIN:45053.1 
+02-19 17:17:24.594  1597  1618 I pixel-thermal: VIRTUAL-SKIN-CHARGE:43.5546 raw data: VIRTUAL-SKIN-CHARGE:43554.6 qi_therm:49352 quiet_therm:41433 
+02-19 17:17:24.594  1597  1618 I pixel-thermal: VIRTUAL-SKIN-CHARGE power_budget=730.713 err=-2.55465 s_power=2383 time_elapsed_ms=7018 p=-544.14 i=-870.016 d=0 dt_per_min=nan compensation=0 budget transient=0 control target=2 excluded power budget=238.131 (PARTIAL_SYSTEM_POWER: 1133.96 mW, cdev_weight: 0.210000)
+02-19 17:17:24.594  1597  1618 I pixel-thermal: VIRTUAL-SKIN-HINT:45.0531 raw data: VIRTUAL-SKIN:45053.1 VIRTUAL-SKIN-HINT:45053.1 
+02-19 17:17:24.595  1597  1618 I pixel-thermal: VIRTUAL-SKIN-CPU-GPU:45.0531 raw data: VIRTUAL-SKIN:45053.1 VIRTUAL-SKIN-CPU-GPU:45053.1 
+02-19 17:17:24.595  1597  1618 I pixel-thermal: VIRTUAL-SKIN-CPU-GPU power_budget=1029.75 err=-0.0531425 s_power=800 time_elapsed_ms=7018 p=-15.9428 i=245.697 d=0 dt_per_min=nan compensation=0 budget transient=0 control target=3 excluded power budget=0
+02-19 17:17:24.596  1597  1618 I pixel-thermal: VIRTUAL-SKIN-CPU-GPU binded power rails: (S4M_VDD_CPUCL0: 36.30 mW)(S2S_VDD_G3D: 0.87 mW)(S2M_VDD_CPUCL2: 0.26 mW)(S3M_VDD_CPUCL1: 4.23 mW)
+02-19 17:17:24.596  1597  1618 I pixel-thermal: cellular-emergency:45.0531 raw data: VIRTUAL-SKIN:45053.1 cellular-emergency:45053.1 
+02-19 17:17:24.601  1597  1618 I pixel-thermal: Successfully update cdev thermal-cpufreq-1 sysfs to 1
+02-19 17:17:24.601  1597  1618 I pixel-thermal: Successfully update cdev thermal-cpufreq-2 sysfs to 9
+02-19 17:17:24.602  1597  1618 I pixel-thermal: Successfully update cdev thermal-cpufreq-0 sysfs to 0
+02-19 17:17:24.610  3094  5052 I NearbyDiscovery: (REDACTED) BloomFilterAdvManager: Detected bloom filter but too far away, ignoring. %sm, %s
+02-19 17:17:25.045  3094 20863 I NearbyConnections: Found BleAdvertisement [ 0x23 0x47 0x52 0x56 0x52 0x11 0x32 0x21 0x61 0xf6 0x94 0x9b 0x77 0x3b 0x50 0x21 0x7b 0x7e 0xec 0xba 0x57 0x3a 0x9b ] (with EndpointId GRVR and EndpointInfo [ 0x32 0x21 0x61 0xf6 0x94 0x9b 0x77 0x3b 0x50 0x21 0x7b 0x7e 0xec 0xba 0x57 0x3a 0x9b ])
+02-19 17:17:25.046  3094 20895 I NearbyMediums: This GATT advertisement BleAdvertisement { version=2, socketVersion=2, isFast=true, serviceIdHash=null, data=[ 0x23 0x57 0x53 0x33 0x37 0x11 0x32 0xd2 0xe3 0x2b 0x1d 0xbb 0x85 0x03 0x54 0x29 0x6a 0x61 0x3a 0x45 0x12 0xe9 0xda ], deviceToken=[ 0x12 0xd8 ], rxAdvertisement=null } is a Fast Advertisement and matched UUID 0000fef3-0000-1000-8000-00805f9b34fb in fastAdvertisementServiceUuids map with serviceID NearbySharing
+02-19 17:17:25.049  3094 20863 I NearbyConnections: ClientProxy(173654343 0p:com.google.android.gms.nearby.sharing) reporting onEndpointFound(GRVR)
+02-19 17:17:25.050  3094 20863 I NearbyConnections: ClientProxy(173654343) reporting onEndpointDistanceChanged(GRVR, UNKNOWN)
+02-19 17:17:25.052  3094 20863 I NearbyConnections: Found BleAdvertisement [ 0x23 0x57 0x53 0x33 0x37 0x11 0x32 0xd2 0xe3 0x2b 0x1d 0xbb 0x85 0x03 0x54 0x29 0x6a 0x61 0x3a 0x45 0x12 0xe9 0xda ] (with EndpointId WS37 and EndpointInfo [ 0x32 0xd2 0xe3 0x2b 0x1d 0xbb 0x85 0x03 0x54 0x29 0x6a 0x61 0x3a 0x45 0x12 0xe9 0xda ])
+02-19 17:17:25.054  3094 20863 I NearbyConnections: ClientProxy(173654343 0p:com.google.android.gms.nearby.sharing) reporting onEndpointFound(WS37)
+02-19 17:17:25.054  3094 20863 I NearbyConnections: ClientProxy(173654343) reporting onEndpointDistanceChanged(WS37, UNKNOWN)
+02-19 17:17:25.056  3094 20909 I NearbySharing: NearbySharing Internal event EndpointDiscovered(endpointId=GRVR)
+02-19 17:17:25.074  3094 20863 I NearbySharing: NearbySharing Internal event EndpointDiscovered(endpointId=WS37)
+02-19 17:17:25.088  3094 20895 I NearbyMediums: Found Fast Ble Advertisements :
+02-19 17:17:25.088  3094 20895 I NearbyMediums: BleAdvertisement { version=2, socketVersion=2, isFast=true, serviceIdHash=null, data=[ 0x23 0x55 0x4b 0x43 0x32 0x11 0x32 0x32 0x54 0xa9 0x8d 0x93 0x68 0x2b 0x47 0xae 0x72 0x62 0xf2 0x2c 0xeb 0x52 0x99 ], deviceToken=[ 0x12 0xd8 ], rxAdvertisement=null } : 1 times.
+02-19 17:17:25.088  3094 20895 I NearbyMediums: BleAdvertisement { version=2, socketVersion=2, isFast=true, serviceIdHash=null, data=[ 0x23 0x37 0x38 0x5a 0x50 0x11 0x32 0x0b 0x53 0x43 0x38 0x83 0x6c 0x89 0x0d 0x45 0x57 0xc6 0xf4 0x76 0x2f 0xaa 0xa9 ], deviceToken=[ 0x1d 0x1d ], rxAdvertisement=null } : 16 times.
+02-19 17:17:25.088  3094 20895 I NearbyMediums: BleAdvertisement { version=2, socketVersion=2, isFast=true, serviceIdHash=null, data=[ 0x23 0x45 0x4b 0x55 0x41 0x11 0x32 0xd4 0x16 0x62 0x4b 0x0e 0x5a 0x89 0x3d 0xc9 0x78 0xce 0x41 0x90 0xa7 0x8c 0x51 ], deviceToken=[ 0xb7 0xfb ], rxAdvertisement=null } : 1 times.
+02-19 17:17:25.088  3094 20895 I NearbyMediums: BleAdvertisement { version=2, socketVersion=2, isFast=true, serviceIdHash=null, data=[ 0x23 0x47 0x52 0x56 0x52 0x11 0x32 0x21 0x61 0xf6 0x94 0x9b 0x77 0x3b 0x50 0x21 0x7b 0x7e 0xec 0xba 0x57 0x3a 0x9b ], deviceToken=[ 0x1d 0x00 ], rxAdvertisement=null } : 1 times.
+02-19 17:17:25.088  3094 20895 I NearbyMediums: Total 19 fast advertisements from 4 unique advertisers.
+02-19 17:17:25.088  3094 20895 I NearbyMediums: Current Tracked Scanning Clients are : {NearbyConnections.EnvironmentMonitor, NearbySharing, NearbyConnections.TxAdvertisement}
+02-19 17:17:25.093  3094 20909 I NearbyConnections: Processing lost BlePeripheral BlePeripheral{advertisement=BleAdvertisement { version=2, socketVersion=2, isFast=true, serviceIdHash=null, data=[ 0x23 0x50 0x45 0x50 0x30 0x11 0x32 0xf9 0x18 0x8b 0x4b 0x66 0x2b 0x83 0x94 0x42 0x35 0x58 0xe3 0xbb 0x0d 0xb1 0xca ], deviceToken=[ 0x12 0xd8 ], rxAdvertisement=[ 0xa0 0x17 0xec 0x37 0x3e 0x8c 0x31 0x97 0x55 0xe6 0x4a 0xbd 0xf7 0x6b 0x31 0xff 0x30 0x08 0xf2 0x81 0xb9 0xd1 0x6d 0x0a 0x5f 0xc4 0x1f 0xc2 0x96 0x29 0x25 0xc1 0x0f 0x5a 0x84 0x15 0x05 0x61 0x00 0x00 0x84 0x15 0x06 0x61 0x00 0x00 0x84 0x15 0x04 0x7f 0x00 0x00 0x84 0x15 0x07 0x61 0x00 0x00 0x83 0x15 0x01 0xff 0xff ] }, dctAdvertisement=null, address=null, psm=0, deviceToken=<ByteString@2557178 size=2 contents="\022\330">, isSecondProfile=false, rxInstantConnectionAdv=[-96, 23, -20, 55, 62, -116, 49, -105, 85, -26, 74, -67, -9, 107, 49, -1, 48, 8, -14, -127, -71, -47, 109, 10, 95, -60, 31, -62, -106, 41, 37, -63, 15, 90, -124, 21, 5, 97, 0, 0, -124, 21, 6, 97, 0, 0, -124, 21, 4, 127, 0, 0, -124, 21, 7, 97, 0, 0, -125, 21, 1, -1, -1]}.
+02-19 17:17:25.116  3094 20909 I NearbyMediums: Replace Fast Advertisement Rx Info for service id : NearbySharing on deviceToken : [ 0x12 0xd8 ]
+02-19 17:17:25.117  3094 20895 I NearbyConnections: Found BleAdvertisement [ 0x23 0x57 0x53 0x33 0x37 0x11 0x32 0xd2 0xe3 0x2b 0x1d 0xbb 0x85 0x03 0x54 0x29 0x6a 0x61 0x3a 0x45 0x12 0xe9 0xda ] (with EndpointId WS37 and EndpointInfo [ 0x32 0xd2 0xe3 0x2b 0x1d 0xbb 0x85 0x03 0x54 0x29 0x6a 0x61 0x3a 0x45 0x12 0xe9 0xda ])
+02-19 17:17:25.118  3094 20895 I NearbyConnections: ClientProxy(173654343) ignoring onEndpointDistanceChanged(WS37, UNKNOWN), because this distance has already been reported
+02-19 17:17:25.129  3094 20895 I NearbySharing: [NS_DISCOVERY] DiscoveryController reported Discovered(endpointId=WS37, metadata=DeviceMetadata(version=1, deviceType=1, deviceName=Arihant's Pixel 6a, displayName=Arihant Tripathy, modelName=null, imageUri=content://com.google.android.gms.fileprovider/nearby_share_images/-689799101.jpg, isSelfShare=false, isKnown=true, bluetoothMacAddress=[36, -107, 47, -76, -53, -9], vendorId=0, matchesLocalQrCode=false))
+02-19 17:17:25.129  3094 20895 I NearbySharing: [NS_DEBUG] Dedupped: same shared credential. endpoint ID PEP0 changed to WS37
+02-19 17:17:25.143  3094 20895 I NearbySharing: {NS_DEBUG] previous receiver info ReceiverInfo(endpointId=PEP0, metadata=DeviceMetadata(version=1, deviceType=1, deviceName=Arihant's Pixel 6a, displayName=Arihant Tripathy, modelName=null, imageUri=content://com.google.android.gms.fileprovider/nearby_share_images/-689799101.jpg, isSelfShare=false, isKnown=true, bluetoothMacAddress=[36, -107, 47, -76, -53, -9], vendorId=0, matchesLocalQrCode=false), state=Tomb(delayedStateChangeJob=jdht{Active}@a2c2d24))
+02-19 17:17:25.145  3094 20895 I NearbySharing: NearbySharing Internal event ReceiverEndpointMapping(endpointId=WS37, receiverId=1)
+02-19 17:17:25.149  3094 20863 I NearbySharing: [NS_CONTROL] DiscoveryStateManager emitted ReportDiscovered(id=1, metadata=DeviceMetadata(version=1, deviceType=1, deviceName=Arihant's Pixel 6a, displayName=Arihant Tripathy, modelName=null, imageUri=content://com.google.android.gms.fileprovider/nearby_share_images/-689799101.jpg, isSelfShare=false, isKnown=true, bluetoothMacAddress=[36, -107, 47, -76, -53, -9], vendorId=0, matchesLocalQrCode=false)).
+02-19 17:17:25.150  3094 20863 I NearbySharing: NearbySharing Internal event ReceiverDiscovered(receiverId=1, deviceName=Arihant's Pixel 6a, isKnown=true, isSelfShare=false, deviceType=1, hasMatchingQrCode=false, isExternal=false, providerName=null, providerId=null, cloudReceiverSessionId=null)
+02-19 17:17:25.150  3094 20895 I NearbySharing: SendManager event Discovered(receiverId=1, receiverMetadata=DeviceMetadata(version=1, deviceType=1, deviceName=Arihant's Pixel 6a, displayName=Arihant Tripathy, modelName=null, imageUri=content://com.google.android.gms.fileprovider/nearby_share_images/-689799101.jpg, isSelfShare=false, isKnown=true, bluetoothMacAddress=[36, -107, 47, -76, -53, -9], vendorId=0, matchesLocalQrCode=false))
+02-19 17:17:25.150  3094 20895 I NearbySharing: SendManager event DistanceChanged(receiverId=1, distance=1, rangingData=null)
+02-19 17:17:25.171  1576  2155 D BackgroundInstallControlService: Package event received: 0
+02-19 17:17:25.171  3094  3094 I NearbySharing: ShortcutInfoManager added shortcut Arihant's Pixel 6a
+02-19 17:17:25.334  2346  3482 D ImpulseConnection: timeout didn't happen: com.google.android.apps.turbo
+02-19 17:17:25.356  2346  2454 D TemperatureStateSource: sequence=1390 actualDelay=10002
+02-19 17:17:25.357  2346  2454 D TemperatureStateSource: Reading temperature: sequence=1391
+02-19 17:17:25.363  1597  1597 I pixel-thermal: VIRTUAL-SKIN:45.0531 raw data: VIRTUAL-SKIN:45053.1 
+02-19 17:17:25.365  2346  2454 D TemperatureStateSource: getDeviceTemperatures: sequence=1391 deviceTemperatureType=3 temperatureSource=0 temperatures=[45.053143]
+02-19 17:17:25.365  2346  2454 D BusinessScope: Enqueuing the block
+02-19 17:17:25.366  2346  2454 D TemperatureStateSource: sequence=1391 waitTime=10000
+02-19 17:17:25.366  2346  2454 D BusinessScope: Start running the #2856 block
+02-19 17:17:25.371  1597  1597 I pixel-thermal: VIRTUAL-SKIN:45.0531 raw data: VIRTUAL-SKIN:45053.1 
+02-19 17:17:25.372  2346  2454 I TemperatureStateSource: temperature was set
+02-19 17:17:25.373  2346  2454 D BusinessScope: Enqueuing the block
+02-19 17:17:25.373  2346  2454 D ImpulseStateSource: Notify clients: 1427
+02-19 17:17:25.373  2346  2454 D BusinessScope: Finish running the #2856 block
+02-19 17:17:25.374  2346  2454 D BusinessScope: Start running the #2857 block
+02-19 17:17:25.375  2346  2468 D BusinessScope: Finish running the #2857 block
+02-19 17:17:25.406 18833 18927 W Turbo.DeviceHealthLeversManagerImpl: applyLeversWithMaintenanceWindow: ignore the same request
+02-19 17:17:25.837  2332  2679 I bluetooth: system/gd/hci/acl_manager/le_impl.h:1218 on_create_connection_timeout: on_create_connection_timeout, address: xx:xx:xx:xx:ec:5c[RANDOM_DEVICE_ADDRESS(0x01)]
+02-19 17:17:25.846  2332  2679 W bluetooth: system/gd/hci/acl_manager/le_impl.h:798 remove_device_from_accept_list: Device not in acceptlist and cannot be removed: xx:xx:xx:xx:ec:5c[RANDOM_DEVICE_ADDRESS(0x01)]
+02-19 17:17:25.849  2332  2679 I bt_gd_shim: system/gd/hci/acl_manager/le_impl.h:1105 disarm_connectability: Disarming LE connection state machine with create connection cancel
+02-19 17:17:25.849  2332  2674 I bluetooth: system/stack/connection_manager/connection_manager.cc:476 on_connection_complete: Le connection completed to device:xx:xx:xx:xx:ec:5c
+02-19 17:17:25.853  2332  2674 I gatt_utils: system/stack/gatt/gatt_utils.cc:1757 gatt_cleanup_upon_disc: Connection timeout bd_addr:xx:xx:xx:xx:ec:5c reason:GATT_CONN_TIMEOUT transport:BT_TRANSPORT_LE
+02-19 17:17:25.861  2332  2679 W bluetooth: system/main/shim/acl.cc:1501 OnLeConnectFail: Connection failed le remote:xx:xx:xx:xx:ec:5c[RANDOM_DEVICE_ADDRESS(0x01)]
+02-19 17:17:25.861  2332  2674 I bluetooth: system/bta/vaps/vaps_server.cc:309 GattsCallback: event: BTA_GATTS_DISCONNECT_EVT
+02-19 17:17:25.861  2332  2674 I bluetooth: system/bta/vaps/vaps_server.cc:369 OnGattDisconnect: Address: xx:xx:xx:xx:ec:5c, conn_id:65535
+02-19 17:17:25.862  2332  2674 I bt_bta_gattc: system/bta/gatt/bta_gattc_act.cc:1410 bta_gattc_conn_cback: Disconnected att_id:53 addr:xx:xx:xx:xx:ec:5c, transport:BT_TRANSPORT_LE reason:GATT_CONN_TIMEOUT
+02-19 17:17:25.869  2332  2674 I bt_bta_gattc: system/bta/gatt/bta_gattc_act.cc:1410 bta_gattc_conn_cback: Disconnected att_id:51 addr:xx:xx:xx:xx:ec:5c, transport:BT_TRANSPORT_LE reason:GATT_CONN_TIMEOUT
+02-19 17:17:25.869  2332  2674 I bt_bta_gattc: system/bta/gatt/bta_gattc_act.cc:1410 bta_gattc_conn_cback: Disconnected att_id:48 addr:xx:xx:xx:xx:ec:5c, transport:BT_TRANSPORT_LE reason:GATT_CONN_TIMEOUT
+02-19 17:17:25.869  2332  2674 I bt_bta_gattc: system/bta/gatt/bta_gattc_act.cc:1410 bta_gattc_conn_cback: Disconnected att_id:47 addr:xx:xx:xx:xx:ec:5c, transport:BT_TRANSPORT_LE reason:GATT_CONN_TIMEOUT
+02-19 17:17:25.869  2332  2674 I bt_bta_gattc: system/bta/gatt/bta_gattc_act.cc:1410 bta_gattc_conn_cback: Disconnected att_id:46 addr:xx:xx:xx:xx:ec:5c, transport:BT_TRANSPORT_LE reason:GATT_CONN_TIMEOUT
+02-19 17:17:25.869  2332  2674 I bt_bta_gattc: system/bta/gatt/bta_gattc_act.cc:1410 bta_gattc_conn_cback: Disconnected att_id:45 addr:xx:xx:xx:xx:ec:5c, transport:BT_TRANSPORT_LE reason:GATT_CONN_TIMEOUT
+02-19 17:17:25.869  2332  2674 I bt_bta_gattc: system/bta/gatt/bta_gattc_act.cc:1410 bta_gattc_conn_cback: Disconnected att_id:44 addr:xx:xx:xx:xx:ec:5c, transport:BT_TRANSPORT_LE reason:GATT_CONN_TIMEOUT
+02-19 17:17:25.870  2332  2674 I bt_bta_gattc: system/bta/gatt/bta_gattc_act.cc:1410 bta_gattc_conn_cback: Disconnected att_id:181 addr:xx:xx:xx:xx:ec:5c, transport:BT_TRANSPORT_LE reason:GATT_CONN_TIMEOUT
+02-19 17:17:25.870  2332  2674 I bluetooth: system/stack/gap/gap_ble.cc:316 client_connect_cback: No active GAP service found for peer:xx:xx:xx:xx:ec:5c callback:Disconnected
+02-19 17:17:25.882  2332  2674 I bluetooth: system/stack/connection_manager/connection_manager.cc:482 on_connection_timed_out_from_shim: Connection failed xx:xx:xx:xx:ec:5c
+02-19 17:17:25.883  2332  2674 I bluetooth: system/stack/connection_manager/connection_manager.cc:476 on_connection_complete: Le connection completed to device:xx:xx:xx:xx:ec:5c
+02-19 17:17:25.883  2332  2674 I gatt_utils: system/stack/gatt/gatt_utils.cc:1757 gatt_cleanup_upon_disc: Connection timeout bd_addr:xx:xx:xx:xx:ec:5c reason:GATT_CONN_TIMEOUT transport:BT_TRANSPORT_LE
+02-19 17:17:25.883  2332  2674 I bluetooth: system/bta/vaps/vaps_server.cc:309 GattsCallback: event: BTA_GATTS_DISCONNECT_EVT
+02-19 17:17:25.883  2332  2674 I bluetooth: system/bta/vaps/vaps_server.cc:369 OnGattDisconnect: Address: xx:xx:xx:xx:ec:5c, conn_id:65535
+02-19 17:17:25.883  2332  2674 I bt_bta_gattc: system/bta/gatt/bta_gattc_act.cc:1410 bta_gattc_conn_cback: Disconnected att_id:53 addr:xx:xx:xx:xx:ec:5c, transport:BT_TRANSPORT_LE reason:GATT_CONN_TIMEOUT
+02-19 17:17:25.883  2332  2674 I bt_bta_gattc: system/bta/gatt/bta_gattc_act.cc:1410 bta_gattc_conn_cback: Disconnected att_id:51 addr:xx:xx:xx:xx:ec:5c, transport:BT_TRANSPORT_LE reason:GATT_CONN_TIMEOUT
+02-19 17:17:25.883  2332  2674 I bt_bta_gattc: system/bta/gatt/bta_gattc_act.cc:1410 bta_gattc_conn_cback: Disconnected att_id:48 addr:xx:xx:xx:xx:ec:5c, transport:BT_TRANSPORT_LE reason:GATT_CONN_TIMEOUT
+02-19 17:17:25.883  2332  2674 I bt_bta_gattc: system/bta/gatt/bta_gattc_act.cc:1410 bta_gattc_conn_cback: Disconnected att_id:47 addr:xx:xx:xx:xx:ec:5c, transport:BT_TRANSPORT_LE reason:GATT_CONN_TIMEOUT
+02-19 17:17:25.883  2332  2674 I bt_bta_gattc: system/bta/gatt/bta_gattc_act.cc:1410 bta_gattc_conn_cback: Disconnected att_id:46 addr:xx:xx:xx:xx:ec:5c, transport:BT_TRANSPORT_LE reason:GATT_CONN_TIMEOUT
+02-19 17:17:25.883  2332  2674 I bt_bta_gattc: system/bta/gatt/bta_gattc_act.cc:1410 bta_gattc_conn_cback: Disconnected att_id:45 addr:xx:xx:xx:xx:ec:5c, transport:BT_TRANSPORT_LE reason:GATT_CONN_TIMEOUT
+02-19 17:17:25.883  2332  2674 I bt_bta_gattc: system/bta/gatt/bta_gattc_act.cc:1410 bta_gattc_conn_cback: Disconnected att_id:44 addr:xx:xx:xx:xx:ec:5c, transport:BT_TRANSPORT_LE reason:GATT_CONN_TIMEOUT
+02-19 17:17:25.883  2332  2674 I bt_bta_gattc: system/bta/gatt/bta_gattc_act.cc:1410 bta_gattc_conn_cback: Disconnected att_id:181 addr:xx:xx:xx:xx:ec:5c, transport:BT_TRANSPORT_LE reason:GATT_CONN_TIMEOUT
+02-19 17:17:25.884  2332  2674 I bluetooth: system/stack/gap/gap_ble.cc:316 client_connect_cback: No active GAP service found for peer:xx:xx:xx:xx:ec:5c callback:Disconnected
+02-19 17:17:25.884  2332  2674 W acl     : system/stack/acl/ble_acl.cc:125 acl_ble_connection_fail: LE connection fail peer:xx:xx:xx:xx:ec:5c[random] bd_addr:xx:xx:xx:xx:ec:5c hci_status:HCI_ERR_HOST_TIMEOUT
+02-19 17:17:25.884  2332  2674 E bta_gattc_main: system/bta/gatt/bta_gattc_main.cc:331 bta_gattc_hdl_event: Ignore unknown conn ID: 65535
+02-19 17:17:25.884  2332  2674 E bta_gattc_main: system/bta/gatt/bta_gattc_main.cc:331 bta_gattc_hdl_event: Ignore unknown conn ID: 65535
+02-19 17:17:25.884  2332  2674 E bta_gattc_main: system/bta/gatt/bta_gattc_main.cc:331 bta_gattc_hdl_event: Ignore unknown conn ID: 65535
+02-19 17:17:25.884  2332  2674 E bta_gattc_main: system/bta/gatt/bta_gattc_main.cc:331 bta_gattc_hdl_event: Ignore unknown conn ID: 65535
+02-19 17:17:25.884  2332  2674 E bta_gattc_main: system/bta/gatt/bta_gattc_main.cc:331 bta_gattc_hdl_event: Ignore unknown conn ID: 65535
+02-19 17:17:25.884  2332  2674 E bta_gattc_main: system/bta/gatt/bta_gattc_main.cc:331 bta_gattc_hdl_event: Ignore unknown conn ID: 65535
+02-19 17:17:25.884  2332  2674 E bta_gattc_main: system/bta/gatt/bta_gattc_main.cc:331 bta_gattc_hdl_event: Ignore unknown conn ID: 65535
+02-19 17:17:25.884  2332  2674 W bt_bta_gattc: system/bta/gatt/bta_gattc_act.cc:348 bta_gattc_open_fail: Connection timed out after 30 seconds. conn_id=0x0. Return GATT_CONNECTION_TIMEOUT(147)
+02-19 17:17:25.889  2332  2674 E bta_gattc_main: system/bta/gatt/bta_gattc_main.cc:331 bta_gattc_hdl_event: Ignore unknown conn ID: 65535
+02-19 17:17:25.889  2332  2674 E bta_gattc_main: system/bta/gatt/bta_gattc_main.cc:331 bta_gattc_hdl_event: Ignore unknown conn ID: 65535
+02-19 17:17:25.889  2332  2674 E bta_gattc_main: system/bta/gatt/bta_gattc_main.cc:331 bta_gattc_hdl_event: Ignore unknown conn ID: 65535
+02-19 17:17:25.889  2332  2674 E bta_gattc_main: system/bta/gatt/bta_gattc_main.cc:331 bta_gattc_hdl_event: Ignore unknown conn ID: 65535
+02-19 17:17:25.889  2332  2674 E bta_gattc_main: system/bta/gatt/bta_gattc_main.cc:331 bta_gattc_hdl_event: Ignore unknown conn ID: 65535
+02-19 17:17:25.889  2332  2674 E bta_gattc_main: system/bta/gatt/bta_gattc_main.cc:331 bta_gattc_hdl_event: Ignore unknown conn ID: 65535
+02-19 17:17:25.889  2332  2674 E bta_gattc_main: system/bta/gatt/bta_gattc_main.cc:331 bta_gattc_hdl_event: Ignore unknown conn ID: 65535
+02-19 17:17:25.889  2332  2674 E bta_gattc_main: system/bta/gatt/bta_gattc_main.cc:331 bta_gattc_hdl_event: Ignore unknown conn ID: 65535
+02-19 17:17:25.899 20072 20573 D BluetoothGatt: onClientConnectionState() - status=147 connected=false device=XX:XX:XX:XX:EC:5C
+02-19 17:17:25.899 20072 20573 D BluetoothGatt: unregisterApp()
+02-19 17:17:25.902   950  1006 I bthal.activity: LogActivities: Disable LE Scanning, 0x2042
+02-19 17:17:25.903   950  1185 I bthal.debug_central: Command Complete Event of LE_SET_EXTENDED_SCAN_ENABLE, opcode:2042
+02-19 17:17:25.903   950  1185 I bthal.flowcontrol: HciEventPreProcess: HCI Event 0xe Opcode 0x2042 Length 6 unhandled by LeSetExtentedScanEnableEvent
+02-19 17:17:25.903  2332  2679 W BluetoothMetrics: system/metrics/src/android/metrics.cc:96 LogBluetoothEvent: Failed BluetoothEvent Upload - Address is Empty
+02-19 17:17:25.904  2332  2679 I bluetooth: system/gd/hci/le_address_manager.cc:397 resume_registered_clients: Resuming registered clients
+02-19 17:17:25.904  2332  2679 I bt_gd_shim: system/gd/hci/acl_manager/le_impl.h:876 arm_connectability: Ignored request to re-arm le connection state machine when filter accept list is empty
+02-19 17:17:25.904  2332  2679 I bluetooth: system/gd/hci/le_scanning_manager_impl.cc:623 stop_scan: Scanning already stopped, return!
+02-19 17:17:25.906 20072 20573 D BluetoothGatt: cancelOpen() - device: XX:XX:XX:XX:EC:5C
+02-19 17:17:25.908  2332  2674 I gatt_api: system/stack/gatt/gatt_api.cc:1304 GATT_Deregister: gatt_if=181
+02-19 17:17:25.911 20072 20573 D BluetoothGatt: close()
+02-19 17:17:25.916  2332  2674 E ble_priv: system/stack/btm/btm_ble_privacy.cc:376 btm_ble_read_resolving_list_entry_complete: no pending resolving list operation
+02-19 17:17:25.917   950  1006 I bthal.activity: LogActivities: LOW_POWER ScanMode
+02-19 17:17:25.917  2332  2679 I bluetooth: system/gd/hci/le_address_manager.cc:782 OnCommandComplete: Received command complete with op_code LE_REMOVE_DEVICE_FROM_FILTER_ACCEPT_LIST(0x2012)
+02-19 17:17:25.918  2332  2679 I bluetooth: system/gd/hci/le_address_manager.cc:397 resume_registered_clients: Resuming registered clients
+02-19 17:17:25.918  2332  2679 W bluetooth: system/gd/hci/le_address_manager.cc:400 resume_registered_clients: client is not paused ClientState::RESUMED(0x3)
+02-19 17:17:25.918  2332  2679 W bluetooth: system/gd/hci/le_address_manager.cc:400 resume_registered_clients: client is not paused ClientState::RESUMED(0x3)
+02-19 17:17:25.918  2332  2679 W bluetooth: system/gd/hci/le_address_manager.cc:400 resume_registered_clients: client is not paused ClientState::RESUMED(0x3)
+02-19 17:17:25.919   950  1006 I bthal.activity: LogActivities: Enable LE Scanning, 0x2042
+02-19 17:17:25.920   950  1185 I bthal.debug_central: Command Complete Event of LE_SET_EXTENDED_SCAN_ENABLE, opcode:2042
+02-19 17:17:25.920   950  1185 I bthal.flowcontrol: HciEventPreProcess: HCI Event 0xe Opcode 0x2042 Length 6 unhandled by LeSetExtentedScanEnableEvent
+02-19 17:17:26.023  3094 20911 I NearbyMediums: Triggered instant on lost for service id : NearbySharing with hash [ 0x18 0x8f 0xd4 0x05 ]
+02-19 17:17:26.024  3094 20863 I NearbyConnections: Processing instant lost on BlePeripheral BlePeripheral{advertisement=BleAdvertisement { version=2, socketVersion=2, isFast=true, serviceIdHash=null, data=[ 0x23 0x55 0x4b 0x43 0x32 0x11 0x32 0x32 0x54 0xa9 0x8d 0x93 0x68 0x2b 0x47 0xae 0x72 0x62 0xf2 0x2c 0xeb 0x52 0x99 ], deviceToken=[ 0x12 0xd8 ], rxAdvertisement=null }, dctAdvertisement=null, address=null, psm=0, deviceToken=<ByteString@8a0f0af size=2 contents="\022\330">, isSecondProfile=false, rxInstantConnectionAdv=null}.
+02-19 17:17:26.027  3094 20863 I NearbyConnections: Remove entry from BleAdvertisementProcessor bleEndpoints.
+02-19 17:17:26.030  3094 20863 I NearbyConnections: ClientProxy(173654343) reporting onEndpointLost(UKC2)
+02-19 17:17:26.034  3094 20863 I NearbySharing: NearbySharing Internal event EndpointLost(endpointId=UKC2)
+02-19 17:17:26.392  2332  2694 W BluetoothRemoteDevices: Address type mismatch for XX:XX:XX:XX:C1:3C, new type: 1
+02-19 17:17:26.393  2332  2694 W BluetoothRemoteDevices: Address type mismatch for XX:XX:XX:XX:C1:3C, new type: 1
+02-19 17:17:26.406  3094  5052 I NearbyDiscovery: (REDACTED) BloomFilterAdvManager: Detected bloom filter but too far away, ignoring. %sm, %s
+02-19 17:17:27.334  1032  1032 I WifiHAL : Creating message to get link statistics; iface = 48
+02-19 17:17:27.392   950  2685 I bthal.activity: bt_power: LeAdvStat: 17:17:21:383 - 17:17:27:392, duration: 6008, le_adv_count: 52, total_le_adv_count: 42384, total_event_count: 62
+02-19 17:17:27.462  1032  1032 E libbinder.IPCThreadState: binder thread pool (1 threads) starved for 128 ms
+02-19 17:17:27.565  1576  2091 D ConnectivityService: NetReassign [no changes] [c 9] [a 9] [i 21]
+02-19 17:17:27.725  2332  2694 W BluetoothRemoteDevices: Address type mismatch for XX:XX:XX:XX:C1:3C, new type: 1
+02-19 17:17:27.733  2332  2694 W BluetoothRemoteDevices: Address type mismatch for XX:XX:XX:XX:C1:3C, new type: 1
+02-19 17:17:27.749  3094  5052 I NearbyDiscovery: (REDACTED) BloomFilterAdvManager: Detected bloom filter but too far away, ignoring. %sm, %s
+02-19 17:17:28.330  1576  1726 I ActivityManager: Test idle passed
+02-19 17:17:28.384  2332  2694 W BluetoothRemoteDevices: Address type mismatch for XX:XX:XX:XX:C1:3C, new type: 1
+02-19 17:17:28.386  2332  2694 W BluetoothRemoteDevices: Address type mismatch for XX:XX:XX:XX:C1:3C, new type: 1
+02-19 17:17:28.393  3094  5052 I NearbyDiscovery: (REDACTED) BloomFilterAdvManager: Detected bloom filter but too far away, ignoring. %sm, %s
+02-19 17:17:28.908  3094 20814 I AlarmManager: setExactAndAllowWhileIdle [name: GCM_HB_ALARM type: 2 triggerAtMillis: 18185023]
+02-19 17:17:28.932  3094 20817 I AlarmManager: setExactAndAllowWhileIdle [name: FcmRetry type: 2 triggerAtMillis: 17705044]
+02-19 17:17:28.955  1576  2155 D BackgroundInstallControlService: Package event received: 0
+02-19 17:17:29.019  1576  2155 D BackgroundInstallControlService: Package event received: 0
+02-19 17:17:29.021  1576  4681 I ActivityManager: Background started FGS: Allowed [callingPackage: com.whatsapp; callingUid: 10255; uidState: SVC ; uidBFSL: n/a; intent: Intent { xflg=0x4 cmp=com.whatsapp/.messaging.service.GcmFGService }; code:PUSH_MESSAGING; tempAllowListReason:<8ef00a2 com.google.android.c2dm.intent.RECEIVE/u0,reasonCode:PUSH_MESSAGING,duration:20000,callingUid:10131>; allowWiu:-1; targetSdkVersion:35; callerTargetSdkVersion:35; startForegroundCount:0; bindFromPackage:null: isBindService:false]
+02-19 17:17:29.026 18987 19043 I ehof    : (REDACTED) appOpsListener %s %s
+02-19 17:17:29.027 18987 19043 I ehof    : (REDACTED) Ignoring irrelevant audio permission changes for package %s
+02-19 17:17:29.031 18983 19502 E msys    : E[N mns]_OnDiskCacheGetData(632)=>Start post callback cache refresh DNS resolution
+02-19 17:17:29.031 18983 19502 E msys    : E[ADNSUCTIMH WAJMNSDNSResolver]_MNSDNSResolutionSuccess(35)=>[LogLevel:I] DNS Resolution Successful with 2 IPs, Persistent Cache Hit: 1, secondary resolver used: 0
+02-19 17:17:29.031 18983 19502 E msys    : E[ADNSUCTIMH WAJMNSDNSResolver]_MNSDNSResolutionSuccess(55)=>[LogLevel:I] Resolved IP Address: 2a03:2880:f349:121:face:b00c:0:7260
+02-19 17:17:29.031 18983 19502 E msys    : E[ADNSUCTIMH WAJMNSDNSResolver]_MNSDNSResolutionSuccess(55)=>[LogLevel:I] Resolved IP Address: 57.144.147.33
+02-19 17:17:29.037 18983 19502 E msys    : E[N mns]_OnSystemDNSSuccessCallback(340)=>Cache refresh succeeded with system DNS resolver. IP count: 2
+02-19 17:17:29.040  1576  4681 W ActivityManager: Foreground service started from background can not have location/camera/microphone access: service com.whatsapp/.messaging.service.GcmFGService
+02-19 17:17:29.041  1576  4681 I ActivityManager: Background started FGS: Allowed [callingPackage: com.whatsapp; callingUid: 10255; uidState: FGS ; uidBFSL: [BFSL]; intent: Intent { cmp=com.whatsapp/.messaging.service.GcmFGService }; code:PROC_STATE_FGS; tempAllowListReason:<8ef00a2 com.google.android.c2dm.intent.RECEIVE/u0,reasonCode:PUSH_MESSAGING,duration:20000,callingUid:10131>; allowWiu:-1; targetSdkVersion:35; callerTargetSdkVersion:35; startForegroundCount:0; bindFromPackage:null: isBindService:false]
+02-19 17:17:29.042  1576  4681 W ForegroundServiceTypeLoggerModule: Foreground service start for UID: 10255 does not have any types
+02-19 17:17:29.042  1576  2155 D BackgroundInstallControlService: Package event received: 0
+02-19 17:17:29.048  1576  4681 D ConnectivityService: Returning UNBLOCKED NetworkInfo to uid=10255
+02-19 17:17:29.051  1576  2155 D BackgroundInstallControlService: Package event received: 0
+02-19 17:17:29.214  2332  2694 W BluetoothRemoteDevices: Address type mismatch for XX:XX:XX:XX:C1:3C, new type: 1
+02-19 17:17:29.215  2332  2694 W BluetoothRemoteDevices: Address type mismatch for XX:XX:XX:XX:C1:3C, new type: 1
+02-19 17:17:29.217  3094  5052 I NearbyDiscovery: (REDACTED) BloomFilterAdvManager: Detected bloom filter but too far away, ignoring. %sm, %s
+02-19 17:17:29.284  1576  2155 D BackgroundInstallControlService: Package event received: 0
+02-19 17:17:29.286  1576  1576 V NotificationHistory: Attempted to add notif for locked/gone/disabled user 0
+02-19 17:17:29.317 16929 17371 I AiAiEcho: SmartspaceNotificationPredictor no parser can handle this notification or notification is invalid
+02-19 17:17:29.439  2193  2279 I PluginActionManager[com.android.systemui.action.PLUGIN_NOTIFICATION_MENU_ROW]: Found 0 plugins
+02-19 17:17:29.607  1196  1196 W TracingMuxer: type=1400 audit(0.0:12965): avc:  denied  { write } for  name="traced_producer" dev="tmpfs" ino=1267 scontext=u:r:gxp_logging:s0 tcontext=u:object_r:traced_producer_socket:s0 tclass=sock_file permissive=0
+02-19 17:17:29.650 20072 20394 D BluetoothGatt: connect() - device: XX:XX:XX:XX:EC:5C, auto: false
+02-19 17:17:29.651 20072 20394 D BluetoothGatt: registerApp() - UUID=a4cb7523-ffaa-47fb-aa8b-8b20bce48b8a
+02-19 17:17:29.663  2332  2674 I gatt_api: system/stack/gatt/gatt_api.cc:1270 GATT_Register: Allocated name:com.fitbit.FitbitMobile uuid:6eeab0b7-4f6c-5916-9c83-204b80b984dd gatt_if:182 eatt_support:false
+02-19 17:17:29.664 20072 20573 D BluetoothGatt: onClientRegistered(0)
+02-19 17:17:29.666  2332  2694 I bt_btif_gattc: system/btif/src/btif_gatt_client.cc:369 btif_gattc_open_impl: Transport=BT_TRANSPORT_LE, device type=BLE, address=xx:xx:xx:xx:ec:5c, address type=1, phy=1
+02-19 17:17:29.667   950  1006 I bthal.activity: LogActivities: Disable LE Scanning, 0x2042
+02-19 17:17:29.678   950  1185 I bthal.debug_central: Command Complete Event of LE_SET_EXTENDED_SCAN_ENABLE, opcode:2042
+02-19 17:17:29.678   950  1185 I bthal.flowcontrol: HciEventPreProcess: HCI Event 0xe Opcode 0x2042 Length 6 unhandled by LeSetExtentedScanEnableEvent
+02-19 17:17:29.681  2332  2679 I bluetooth: system/gd/hci/le_address_manager.cc:782 OnCommandComplete: Received command complete with op_code LE_ADD_DEVICE_TO_FILTER_ACCEPT_LIST(0x2011)
+02-19 17:17:29.681  2332  2679 I bluetooth: system/gd/hci/le_address_manager.cc:397 resume_registered_clients: Resuming registered clients
+02-19 17:17:29.682  2332  2679 I bt_gd_shim: system/gd/hci/acl_manager/le_impl.h:1097 choose_connection_mode: Connection mode: AGGRESSIVE
+02-19 17:17:29.682  2332  2679 I bluetooth: system/gd/hci/le_scanning_manager_impl.cc:623 stop_scan: Scanning already stopped, return!
+02-19 17:17:29.682   950  1006 I bthal.activity: LogActivities: LE Extended Create Connection
+02-19 17:17:29.685   950  1006 I bthal.activity: LogActivities: LOW_POWER ScanMode
+02-19 17:17:29.685  2332  2679 I bt_gd_shim: system/gd/hci/acl_manager/le_impl.h:845 update_connectability_state_after_armed: Le connection state machine armed state:ConnectabilityState::ARMED status:SUCCESS(0x00)
+02-19 17:17:29.686   950  1006 I bthal.activity: LogActivities: Enable LE Scanning, 0x2042
+02-19 17:17:29.686   950  1185 I bthal.debug_central: Command Complete Event of LE_SET_EXTENDED_SCAN_ENABLE, opcode:2042
+02-19 17:17:29.686   950  1185 I bthal.flowcontrol: HciEventPreProcess: HCI Event 0xe Opcode 0x2042 Length 6 unhandled by LeSetExtentedScanEnableEvent
+02-19 17:17:29.858  2332  2694 W BluetoothRemoteDevices: Address type mismatch for XX:XX:XX:XX:C1:3C, new type: 1
+02-19 17:17:29.862  2332  2694 W BluetoothRemoteDevices: Address type mismatch for XX:XX:XX:XX:C1:3C, new type: 1
+02-19 17:17:29.962  1576  5007 W JobInfo : Job 'com.whatsapp/.infra.push.RegistrationIntentService#4' has a deadline with no functional constraints. The deadline won't improve job execution latency. Consider removing the deadline.
+02-19 17:17:30.523  1032  1032 I WifiHAL : Creating message to get link statistics; iface = 48
+02-19 17:17:30.647  1576  2091 D ConnectivityService: NetReassign [no changes] [c 6] [a 7] [i 13]
+02-19 17:17:31.294  1597  1618 I pixel-thermal: USB-MINUS-USB2:-0.573 raw data: USB-MINUS-USB2:-573 usb_pwr_therm:40952 usb_pwr_therm2:41525 
+02-19 17:17:31.295  1597  1618 I pixel-thermal: VIRTUAL-USB-UI:0 raw data: USB-MINUS-NEUTRAL:-3138 USB-MINUS-USB2:-573 VIRTUAL-USB-UI:0 neutral_therm:44090 usb_pwr_therm:40952 
+02-19 17:17:31.296  1597  1618 I pixel-thermal: VIRTUAL-USB-THROTTLING:0 raw data: USB-MINUS-NEUTRAL:-3138 USB-MINUS-USB2:-573 VIRTUAL-USB-THROTTLING:0 usb_pwr_therm:40952 
+02-19 17:17:31.296  1597  1618 I pixel-thermal: USB-MINUS-NEUTRAL:-3.138 raw data: USB-MINUS-NEUTRAL:-3138 
+02-19 17:17:31.296  1597  1618 I pixel-thermal: usb_pwr_therm:40.952 raw data: usb_pwr_therm:40952 
+02-19 17:17:31.471 16929 17648 I libbinder.IPCThreadState: oneway function results for code 2 on binder at 0xb4000073b8ed01e0 will be dropped but finished with status UNKNOWN_TRANSACTION
+02-19 17:17:31.483 17245 17245 I AstreaGrpcService: AstreaGrpcService#onDestroy called.
+02-19 17:17:31.605  1597  1618 I pixel-thermal: quiet_therm:41.456 raw data: quiet_therm:41456 
+02-19 17:17:31.607  1597  1618 I pixel-thermal: VIRTUAL-SKIN-CPU:44.2129 raw data: VIRTUAL-GNSS-DISP:44212.9 VIRTUAL-NEUTRAL-QUIET:41998.6 VIRTUAL-QUIET-USB2:40262.9 VIRTUAL-SKIN:44212.9 VIRTUAL-SKIN-CPU:44212.9 VIRTUAL-USB2-QUIET:39723.6 disp_therm:40792 gnss_tcxo_therm:47466 neutral_therm:44090 quiet_therm:41456 usb_pwr_therm2:41525 
+02-19 17:17:31.607  1597  1618 I pixel-thermal: VIRTUAL-SKIN-CPU power_budget=800 err=-3.21292 s_power=800 time_elapsed_ms=7018 p=-1285.17 i=184.219 d=0 dt_per_min=nan compensation=0 budget transient=0 control target=3 excluded power budget=0
+02-19 17:17:31.607  1597  1618 I pixel-thermal: VIRTUAL-SKIN-CPU binded power rails: (S4M_VDD_CPUCL0: 59.29 mW)(S2M_VDD_CPUCL2: 2.18 mW)(S3M_VDD_CPUCL1: 25.65 mW)
+02-19 17:17:31.608  1597  1618 I pixel-thermal: VIRTUAL-SKIN:44.2129 raw data: VIRTUAL-SKIN:44212.9 
+02-19 17:17:31.609  1597  1618 I pixel-thermal: VIRTUAL-SKIN-CHARGE:43.3606 raw data: VIRTUAL-SKIN-CHARGE:43360.6 qi_therm:48755 quiet_therm:41456 
+02-19 17:17:31.609  1597  1618 I pixel-thermal: VIRTUAL-SKIN-CHARGE power_budget=845.372 err=-2.36065 s_power=2383 time_elapsed_ms=7018 p=-502.818 i=-870.016 d=0 dt_per_min=nan compensation=0 budget transient=0 control target=2 excluded power budget=164.794 (PARTIAL_SYSTEM_POWER: 784.73 mW, cdev_weight: 0.210000)
+02-19 17:17:31.609  1597  1618 I pixel-thermal: VIRTUAL-SKIN-HINT:44.2129 raw data: VIRTUAL-SKIN:44212.9 VIRTUAL-SKIN-HINT:44212.9 
+02-19 17:17:31.609  1597  1618 I pixel-thermal: VIRTUAL-SKIN-CPU-GPU:44.2129 raw data: VIRTUAL-SKIN:44212.9 VIRTUAL-SKIN-CPU-GPU:44212.9 
+02-19 17:17:31.609  1597  1618 I pixel-thermal: VIRTUAL-SKIN-CPU-GPU power_budget=1285.76 err=0.787079 s_power=800 time_elapsed_ms=7018 p=236.124 i=249.632 d=0 dt_per_min=nan compensation=0 budget transient=0 control target=3 excluded power budget=0
+02-19 17:17:31.609  1597  1618 I pixel-thermal: VIRTUAL-SKIN-CPU-GPU binded power rails: (S4M_VDD_CPUCL0: 59.29 mW)(S3M_VDD_CPUCL1: 25.65 mW)(S2S_VDD_G3D: 0.05 mW)(S2M_VDD_CPUCL2: 2.18 mW)
+02-19 17:17:31.610  1597  1618 I pixel-thermal: cellular-emergency:44.2129 raw data: VIRTUAL-SKIN:44212.9 cellular-emergency:44212.9 
+02-19 17:17:31.610  1597  1618 I pixel-thermal: Successfully update cdev thermal-cpufreq-1 sysfs to 0
+02-19 17:17:31.883  1576  5007 D ActivityManager: Stop FGS timeout: ServiceRecord{d3e9e41 u0 com.whatsapp/.messaging.service.GcmFGService c:com.whatsapp}
+02-19 17:17:31.885  1576  5007 W ForegroundServiceTypeLoggerModule: FGS stop call for: 10255 has no types!
+02-19 17:17:31.887  1576  2155 D BackgroundInstallControlService: Package event received: 0
+02-19 17:17:31.913  1576  5007 D ConnectivityService: Returning BLOCKED NetworkInfo to uid=10255
+02-19 17:17:32.655  2332  2694 W BluetoothRemoteDevices: Address type mismatch for XX:XX:XX:XX:C1:3C, new type: 1
+02-19 17:17:32.656  2332  2694 W BluetoothRemoteDevices: Address type mismatch for XX:XX:XX:XX:C1:3C, new type: 1
+02-19 17:17:32.665  3094  5052 I NearbyDiscovery: (REDACTED) BloomFilterAdvManager: Detected bloom filter but too far away, ignoring. %sm, %s
+02-19 17:17:32.684  3094  5052 I NearbyDiscovery: (REDACTED) %s
+02-19 17:17:32.690  3094  5052 I NearbyDiscovery: (REDACTED) %s
+02-19 17:17:32.693  3094  5052 I NearbyDiscovery: (REDACTED) %s
+02-19 17:17:33.339  1576  1726 I ActivityManager: Test idle passed
+02-19 17:17:33.441  3094 20814 I AlarmManager: setExactAndAllowWhileIdle [name: GCM_HB_ALARM type: 2 triggerAtMillis: 18189556]
+02-19 17:17:33.467  3094 20915 I AlarmManager: setExactAndAllowWhileIdle [name: FcmRetry type: 2 triggerAtMillis: 17709581]
+02-19 17:17:33.473  3094 20915 I AlarmManager: setExactAndAllowWhileIdle [name: GCM_HB_ALARM type: 2 triggerAtMillis: 18189589]
+02-19 17:17:33.481  1576  2155 D BackgroundInstallControlService: Package event received: 0
+02-19 17:17:33.503  1576  1616 I ActivityManager: Background started FGS: Allowed [callingPackage: com.whatsapp; callingUid: 10255; uidState: SVC ; uidBFSL: n/a; intent: Intent { xflg=0x4 cmp=com.whatsapp/.messaging.service.GcmFGService }; code:PUSH_MESSAGING; tempAllowListReason:<67bfe22 com.google.android.c2dm.intent.RECEIVE/u0,reasonCode:PUSH_MESSAGING,duration:20000,callingUid:10131>; allowWiu:-1; targetSdkVersion:35; callerTargetSdkVersion:35; startForegroundCount:0; bindFromPackage:null: isBindService:false]
+02-19 17:17:33.516 18983 19502 E msys    : E[N mns]_OnDiskCacheGetData(632)=>Start post callback cache refresh DNS resolution
+02-19 17:17:33.516 18983 19502 E msys    : E[ADNSUCTIMH WAJMNSDNSResolver]_MNSDNSResolutionSuccess(35)=>[LogLevel:I] DNS Resolution Successful with 2 IPs, Persistent Cache Hit: 1, secondary resolver used: 0
+02-19 17:17:33.516 18983 19502 E msys    : E[ADNSUCTIMH WAJMNSDNSResolver]_MNSDNSResolutionSuccess(55)=>[LogLevel:I] Resolved IP Address: 2a03:2880:f349:121:face:b00c:0:7260
+02-19 17:17:33.516 18983 19502 E msys    : E[ADNSUCTIMH WAJMNSDNSResolver]_MNSDNSResolutionSuccess(55)=>[LogLevel:I] Resolved IP Address: 57.144.147.33
+02-19 17:17:33.521  1576  2155 D BackgroundInstallControlService: Package event received: 0
+02-19 17:17:33.521 18983 19502 E msys    : E[N mns]_OnSystemDNSSuccessCallback(340)=>Cache refresh succeeded with system DNS resolver. IP count: 2
+02-19 17:17:33.531  1576  5007 W ActivityManager: Foreground service started from background can not have location/camera/microphone access: service com.whatsapp/.messaging.service.GcmFGService
+02-19 17:17:33.531  1576  5007 I ActivityManager: Background started FGS: Allowed [callingPackage: com.whatsapp; callingUid: 10255; uidState: FGS ; uidBFSL: [BFSL]; intent: Intent { cmp=com.whatsapp/.messaging.service.GcmFGService }; code:PROC_STATE_FGS; tempAllowListReason:<67bfe22 com.google.android.c2dm.intent.RECEIVE/u0,reasonCode:PUSH_MESSAGING,duration:20000,callingUid:10131>; allowWiu:-1; targetSdkVersion:35; callerTargetSdkVersion:35; startForegroundCount:0; bindFromPackage:null: isBindService:false]
+02-19 17:17:33.532  1576  5007 W ForegroundServiceTypeLoggerModule: Foreground service start for UID: 10255 does not have any types
+02-19 17:17:33.533  1576  2155 D BackgroundInstallControlService: Package event received: 0
+02-19 17:17:33.543  1576  1616 D ConnectivityService: Returning UNBLOCKED NetworkInfo to uid=10255
+02-19 17:17:33.619  3094 20895 I NearbyMediums: This GATT advertisement BleAdvertisement { version=2, socketVersion=2, isFast=true, serviceIdHash=null, data=[ 0x23 0x41 0x41 0x45 0x4b 0x11 0x32 0xaf 0x6e 0x4f 0xde 0x6a 0xf4 0x90 0x54 0xde 0x27 0x54 0x84 0x67 0x3d 0xd5 0x91 ], deviceToken=[ 0x12 0xd8 ], rxAdvertisement=null } is a Fast Advertisement and matched UUID 0000fef3-0000-1000-8000-00805f9b34fb in fastAdvertisementServiceUuids map with serviceID NearbySharing
+02-19 17:17:33.620  1032  1032 I WifiHAL : Creating message to get link statistics; iface = 48
+02-19 17:17:33.621  3094 20910 I NearbyConnections: Found BleAdvertisement [ 0x23 0x41 0x41 0x45 0x4b 0x11 0x32 0xaf 0x6e 0x4f 0xde 0x6a 0xf4 0x90 0x54 0xde 0x27 0x54 0x84 0x67 0x3d 0xd5 0x91 ] (with EndpointId AAEK and EndpointInfo [ 0x32 0xaf 0x6e 0x4f 0xde 0x6a 0xf4 0x90 0x54 0xde 0x27 0x54 0x84 0x67 0x3d 0xd5 0x91 ])
+02-19 17:17:33.623  3094 20910 I NearbyConnections: ClientProxy(173654343 0p:com.google.android.gms.nearby.sharing) reporting onEndpointFound(AAEK)
+02-19 17:17:33.624  3094 20910 I NearbyConnections: ClientProxy(173654343) reporting onEndpointDistanceChanged(AAEK, UNKNOWN)
+02-19 17:17:33.627  3094 20910 I NearbySharing: NearbySharing Internal event EndpointDiscovered(endpointId=AAEK)
+02-19 17:17:33.716  1576  2091 D ConnectivityService: NetReassign [no changes] [c 3] [a 3] [i 6]
+02-19 17:17:33.746  1576  1576 V NotificationHistory: Attempted to add notif for locked/gone/disabled user 0
+02-19 17:17:33.747  1576  2155 D BackgroundInstallControlService: Package event received: 0
+02-19 17:17:33.755 16929 17371 I AiAiEcho: SmartspaceNotificationPredictor no parser can handle this notification or notification is invalid
+02-19 17:17:33.868  2193  2279 I PluginActionManager[com.android.systemui.action.PLUGIN_NOTIFICATION_MENU_ROW]: Found 0 plugins
+02-19 17:17:34.313  3094 20895 I NearbyMediums: Triggered instant on lost for service id : NearbySharing with hash [ 0xc9 0x99 0x59 0xec ]
+02-19 17:17:34.313  3094 20910 I NearbyConnections: Processing instant lost on BlePeripheral BlePeripheral{advertisement=BleAdvertisement { version=2, socketVersion=2, isFast=true, serviceIdHash=null, data=[ 0x23 0x57 0x53 0x33 0x37 0x11 0x32 0xd2 0xe3 0x2b 0x1d 0xbb 0x85 0x03 0x54 0x29 0x6a 0x61 0x3a 0x45 0x12 0xe9 0xda ], deviceToken=[ 0x12 0xd8 ], rxAdvertisement=[ 0xa0 0x17 0xf8 0xda 0xad 0x8b 0x9e 0x7f 0x1e 0x6b 0xf2 0xee 0x24 0x9a 0x20 0x23 0x15 0x61 0x24 0xe3 0x94 0xdc 0x27 0x78 0x67 0x62 0xa8 0xa5 0x42 0xf3 0x04 0xcd 0x0c 0x16 0x84 0x15 0x05 0x61 0x00 0x00 0x84 0x15 0x06 0x61 0x00 0x00 0x84 0x15 0x04 0x7f 0x00 0x00 0x84 0x15 0x07 0x61 0x00 0x00 0x83 0x15 0x01 0xff 0xff ] }, dctAdvertisement=null, address=null, psm=0, deviceToken=<ByteString@cbcc357 size=2 contents="\022\330">, isSecondProfile=false, rxInstantConnectionAdv=[-96, 23, -8, -38, -83, -117, -98, 127, 30, 107, -14, -18, 36, -102, 32, 35, 21, 97, 36, -29, -108, -36, 39, 120, 103, 98, -88, -91, 66, -13, 4, -51, 12, 22, -124, 21, 5, 97, 0, 0, -124, 21, 6, 97, 0, 0, -124, 21, 4, 127, 0, 0, -124, 21, 7, 97, 0, 0, -125, 21, 1, -1, -1]}.
+02-19 17:17:34.314  3094 20910 I NearbyConnections: Remove entry from BleAdvertisementProcessor bleEndpoints.
+02-19 17:17:34.315  3094 20910 I NearbyConnections: ClientProxy(173654343) reporting onEndpointLost(WS37)
+02-19 17:17:34.317  3094 20895 I NearbySharing: NearbySharing Internal event EndpointLost(endpointId=WS37)
+02-19 17:17:34.317  3094 20911 I NearbySharing: [NS_DISCOVERY] DiscoveryController reported Lost(endpointId=WS37)
+02-19 17:17:34.764  1576  5007 W JobInfo : Job 'com.whatsapp/.infra.push.RegistrationIntentService#4' has a deadline with no functional constraints. The deadline won't improve job execution latency. Consider removing the deadline.
+02-19 17:17:34.819  3094 20863 I NearbySharing: [NS_CONTROL] DiscoveryStateManager emitted ReportLost(id=1).
+02-19 17:17:34.819  3094 20863 I NearbySharing: NearbySharing Internal event ReceiverLost(receiverId=1)
+02-19 17:17:34.820  3094 20909 I NearbySharing: SendManager event Lost(receiverId=1)
+02-19 17:17:34.825  3094  3094 I NearbySharing: ShortcutInfoManager removed shortcut Arihant's Pixel 6a
+02-19 17:17:34.825  1576  1725 W NotificationHistory: Attempted to remove conversation for locked/gone/disabled user 0
+02-19 17:17:35.094  3094 20909 I NearbyMediums: Found Fast Ble Advertisements :
+02-19 17:17:35.094  3094 20909 I NearbyMediums: BleAdvertisement { version=2, socketVersion=2, isFast=true, serviceIdHash=null, data=[ 0x23 0x57 0x53 0x33 0x37 0x11 0x32 0xd2 0xe3 0x2b 0x1d 0xbb 0x85 0x03 0x54 0x29 0x6a 0x61 0x3a 0x45 0x12 0xe9 0xda ], deviceToken=[ 0x12 0xd8 ], rxAdvertisement=null } : 11 times.
+02-19 17:17:35.094  3094 20909 I NearbyMediums: BleAdvertisement { version=2, socketVersion=2, isFast=true, serviceIdHash=null, data=[ 0x23 0x37 0x38 0x5a 0x50 0x11 0x32 0x0b 0x53 0x43 0x38 0x83 0x6c 0x89 0x0d 0x45 0x57 0xc6 0xf4 0x76 0x2f 0xaa 0xa9 ], deviceToken=[ 0x1d 0x1d ], rxAdvertisement=null } : 16 times.
+02-19 17:17:35.094  3094 20909 I NearbyMediums: BleAdvertisement { version=2, socketVersion=2, isFast=true, serviceIdHash=null, data=[ 0x23 0x45 0x4b 0x55 0x41 0x11 0x32 0xd4 0x16 0x62 0x4b 0x0e 0x5a 0x89 0x3d 0xc9 0x78 0xce 0x41 0x90 0xa7 0x8c 0x51 ], deviceToken=[ 0xb7 0xfb ], rxAdvertisement=null } : 3 times.
+02-19 17:17:35.094  3094 20909 I NearbyMediums: BleAdvertisement { version=2, socketVersion=2, isFast=true, serviceIdHash=null, data=[ 0x23 0x47 0x52 0x56 0x52 0x11 0x32 0x21 0x61 0xf6 0x94 0x9b 0x77 0x3b 0x50 0x21 0x7b 0x7e 0xec 0xba 0x57 0x3a 0x9b ], deviceToken=[ 0x1d 0x00 ], rxAdvertisement=null } : 1 times.
+02-19 17:17:35.094  3094 20909 I NearbyMediums: Total 31 fast advertisements from 4 unique advertisers.
+02-19 17:17:35.095  3094 20909 I NearbyMediums: Current Tracked Scanning Clients are : {NearbyConnections.EnvironmentMonitor, NearbySharing, NearbyConnections.TxAdvertisement}
+02-19 17:17:35.098  3094 20910 I NearbyConnections: Processing lost BlePeripheral BlePeripheral{advertisement=BleAdvertisement { version=2, socketVersion=2, isFast=true, serviceIdHash=null, data=[ 0x23 0x55 0x4b 0x43 0x32 0x11 0x32 0x32 0x54 0xa9 0x8d 0x93 0x68 0x2b 0x47 0xae 0x72 0x62 0xf2 0x2c 0xeb 0x52 0x99 ], deviceToken=[ 0x12 0xd8 ], rxAdvertisement=null }, dctAdvertisement=null, address=null, psm=0, deviceToken=<ByteString@44c9ab0 size=2 contents="\022\330">, isSecondProfile=false, rxInstantConnectionAdv=null}.
+02-19 17:17:35.351  2346  2468 D ImpulseConnection: timeout didn't happen: com.google.android.apps.turbo
+02-19 17:17:35.367  2346  3482 D TemperatureStateSource: sequence=1391 actualDelay=10001
+02-19 17:17:35.368  2346  3482 D TemperatureStateSource: Reading temperature: sequence=1392
+02-19 17:17:35.375  1597  1597 I pixel-thermal: VIRTUAL-SKIN:43.5931 raw data: VIRTUAL-GNSS-DISP:43593.1 VIRTUAL-NEUTRAL-QUIET:41969.9 VIRTUAL-QUIET-USB2:40281.3 VIRTUAL-SKIN:43593.1 VIRTUAL-USB2-QUIET:39720.9 disp_therm:40700 gnss_tcxo_therm:46464 neutral_therm:43976 quiet_therm:41479 usb_pwr_therm2:41502 
+02-19 17:17:35.376  2346  3482 D TemperatureStateSource: getDeviceTemperatures: sequence=1392 deviceTemperatureType=3 temperatureSource=0 temperatures=[43.59312]
+02-19 17:17:35.376  2346  3482 D BusinessScope: Enqueuing the block
+02-19 17:17:35.376  2346  2454 D BusinessScope: Start running the #2858 block
+02-19 17:17:35.378  2346  3482 D TemperatureStateSource: sequence=1392 waitTime=10000
+02-19 17:17:35.380  1597  1597 I pixel-thermal: VIRTUAL-SKIN:43.5931 raw data: VIRTUAL-SKIN:43593.1 
+02-19 17:17:35.381  2346  2454 I TemperatureStateSource: temperature was set
+02-19 17:17:35.381  2346  2454 D BusinessScope: Enqueuing the block
+02-19 17:17:35.381  2346  2454 D ImpulseStateSource: Notify clients: 1428
+02-19 17:17:35.381  2346  2454 D BusinessScope: Finish running the #2858 block
+02-19 17:17:35.382  2346  2454 D BusinessScope: Start running the #2859 block
+02-19 17:17:35.383  2346  2567 D BusinessScope: Finish running the #2859 block
+02-19 17:17:35.408 18833 18927 W Turbo.DeviceHealthLeversManagerImpl: applyLeversWithMaintenanceWindow: ignore the same request
+02-19 17:17:35.461  2332  2694 W BluetoothRemoteDevices: Address type mismatch for XX:XX:XX:XX:C1:3C, new type: 1
+02-19 17:17:35.464  2332  2694 W BluetoothRemoteDevices: Address type mismatch for XX:XX:XX:XX:C1:3C, new type: 1
+02-19 17:17:35.472  3094  5052 I NearbyDiscovery: (REDACTED) BloomFilterAdvManager: Detected bloom filter but too far away, ignoring. %sm, %s
+02-19 17:17:35.623  2332  2694 W BluetoothRemoteDevices: Address type mismatch for XX:XX:XX:XX:C1:3C, new type: 1
+02-19 17:17:35.624  2332  2694 W BluetoothRemoteDevices: Address type mismatch for XX:XX:XX:XX:C1:3C, new type: 1
+02-19 17:17:35.632  3094  5052 I NearbyDiscovery: (REDACTED) BloomFilterAdvManager: Detected bloom filter but too far away, ignoring. %sm, %s
+02-19 17:17:36.707  1032  1032 I WifiHAL : Creating message to get link statistics; iface = 48
+02-19 17:17:36.836  1032  1032 E libbinder.IPCThreadState: binder thread pool (1 threads) starved for 129 ms
+02-19 17:17:36.849  1576  1755 D ActivityManager: Stop FGS timeout: ServiceRecord{5885fa5 u0 com.whatsapp/.messaging.service.GcmFGService c:com.whatsapp}
+02-19 17:17:36.854  1576  1755 W ForegroundServiceTypeLoggerModule: FGS stop call for: 10255 has no types!
+02-19 17:17:36.858  1576  2155 D BackgroundInstallControlService: Package event received: 0
+02-19 17:17:36.887  1576  4069 D ConnectivityService: Returning BLOCKED NetworkInfo to uid=10255
+02-19 17:17:36.905  1576  2091 D ConnectivityService: NetReassign [no changes] [c 2] [a 2] [i 8]
+02-19 17:17:36.927  2332  2694 W BluetoothRemoteDevices: Address type mismatch for XX:XX:XX:XX:C1:3C, new type: 1
+02-19 17:17:36.930  2332  2694 W BluetoothRemoteDevices: Address type mismatch for XX:XX:XX:XX:C1:3C, new type: 1
+02-19 17:17:36.935  3094  5052 I NearbyDiscovery: (REDACTED) BloomFilterAdvManager: Detected bloom filter but too far away, ignoring. %sm, %s
+02-19 17:17:36.986  2193  2193 D DLObserver: onReceive(); android.intent.action.BATTERY_CHANGED
+02-19 17:17:36.986  2193  2193 D DLObserver: plugged=0
+02-19 17:17:36.987  2193  2193 D SystemEventDataSource: onReceive: intentAction
+02-19 17:17:36.990  2193  2193 I ReverseChargingControl: handleIntentForReverseCharging(): rtx=0 wlc=0 plgac=0 ac=0 acrtx=0 extra=0 this=com.google.android.systemui.reversecharging.ReverseChargingController@f23c221
+02-19 17:17:36.991  2193  2193 D KeyguardIndicationGoogle: isChargeLimitEnabled= false, user= 0
+02-19 17:17:36.998  2193  2193 D PowerNotificationWarningsGoogleImpl: onReceive: android.intent.action.BATTERY_CHANGED
+02-19 17:17:36.998  2193  2193 D PulsarController: dispatchIntent: android.intent.action.BATTERY_CHANGED
+02-19 17:17:36.998  2193  2193 D IncompatibleChargerNotification: dispatchIntent: android.intent.action.BATTERY_CHANGED
+02-19 17:17:37.001  1576  1726 D ActivityManager: sync unfroze 20604 com.android.settings for 3
+02-19 17:17:37.017 18833 18833 W JobInfo : Job 'com.google.android.apps.turbo/.deadline.library.BatteryFlagService#201' has a deadline with no functional constraints. The deadline won't improve job execution latency. Consider removing the deadline.
+02-19 17:17:37.018   950  1006 I bthal.activitywatcher: getStateResidency: ActivityStat{0 : totalTimeMs 2876149 totalEntryCount 78016 lastEntryMs 4289179}
+02-19 17:17:37.018   950  1006 I bthal.activitywatcher: getStateResidency: ActivityStat{1 : totalTimeMs 10867467 totalEntryCount 78352 lastEntryMs 4289203}
+02-19 17:17:37.018   950  1006 I bthal.activitywatcher: getStateResidency: ActivityStat{2 : totalTimeMs 291929 totalEntryCount 804756 lastEntryMs 4289519}
+02-19 17:17:37.018   950  1006 I bthal.activitywatcher: getStateResidency: ActivityStat{3 : totalTimeMs 6445213 totalEntryCount 2198466 lastEntryMs 4289519}
+02-19 17:17:37.018  1576  5007 W JobInfo : Job 'com.google.android.apps.turbo/.deadline.library.BatteryFlagService#201' has a deadline with no functional constraints. The deadline won't improve job execution latency. Consider removing the deadline.
+02-19 17:17:37.023 18987 19043 I ehof    : (REDACTED) appOpsListener %s %s
+02-19 17:17:37.023 18987 19043 I ehof    : (REDACTED) Ignoring irrelevant audio permission changes for package %s
+02-19 17:17:37.024  2193  2261 D GoogleBatteryDataSource: fetchDwellDefendStatus: DISCONNECTED
+02-19 17:17:37.025  1576  5007 W JobInfo : Job 'com.google.android.apps.turbo/.deadline.library.DeadlineUpdateJobService#200' has a deadline with no functional constraints. The deadline won't improve job execution latency. Consider removing the deadline.
+02-19 17:17:37.026  2193  2261 D GoogleBatteryDataSource: fetchTempDefendStatus: t_sum=0, time_sum=0 t_avg=0 lst_v=0 lst_t=0 lst_u=0, dt=1220, t=0 e=1
+02-19 17:17:37.027  2193  2261 D SystemEventDataSource: updatedEventData: SystemEventData(intentAction=android.intent.action.BATTERY_CHANGED, plugged=EventData(value=0), batteryScale=EventData(value=100), batteryLevel=EventData(value=58), chargingStatus=EventData(value=1), maxChargingCurrent=EventData(value=0), maxChargingVoltage=EventData(value=0), batteryStatus=EventData(value=3), halEventData=HalEventData(dockDefendStatus=EventData(value=-3), tempDefendEventData=EventData(value=false), dwellDefendEventData=EventData(value=false)), settingsEventData=SettingsEventData(dockDefenderBypass=EventData(value=0), chargingLimitSettings=EventData(value=0), dndState=EventData(value=true), airplaneState=EventData(value=false)), frameworkApiEventData=FrameworkApiEventData(batterySaverState=EventData(value=false), extremeBatterySaverState=EventData(value=false)))
+02-19 17:17:37.027  2193  2261 D ChargingLimitEventModule: validate()=false, chargingStatus=1
+02-19 17:17:37.027  2193  2261 D DwellDefendBatteryModule: validate: false -> false
+02-19 17:17:37.027  2193  2261 D TempDefendBatteryModule: validate: false -> false
+02-19 17:17:37.027  2193  2259 D BatteryEventService: collect BatteryEvents: BatteryEvents(eventTypes=[DND_ON, NOT_CHARGING, SCREEN_ON], batteryLevel=58, pluggedType=0)
+02-19 17:17:37.028  2193  2259 D BatteryEventService: notifyForBatteryEventsUpdate: BatteryEvents(eventTypes=[DND_ON, NOT_CHARGING, SCREEN_ON], batteryLevel=58, pluggedType=0)
+02-19 17:17:37.028  2193  2259 D BatteryEventService: AIDL callback listeners count: 1
+02-19 17:17:37.028  2193  2259 D BatteryEventService: aidlCallback: NOTIFICATION, events: []
+02-19 17:17:37.028  2193  2259 D BatteryEventClient: [PowerNotificationWarningsGoogleImpl] onBatteryEventChanged: [], batteryLevel: 58
+02-19 17:17:37.028  2193  2259 D PowerNotificationWarningsGoogleImpl: [onBatteryEventUpdate] []
+02-19 17:17:37.028  2193  2259 D BatteryDefenderNotification: onNonDefenderEvent: charged: false
+02-19 17:17:37.028  2193  2259 D BatteryEventService: notify AIDL callback to null, cost: 0 ms
+02-19 17:17:37.028  2193  2259 I BatteryEventService: notify all AIDL callbacks, cost: 0 ms
+02-19 17:17:37.028  2193  2259 D BatteryEventService: BatteryEventsListener (broadcast) count: 1
+02-19 17:17:37.028  2193  2259 D BatteryEventService: broadcastIntent(uid:0): Intent { act=com.google.android.battery_event.BATTERY_EVENTS_UPDATE cmp=com.google.android.apps.turbo/.batteryevent.BatteryEventUpdateReceiver (has extras) }, events:[SCREEN_ON, DND_ON]
+02-19 17:17:37.030   950  1006 I bthal.activitywatcher: send_hci_activities_vsc: Sent VSC <[4]{89, 253, 1, 1}>
+02-19 17:17:37.030   978   978 W android.hardware.power.stats-service.pixel: getStateResidency latency for Bluetooth exceeded time allowed: 14945us
+02-19 17:17:37.031  2193  2259 I BatteryEventService: notify all broadcast intent, cost: 3 ms
+02-19 17:17:37.031   950  1185 I bthal.activitywatcher: filter_hci_activities_vse: Filtered <[103]{14, 101, 1, 89, 253, 0, 1, 37, 1, 0, 0, 205, 24, 0, 0, 51, 54, 6, 0, 0, 0, 0, 0, 64, 54, 6, 0, 0, 0, 0, 0, 38, 1, 0, 0, 43, 64, 1, 0, 64, 54, 6, 0, 0, 0, 0, 0, 51, 54, 6, 0, 0, 0, 0, 0, 8, 24, 0, 0, 178, 8, 0, 0, 141, 55, 6, 0, 0, 0, 0, 0, 141, 55, 6, 0, 0, 0, 0, 0, 167, 68, 0, 0, 215, 194, 0, 0, 141, 55, 6, 0, 0, 0, 0, 0, 141, 55, 6, 0, 0, 0, 0, 0}>
+02-19 17:17:37.031   950  1185 I bthal.flowcontrol: HciEventPreProcess: HCI Event 0xe Opcode 0xfd59 Length 103 handled by ControllerActivityWatcher
+02-19 17:17:37.034  1197  1197 D AOC     : A3:MSG: controller.cc, 275: CNTRL: cmd ID: 0x000a, tag: 0xd7 [cntr = 7193]
+02-19 17:17:37.034  1197  1197 D AOC     : A3:MSG: controller.cc, 910: CNTRL: ipc: control, cmd ID: 0x000a, tag: 0xd7, rc: 0
+02-19 17:17:37.035 18833 20392 W Turbo.OnDeviceBatteryHistory: addEvents: loaded 0 battery events.
+02-19 17:17:37.035 18833 20392 W Turbo.OnDeviceBatteryHistory: addEvents: loaded battery events completed.
+02-19 17:17:37.035  1197  1197 D AOC     : A3:MSG: controller.cc, 275: CNTRL: cmd ID: 0x000a, tag: 0xd8 [cntr = 7194]
+02-19 17:17:37.035  1197  1197 D AOC     : A3:MSG: controller.cc, 910: CNTRL: ipc: control, cmd ID: 0x000a, tag: 0xd8, rc: 0
+02-19 17:17:37.036  1197  1197 D AOC     : A3:MSG: controller.cc, 275: CNTRL: cmd ID: 0x000a, tag: 0xd9 [cntr = 7195]
+02-19 17:17:37.037  1197  1197 D AOC     : A3:MSG: controller.cc, 910: CNTRL: ipc: control, cmd ID: 0x000a, tag: 0xd9, rc: 0
+02-19 17:17:37.037 18833 18833 W JobInfo : Job 'com.google.android.apps.turbo/.nudges.broadcasts.BatteryHistoryLoggerJobService#2' has a deadline with no functional constraints. The deadline won't improve job execution latency. Consider removing the deadline.
+02-19 17:17:37.037  1576  4809 W JobInfo : Job 'com.google.android.apps.turbo/.nudges.broadcasts.BatteryHistoryLoggerJobService#2' has a deadline with no functional constraints. The deadline won't improve job execution latency. Consider removing the deadline.
+02-19 17:17:37.037  1197  1197 D AOC     : A3:MSG: controller.cc, 275: CNTRL: cmd ID: 0x000a, tag: 0xda [cntr = 7196]
+02-19 17:17:37.038  1197  1197 D AOC     : A3:MSG: controller.cc, 910: CNTRL: ipc: control, cmd ID: 0x000a, tag: 0xda, rc: 0
+02-19 17:17:37.038  1197  1197 D AOC     : A3:MSG: controller.cc, 275: CNTRL: cmd ID: 0x000a, tag: 0xdb [cntr = 7197]
+02-19 17:17:37.039  1197  1197 D AOC     : A3:MSG: controller.cc, 910: CNTRL: ipc: control, cmd ID: 0x000a, tag: 0xdb, rc: 0
+02-19 17:17:37.040  1197  1197 D AOC     : A3:MSG: controller.cc, 275: CNTRL: cmd ID: 0x000a, tag: 0xdc [cntr = 7198]
+02-19 17:17:37.040  1197  1197 D AOC     : A3:MSG: controller.cc, 910: CNTRL: ipc: control, cmd ID: 0x000a, tag: 0xdc, rc: 0
+02-19 17:17:37.041  1197  1197 D AOC     : A3:MSG: controller.cc, 275: CNTRL: cmd ID: 0x000a, tag: 0xdd [cntr = 7199]
+02-19 17:17:37.041  1576  2155 D BackgroundInstallControlService: Package event received: 0
+02-19 17:17:37.041  1197  1197 D AOC     : A3:MSG: controller.cc, 910: CNTRL: ipc: control, cmd ID: 0x000a, tag: 0xdd, rc: 0
+02-19 17:17:37.042  1197  1197 D AOC     : A3:MSG: controller.cc, 275: CNTRL: cmd ID: 0x000a, tag: 0xde [cntr = 7200]
+02-19 17:17:37.043  1197  1197 D AOC     : A3:MSG: controller.cc, 910: CNTRL: ipc: control, cmd ID: 0x000a, tag: 0xde, rc: 0
+02-19 17:17:37.044  1197  1197 D AOC     : A3:MSG: controller.cc, 275: CNTRL: cmd ID: 0x000a, tag: 0xdf [cntr = 7201]
+02-19 17:17:37.045  1197  1197 D AOC     : A3:MSG: controller.cc, 910: CNTRL: ipc: control, cmd ID: 0x000a, tag: 0xdf, rc: 0
+02-19 17:17:37.045  1197  1197 D AOC     : A3:MSG: controller.cc, 275: CNTRL: cmd ID: 0x000a, tag: 0xe0 [cntr = 7202]
+02-19 17:17:37.045  1197  1197 D AOC     : A3:MSG: controller.cc, 910: CNTRL: ipc: control, cmd ID: 0x000a, tag: 0xe0, rc: 0
+02-19 17:17:37.046  1197  1197 D AOC     : A3:MSG: controller.cc, 275: CNTRL: cmd ID: 0x000a, tag: 0xe1 [cntr = 7203]
+02-19 17:17:37.047  1197  1197 D AOC     : A3:MSG: controller.cc, 910: CNTRL: ipc: control, cmd ID: 0x000a, tag: 0xe1, rc: 0
+02-19 17:17:37.048  1197  1197 D AOC     : A3:MSG: controller.cc, 275: CNTRL: cmd ID: 0x000a, tag: 0xe2 [cntr = 7204]
+02-19 17:17:37.048  1197  1197 D AOC     : A3:MSG: controller.cc, 910: CNTRL: ipc: control, cmd ID: 0x000a, tag: 0xe2, rc: 0
+02-19 17:17:37.049  1197  1197 D AOC     : A3:MSG: controller.cc, 275: CNTRL: cmd ID: 0x000a, tag: 0xe3 [cntr = 7205]
+02-19 17:17:37.050  1197  1197 D AOC     : A3:MSG: controller.cc, 910: CNTRL: ipc: control, cmd ID: 0x000a, tag: 0xe3, rc: 0
+02-19 17:17:37.051  1197  1197 D AOC     : A3:MSG: controller.cc, 275: CNTRL: cmd ID: 0x000a, tag: 0xe4 [cntr = 7206]
+02-19 17:17:37.051  1197  1197 D AOC     : A3:MSG: controller.cc, 910: CNTRL: ipc: control, cmd ID: 0x000a, tag: 0xe4, rc: 0
+02-19 17:17:37.052  1197  1197 D AOC     : A3:MSG: controller.cc, 275: CNTRL: cmd ID: 0x000a, tag: 0xe5 [cntr = 7207]
+02-19 17:17:37.053  1197  1197 D AOC     : A3:MSG: controller.cc, 910: CNTRL: ipc: control, cmd ID: 0x000a, tag: 0xe5, rc: 0
+02-19 17:17:37.053 20604 20604 D BatteryUsageBroadcastReceiver: onReceive:android.intent.action.BATTERY_LEVEL_CHANGED
+02-19 17:17:37.053  1197  1197 D AOC     : A3:MSG: controller.cc, 275: CNTRL: cmd ID: 0x000a, tag: 0xe6 [cntr = 7208]
+02-19 17:17:37.054  1197  1197 D AOC     : A3:MSG: controller.cc, 910: CNTRL: ipc: control, cmd ID: 0x000a, tag: 0xe6, rc: 0
+02-19 17:17:37.055  1197  1197 D AOC     : A3:MSG: controller.cc, 275: CNTRL: cmd ID: 0x000a, tag: 0xe7 [cntr = 7209]
+02-19 17:17:37.055  1197  1197 D AOC     : A3:MSG: controller.cc, 910: CNTRL: ipc: control, cmd ID: 0x000a, tag: 0xe7, rc: 0
+02-19 17:17:37.070   950  1006 I bthal.activitywatcher: getStateResidency: ActivityStat{0 : totalTimeMs 2882498 totalEntryCount 78309 lastEntryMs 4289179}
+02-19 17:17:37.070   950  1006 I bthal.activitywatcher: getStateResidency: ActivityStat{1 : totalTimeMs 10949430 totalEntryCount 78646 lastEntryMs 4289203}
+02-19 17:17:37.071   950  1006 I bthal.activitywatcher: getStateResidency: ActivityStat{2 : totalTimeMs 294155 totalEntryCount 810908 lastEntryMs 4289519}
+02-19 17:17:37.071   950  1006 I bthal.activitywatcher: getStateResidency: ActivityStat{3 : totalTimeMs 6495092 totalEntryCount 2216041 lastEntryMs 4289519}
+02-19 17:17:37.071   950  1006 I bthal.activitywatcher: send_hci_activities_vsc: Sent VSC <[4]{89, 253, 1, 1}>
+02-19 17:17:37.071   950  1185 I bthal.activitywatcher: filter_hci_activities_vse: Filtered <[103]{14, 101, 1, 89, 253, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 51, 54, 6, 0, 0, 0, 0, 0, 64, 54, 6, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 64, 54, 6, 0, 0, 0, 0, 0, 51, 54, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 141, 55, 6, 0, 0, 0, 0, 0, 141, 55, 6, 0, 0, 0, 0, 0, 10, 0, 0, 0, 0, 0, 0, 0, 184, 55, 6, 0, 0, 0, 0, 0, 185, 55, 6, 0, 0, 0, 0, 0}>
+02-19 17:17:37.071   950  1185 I bthal.flowcontrol: HciEventPreProcess: HCI Event 0xe Opcode 0xfd59 Length 103 handled by ControllerActivityWatcher
+02-19 17:17:37.071  1197  1197 D AOC     : A3:MSG: controller.cc, 275: CNTRL: cmd ID: 0x000a, tag: 0xe8 [cntr = 7210]
+02-19 17:17:37.072 18833 20392 W Turbo.RemainingTimeModelLoader: Start to load model for: [battery_remaining_time] model file with new version 20231102
+02-19 17:17:37.072  1197  1197 D AOC     : A3:MSG: controller.cc, 910: CNTRL: ipc: control, cmd ID: 0x000a, tag: 0xe8, rc: 0
+02-19 17:17:37.073  1197  1197 D AOC     : A3:MSG: controller.cc, 275: CNTRL: cmd ID: 0x000a, tag: 0xe9 [cntr = 7211]
+02-19 17:17:37.074  1197  1197 D AOC     : A3:MSG: controller.cc, 910: CNTRL: ipc: control, cmd ID: 0x000a, tag: 0xe9, rc: 0
+02-19 17:17:37.074  1197  1197 D AOC     : A3:MSG: controller.cc, 275: CNTRL: cmd ID: 0x000a, tag: 0xea [cntr = 7212]
+02-19 17:17:37.075  1197  1197 D AOC     : A3:MSG: controller.cc, 910: CNTRL: ipc: control, cmd ID: 0x000a, tag: 0xea, rc: 0
+02-19 17:17:37.076  1197  1197 D AOC     : A3:MSG: controller.cc, 275: CNTRL: cmd ID: 0x000a, tag: 0xeb [cntr = 7213]
+02-19 17:17:37.076  1197  1197 D AOC     : A3:MSG: controller.cc, 910: CNTRL: ipc: control, cmd ID: 0x000a, tag: 0xeb, rc: 0
+02-19 17:17:37.078  1197  1197 D AOC     : A3:MSG: controller.cc, 275: CNTRL: cmd ID: 0x000a, tag: 0xec [cntr = 7214]
+02-19 17:17:37.078  1197  1197 D AOC     : A3:MSG: controller.cc, 910: CNTRL: ipc: control, cmd ID: 0x000a, tag: 0xec, rc: 0
+02-19 17:17:37.079  1197  1197 D AOC     : A3:MSG: controller.cc, 275: CNTRL: cmd ID: 0x000a, tag: 0xed [cntr = 7215]
+02-19 17:17:37.079  1197  1197 D AOC     : A3:MSG: controller.cc, 910: CNTRL: ipc: control, cmd ID: 0x000a, tag: 0xed, rc: 0
+02-19 17:17:37.079 20604 20611 W ndroid.settings: userfaultfd: MOVE ioctl seems unsupported: Connection timed out
+02-19 17:17:37.079  1197  1197 D AOC     : A3:MSG: controller.cc, 275: CNTRL: cmd ID: 0x000a, tag: 0xee [cntr = 7216]
+02-19 17:17:37.080  1197  1197 D AOC     : A3:MSG: controller.cc, 910: CNTRL: ipc: control, cmd ID: 0x000a, tag: 0xee, rc: 0
+02-19 17:17:37.080  1197  1197 D AOC     : A3:MSG: controller.cc, 275: CNTRL: cmd ID: 0x000a, tag: 0xef [cntr = 7217]
+02-19 17:17:37.081  1197  1197 D AOC     : A3:MSG: controller.cc, 910: CNTRL: ipc: control, cmd ID: 0x000a, tag: 0xef, rc: 0
+02-19 17:17:37.082  1197  1197 D AOC     : A3:MSG: controller.cc, 275: CNTRL: cmd ID: 0x000a, tag: 0xf0 [cntr = 7218]
+02-19 17:17:37.082  1197  1197 D AOC     : A3:MSG: controller.cc, 910: CNTRL: ipc: control, cmd ID: 0x000a, tag: 0xf0, rc: 0
+02-19 17:17:37.083  1197  1197 D AOC     : A3:MSG: controller.cc, 275: CNTRL: cmd ID: 0x000a, tag: 0xf1 [cntr = 7219]
+02-19 17:17:37.083  1197  1197 D AOC     : A3:MSG: controller.cc, 910: CNTRL: ipc: control, cmd ID: 0x000a, tag: 0xf1, rc: 0
+02-19 17:17:37.085  1197  1197 D AOC     : A3:MSG: controller.cc, 275: CNTRL: cmd ID: 0x000a, tag: 0xf2 [cntr = 7220]
+02-19 17:17:37.085  1197  1197 D AOC     : A3:MSG: controller.cc, 910: CNTRL: ipc: control, cmd ID: 0x000a, tag: 0xf2, rc: 0
+02-19 17:17:37.088  1197  1197 D AOC     : A3:MSG: controller.cc, 275: CNTRL: cmd ID: 0x000a, tag: 0xf3 [cntr = 7221]
+02-19 17:17:37.088  1197  1197 D AOC     : A3:MSG: controller.cc, 910: CNTRL: ipc: control, cmd ID: 0x000a, tag: 0xf3, rc: 0
+02-19 17:17:37.088  1197  1197 D AOC     : A3:MSG: controller.cc, 275: CNTRL: cmd ID: 0x000a, tag: 0xf4 [cntr = 7222]
+02-19 17:17:37.088  1197  1197 D AOC     : A3:MSG: controller.cc, 910: CNTRL: ipc: control, cmd ID: 0x000a, tag: 0xf4, rc: 0
+02-19 17:17:37.088  1197  1197 D AOC     : A3:MSG: controller.cc, 275: CNTRL: cmd ID: 0x000a, tag: 0xf5 [cntr = 7223]
+02-19 17:17:37.091  1197  1197 D AOC     : A3:MSG: controller.cc, 910: CNTRL: ipc: control, cmd ID: 0x000a, tag: 0xf5, rc: 0
+02-19 17:17:37.092  1197  1197 D AOC     : A3:MSG: controller.cc, 275: CNTRL: cmd ID: 0x000a, tag: 0xf6 [cntr = 7224]
+02-19 17:17:37.092  1197  1197 D AOC     : A3:MSG: controller.cc, 910: CNTRL: ipc: control, cmd ID: 0x000a, tag: 0xf6, rc: 0
+02-19 17:17:37.093  1197  1197 D AOC     : A3:MSG: controller.cc, 275: CNTRL: cmd ID: 0x000a, tag: 0xf7 [cntr = 7225]
+02-19 17:17:37.093  1197  1197 D AOC     : A3:MSG: controller.cc, 910: CNTRL: ipc: control, cmd ID: 0x000a, tag: 0xf7, rc: 0
+02-19 17:17:37.094  1197  1197 D AOC     : A3:MSG: controller.cc, 275: CNTRL: cmd ID: 0x000a, tag: 0xf8 [cntr = 7226]
+02-19 17:17:37.095  1197  1197 D AOC     : A3:MSG: controller.cc, 910: CNTRL: ipc: control, cmd ID: 0x000a, tag: 0xf8, rc: 0
+02-19 17:17:37.100 18833 20392 W Turbo.EstimatedTimeRemainingProvider: queryTimeToDischarge: 21090708
+02-19 17:17:38.328  1597  1618 I pixel-thermal: USB-MINUS-USB2:-0.619 raw data: USB-MINUS-USB2:-619 usb_pwr_therm:40883 usb_pwr_therm2:41502 
+02-19 17:17:38.329  1597  1618 I pixel-thermal: VIRTUAL-USB-UI:0 raw data: USB-MINUS-NEUTRAL:-3093 USB-MINUS-USB2:-619 VIRTUAL-USB-UI:0 neutral_therm:43976 usb_pwr_therm:40883 
+02-19 17:17:38.329  1597  1618 I pixel-thermal: VIRTUAL-USB-THROTTLING:0 raw data: USB-MINUS-NEUTRAL:-3093 USB-MINUS-USB2:-619 VIRTUAL-USB-THROTTLING:0 usb_pwr_therm:40883 
+02-19 17:17:38.330  1597  1618 I pixel-thermal: USB-MINUS-NEUTRAL:-3.093 raw data: USB-MINUS-NEUTRAL:-3093 
+02-19 17:17:38.330  1597  1618 I pixel-thermal: usb_pwr_therm:40.883 raw data: usb_pwr_therm:40883 
+02-19 17:17:38.344  1576  1726 I ActivityManager: Test idle passed
+02-19 17:17:38.631  1597  1618 I pixel-thermal: quiet_therm:41.479 raw data: quiet_therm:41479 
+02-19 17:17:38.633  1597  1618 I pixel-thermal: VIRTUAL-SKIN-CPU:43.5931 raw data: VIRTUAL-GNSS-DISP:43593.1 VIRTUAL-NEUTRAL-QUIET:41969.9 VIRTUAL-QUIET-USB2:40281.3 VIRTUAL-SKIN:43593.1 VIRTUAL-SKIN-CPU:43593.1 VIRTUAL-USB2-QUIET:39720.9 disp_therm:40700 gnss_tcxo_therm:46464 neutral_therm:43976 quiet_therm:41479 usb_pwr_therm2:41502 
+02-19 17:17:38.633  1597  1618 I pixel-thermal: VIRTUAL-SKIN-CPU power_budget=800 err=-2.59312 s_power=800 time_elapsed_ms=7022 p=-1037.25 i=184.219 d=0 dt_per_min=nan compensation=0 budget transient=0 control target=3 excluded power budget=0
+02-19 17:17:38.634  1597  1618 I pixel-thermal: VIRTUAL-SKIN-CPU binded power rails: (S4M_VDD_CPUCL0: 50.30 mW)(S3M_VDD_CPUCL1: 19.50 mW)(S2M_VDD_CPUCL2: 1.16 mW)
+02-19 17:17:38.634  1597  1618 I pixel-thermal: VIRTUAL-SKIN:43.5931 raw data: VIRTUAL-SKIN:43593.1 
+02-19 17:17:38.635  1597  1618 I pixel-thermal: VIRTUAL-SKIN-CHARGE:43.1586 raw data: VIRTUAL-SKIN-CHARGE:43158.6 qi_therm:48135 quiet_therm:41479 
+02-19 17:17:38.635  1597  1618 I pixel-thermal: VIRTUAL-SKIN-CHARGE power_budget=961.743 err=-2.1586 s_power=2383 time_elapsed_ms=7022 p=-459.783 i=-870.016 d=0 dt_per_min=nan compensation=0 budget transient=0 control target=2 excluded power budget=91.459 (PARTIAL_SYSTEM_POWER: 435.52 mW, cdev_weight: 0.210000)
+02-19 17:17:38.635  1597  1618 I pixel-thermal: VIRTUAL-SKIN-HINT:43.5931 raw data: VIRTUAL-SKIN:43593.1 VIRTUAL-SKIN-HINT:43593.1 
+02-19 17:17:38.635  1597  1618 I pixel-thermal: VIRTUAL-SKIN-CPU-GPU:43.5931 raw data: VIRTUAL-SKIN:43593.1 VIRTUAL-SKIN-CPU-GPU:43593.1 
+02-19 17:17:38.636  1597  1618 I pixel-thermal: VIRTUAL-SKIN-CPU-GPU power_budget=1478.73 err=1.40688 s_power=800 time_elapsed_ms=7022 p=422.064 i=256.667 d=0 dt_per_min=nan compensation=0 budget transient=0 control target=3 excluded power budget=0
+02-19 17:17:38.636  1597  1618 I pixel-thermal: VIRTUAL-SKIN-CPU-GPU binded power rails: (S4M_VDD_CPUCL0: 50.30 mW)(S3M_VDD_CPUCL1: 19.50 mW)(S2S_VDD_G3D: 0.57 mW)(S2M_VDD_CPUCL2: 1.16 mW)
+02-19 17:17:38.636  1597  1618 I pixel-thermal: cellular-emergency:43.5931 raw data: VIRTUAL-SKIN:43593.1 cellular-emergency:43593.1 
+02-19 17:17:38.638  1597  1618 I pixel-thermal: Successfully update cdev thermal-cpufreq-2 sysfs to 8
+02-19 17:17:38.740  2332  2694 W BluetoothRemoteDevices: Address type mismatch for XX:XX:XX:XX:C1:3C, new type: 1
+02-19 17:17:38.742  2332  2694 W BluetoothRemoteDevices: Address type mismatch for XX:XX:XX:XX:C1:3C, new type: 1
+02-19 17:17:38.752  3094  5052 I NearbyDiscovery: (REDACTED) BloomFilterAdvManager: Detected bloom filter but too far away, ignoring. %sm, %s
+02-19 17:17:39.079  2321 27126 D IpClient/wlan1: interfaceLinkStateChanged: ifindex 48 up
+02-19 17:17:39.726  2332  2694 W BluetoothRemoteDevices: Address type mismatch for XX:XX:XX:XX:C1:3C, new type: 1
+02-19 17:17:39.728  2332  2694 W BluetoothRemoteDevices: Address type mismatch for XX:XX:XX:XX:C1:3C, new type: 1
+02-19 17:17:39.737  3094  5052 I NearbyDiscovery: (REDACTED) BloomFilterAdvManager: Detected bloom filter but too far away, ignoring. %sm, %s
+02-19 17:17:39.895  1032  1032 I WifiHAL : Creating message to get link statistics; iface = 48
+02-19 17:17:40.046  1576  2091 D ConnectivityService: NetReassign [no changes] [c 8] [a 9] [i 20]
+02-19 17:17:40.393  2332  2694 W BluetoothRemoteDevices: Address type mismatch for XX:XX:XX:XX:C1:3C, new type: 1
+02-19 17:17:40.393  2332  2694 W BluetoothRemoteDevices: Address type mismatch for XX:XX:XX:XX:C1:3C, new type: 1
+02-19 17:17:40.403  3094  5052 I NearbyDiscovery: (REDACTED) BloomFilterAdvManager: Detected bloom filter but too far away, ignoring. %sm, %s
+02-19 17:17:40.881  3094 20910 I NearbyMediums: This GATT advertisement BleAdvertisement { version=2, socketVersion=2, isFast=true, serviceIdHash=null, data=[ 0x23 0x39 0x33 0x4b 0x4d 0x11 0x32 0xb3 0xdd 0x15 0x9d 0xa4 0xb0 0x53 0x5a 0x2d 0x63 0xf5 0xdf 0x72 0x51 0x86 0xfc ], deviceToken=[ 0x12 0xd8 ], rxAdvertisement=null } is a Fast Advertisement and matched UUID 0000fef3-0000-1000-8000-00805f9b34fb in fastAdvertisementServiceUuids map with serviceID NearbySharing
+02-19 17:17:40.883  3094 20909 I NearbyConnections: Found BleAdvertisement [ 0x23 0x39 0x33 0x4b 0x4d 0x11 0x32 0xb3 0xdd 0x15 0x9d 0xa4 0xb0 0x53 0x5a 0x2d 0x63 0xf5 0xdf 0x72 0x51 0x86 0xfc ] (with EndpointId 93KM and EndpointInfo [ 0x32 0xb3 0xdd 0x15 0x9d 0xa4 0xb0 0x53 0x5a 0x2d 0x63 0xf5 0xdf 0x72 0x51 0x86 0xfc ])
+02-19 17:17:40.887  3094 20909 I NearbyConnections: ClientProxy(173654343 0p:com.google.android.gms.nearby.sharing) reporting onEndpointFound(93KM)
+02-19 17:17:40.888  3094 20909 I NearbyConnections: ClientProxy(173654343) reporting onEndpointDistanceChanged(93KM, UNKNOWN)
+02-19 17:17:40.894  3094 20909 I NearbySharing: NearbySharing Internal event EndpointDiscovered(endpointId=93KM)
+02-19 17:17:40.924  3094 20910 I NearbySharing: [NS_DISCOVERY] DiscoveryController reported Discovered(endpointId=93KM, metadata=DeviceMetadata(version=1, deviceType=1, deviceName=Arihant's Pixel 6a, displayName=Arihant Tripathy, modelName=null, imageUri=content://com.google.android.gms.fileprovider/nearby_share_images/-689799101.jpg, isSelfShare=false, isKnown=true, bluetoothMacAddress=[36, -107, 47, -76, -53, -9], vendorId=0, matchesLocalQrCode=false))
+02-19 17:17:40.925  3094 20910 I NearbySharing: [NS_DEBUG] Dedupped: same shared credential. endpoint ID WS37 changed to 93KM
+02-19 17:17:40.925  3094 20910 I NearbySharing: {NS_DEBUG] previous receiver info ReceiverInfo(endpointId=WS37, metadata=DeviceMetadata(version=1, deviceType=1, deviceName=Arihant's Pixel 6a, displayName=Arihant Tripathy, modelName=null, imageUri=content://com.google.android.gms.fileprovider/nearby_share_images/-689799101.jpg, isSelfShare=false, isKnown=true, bluetoothMacAddress=[36, -107, 47, -76, -53, -9], vendorId=0, matchesLocalQrCode=false), state=Tomb(delayedStateChangeJob=jdht{Active}@67b3110))
+02-19 17:17:40.925  3094 20910 I NearbySharing: NearbySharing Internal event ReceiverEndpointMapping(endpointId=93KM, receiverId=1)
+02-19 17:17:40.929  3094 20964 I NearbySharing: [NS_CONTROL] DiscoveryStateManager emitted ReportDiscovered(id=1, metadata=DeviceMetadata(version=1, deviceType=1, deviceName=Arihant's Pixel 6a, displayName=Arihant Tripathy, modelName=null, imageUri=content://com.google.android.gms.fileprovider/nearby_share_images/-689799101.jpg, isSelfShare=false, isKnown=true, bluetoothMacAddress=[36, -107, 47, -76, -53, -9], vendorId=0, matchesLocalQrCode=false)).
+02-19 17:17:40.929  3094 20964 I NearbySharing: NearbySharing Internal event ReceiverDiscovered(receiverId=1, deviceName=Arihant's Pixel 6a, isKnown=true, isSelfShare=false, deviceType=1, hasMatchingQrCode=false, isExternal=false, providerName=null, providerId=null, cloudReceiverSessionId=null)
+02-19 17:17:40.931  3094 20966 I NearbySharing: SendManager event Discovered(receiverId=1, receiverMetadata=DeviceMetadata(version=1, deviceType=1, deviceName=Arihant's Pixel 6a, displayName=Arihant Tripathy, modelName=null, imageUri=content://com.google.android.gms.fileprovider/nearby_share_images/-689799101.jpg, isSelfShare=false, isKnown=true, bluetoothMacAddress=[36, -107, 47, -76, -53, -9], vendorId=0, matchesLocalQrCode=false))
+02-19 17:17:40.932  3094 20966 I NearbySharing: SendManager event DistanceChanged(receiverId=1, distance=1, rangingData=null)
+02-19 17:17:40.946  1576  2155 D BackgroundInstallControlService: Package event received: 0
+02-19 17:17:40.948  3094  3094 I NearbySharing: ShortcutInfoManager added shortcut Arihant's Pixel 6a
+02-19 17:17:40.992  3094  4607 I AlarmManager: setExactAndAllowWhileIdle [name: GCM_HB_ALARM type: 2 triggerAtMillis: 18197107]
+02-19 17:17:41.008  3094 20916 I AlarmManager: setExactAndAllowWhileIdle [name: FcmRetry type: 2 triggerAtMillis: 17717122]
+02-19 17:17:41.022  1576  2155 D BackgroundInstallControlService: Package event received: 0
+02-19 17:17:41.041  3094 20863 I NearbyMediums: Replace Fast Advertisement Rx Info for service id : NearbySharing on deviceToken : [ 0x12 0xd8 ]
+02-19 17:17:41.044  3094 20911 I NearbyConnections: Found BleAdvertisement [ 0x23 0x39 0x33 0x4b 0x4d 0x11 0x32 0xb3 0xdd 0x15 0x9d 0xa4 0xb0 0x53 0x5a 0x2d 0x63 0xf5 0xdf 0x72 0x51 0x86 0xfc ] (with EndpointId 93KM and EndpointInfo [ 0x32 0xb3 0xdd 0x15 0x9d 0xa4 0xb0 0x53 0x5a 0x2d 0x63 0xf5 0xdf 0x72 0x51 0x86 0xfc ])
+02-19 17:17:41.045  3094 20911 I NearbyConnections: ClientProxy(173654343) ignoring onEndpointDistanceChanged(93KM, UNKNOWN), because this distance has already been reported
+02-19 17:17:41.051  3094 20911 I NearbyMediums: Triggered instant on lost for service id : NearbySharing with hash [ 0x8a 0xf7 0x7b 0xf7 ]
+02-19 17:17:41.051  3094 20966 I NearbyConnections: Processing instant lost on BlePeripheral BlePeripheral{advertisement=BleAdvertisement { version=2, socketVersion=2, isFast=true, serviceIdHash=null, data=[ 0x23 0x41 0x41 0x45 0x4b 0x11 0x32 0xaf 0x6e 0x4f 0xde 0x6a 0xf4 0x90 0x54 0xde 0x27 0x54 0x84 0x67 0x3d 0xd5 0x91 ], deviceToken=[ 0x12 0xd8 ], rxAdvertisement=null }, dctAdvertisement=null, address=null, psm=0, deviceToken=<ByteString@e7e95b3 size=2 contents="\022\330">, isSecondProfile=false, rxInstantConnectionAdv=null}.
+02-19 17:17:41.051  3094 20966 I NearbyConnections: Remove entry from BleAdvertisementProcessor bleEndpoints.
+02-19 17:17:41.052  3094 20966 I NearbyConnections: ClientProxy(173654343) reporting onEndpointLost(AAEK)
+02-19 17:17:41.053  3094 20911 I NearbySharing: NearbySharing Internal event EndpointLost(endpointId=AAEK)
+02-19 17:17:41.054  1576  5007 I ActivityManager: Background started FGS: Allowed [callingPackage: com.whatsapp; callingUid: 10255; uidState: SVC ; uidBFSL: n/a; intent: Intent { xflg=0x4 cmp=com.whatsapp/.messaging.service.GcmFGService }; code:PUSH_MESSAGING; tempAllowListReason:<c545cdb com.google.android.c2dm.intent.RECEIVE/u0,reasonCode:PUSH_MESSAGING,duration:20000,callingUid:10131>; allowWiu:-1; targetSdkVersion:35; callerTargetSdkVersion:35; startForegroundCount:0; bindFromPackage:null: isBindService:false]
+02-19 17:17:41.062  1576  2155 D BackgroundInstallControlService: Package event received: 0
+02-19 17:17:41.070 18983 19502 E msys    : E[N mns]_OnDiskCacheGetData(632)=>Start post callback cache refresh DNS resolution
+02-19 17:17:41.071 18983 19502 E msys    : E[ADNSUCTIMH WAJMNSDNSResolver]_MNSDNSResolutionSuccess(35)=>[LogLevel:I] DNS Resolution Successful with 2 IPs, Persistent Cache Hit: 1, secondary resolver used: 0
+02-19 17:17:41.071 18983 19502 E msys    : E[ADNSUCTIMH WAJMNSDNSResolver]_MNSDNSResolutionSuccess(55)=>[LogLevel:I] Resolved IP Address: 2a03:2880:f349:121:face:b00c:0:7260
+02-19 17:17:41.071 18983 19502 E msys    : E[ADNSUCTIMH WAJMNSDNSResolver]_MNSDNSResolutionSuccess(55)=>[LogLevel:I] Resolved IP Address: 57.144.147.33
+02-19 17:17:41.074 18983 19502 E msys    : E[N mns]_OnSystemDNSSuccessCallback(340)=>Cache refresh succeeded with system DNS resolver. IP count: 2
+02-19 17:17:41.075  1576  1616 W ActivityManager: Foreground service started from background can not have location/camera/microphone access: service com.whatsapp/.messaging.service.GcmFGService
+02-19 17:17:41.075  1576  1616 I ActivityManager: Background started FGS: Allowed [callingPackage: com.whatsapp; callingUid: 10255; uidState: FGS ; uidBFSL: [BFSL]; intent: Intent { cmp=com.whatsapp/.messaging.service.GcmFGService }; code:PROC_STATE_FGS; tempAllowListReason:<c545cdb com.google.android.c2dm.intent.RECEIVE/u0,reasonCode:PUSH_MESSAGING,duration:20000,callingUid:10131>; allowWiu:-1; targetSdkVersion:35; callerTargetSdkVersion:35; startForegroundCount:0; bindFromPackage:null: isBindService:false]
+02-19 17:17:41.076  1576  2155 D BackgroundInstallControlService: Package event received: 0
+02-19 17:17:41.077  1576  1616 W ForegroundServiceTypeLoggerModule: Foreground service start for UID: 10255 does not have any types
+02-19 17:17:41.079  1576  1616 D ConnectivityService: Returning UNBLOCKED NetworkInfo to uid=10255
+02-19 17:17:41.085  1576  2155 D BackgroundInstallControlService: Package event received: 0
+02-19 17:17:41.147 20481 20481 D DataRetentionReceiver: Intent Received
+02-19 17:17:41.198 20481 20514 D ConnectivityDataExpirationRunner: Deleted expired events: [1075902, 1075903, 1075905]
+02-19 17:17:41.311  1576  2155 D BackgroundInstallControlService: Package event received: 0
+02-19 17:17:41.364  1576  1576 V NotificationHistory: Attempted to add notif for locked/gone/disabled user 0
+02-19 17:17:41.369  1576  1611 I system_server: Background young concurrent mark compact GC freed 94MB AllocSpace bytes, 68(1736KB) LOS objects, 54% free, 79MB/174MB, paused 1.122ms,3.761ms total 298.057ms
+02-19 17:17:41.371 16929 17371 I AiAiEcho: SmartspaceNotificationPredictor no parser can handle this notification or notification is invalid
+02-19 17:17:41.431  2193  2279 I PluginActionManager[com.android.systemui.action.PLUGIN_NOTIFICATION_MENU_ROW]: Found 0 plugins
+02-19 17:17:41.886  2332  2694 W BluetoothRemoteDevices: Address type mismatch for XX:XX:XX:XX:C1:3C, new type: 1
+02-19 17:17:41.887  2332  2694 W BluetoothRemoteDevices: Address type mismatch for XX:XX:XX:XX:C1:3C, new type: 1
+02-19 17:17:41.898  3094  5052 I NearbyDiscovery: (REDACTED) BloomFilterAdvManager: Detected bloom filter but too far away, ignoring. %sm, %s
+02-19 17:17:42.257 20481 20514 D GlobalMaxDataSizeCleaner: Global max data limit not breached. Skipping cleanup.
+02-19 17:17:43.000  1032  1032 I WifiHAL : Creating message to get link statistics; iface = 48
+02-19 17:17:43.093  1576  2091 D ConnectivityService: NetReassign [no changes] [c 2] [a 6] [i 5]
+02-19 17:17:43.219  1576  5007 W JobInfo : Job 'com.whatsapp/.infra.push.RegistrationIntentService#4' has a deadline with no functional constraints. The deadline won't improve job execution latency. Consider removing the deadline.
+02-19 17:17:43.348  1576  1726 I ActivityManager: Test idle passed
+02-19 17:17:44.121 18987 19048 I ehof    : (REDACTED) appOpsListener %s %s
+02-19 17:17:44.121 18987 19048 I ehof    : (REDACTED) Ignoring irrelevant audio permission changes for package %s
+02-19 17:17:45.101  3094 20863 I NearbyMediums: Found Fast Ble Advertisements :
+02-19 17:17:45.101  3094 20863 I NearbyMediums: BleAdvertisement { version=2, socketVersion=2, isFast=true, serviceIdHash=null, data=[ 0x23 0x41 0x41 0x45 0x4b 0x11 0x32 0xaf 0x6e 0x4f 0xde 0x6a 0xf4 0x90 0x54 0xde 0x27 0x54 0x84 0x67 0x3d 0xd5 0x91 ], deviceToken=[ 0x12 0xd8 ], rxAdvertisement=null } : 1 times.
+02-19 17:17:45.101  3094 20863 I NearbyMediums: BleAdvertisement { version=2, socketVersion=2, isFast=true, serviceIdHash=null, data=[ 0x23 0x37 0x38 0x5a 0x50 0x11 0x32 0x0b 0x53 0x43 0x38 0x83 0x6c 0x89 0x0d 0x45 0x57 0xc6 0xf4 0x76 0x2f 0xaa 0xa9 ], deviceToken=[ 0x1d 0x1d ], rxAdvertisement=null } : 13 times.
+02-19 17:17:45.101  3094 20863 I NearbyMediums: BleAdvertisement { version=2, socketVersion=2, isFast=true, serviceIdHash=null, data=[ 0x23 0x45 0x4b 0x55 0x41 0x11 0x32 0xd4 0x16 0x62 0x4b 0x0e 0x5a 0x89 0x3d 0xc9 0x78 0xce 0x41 0x90 0xa7 0x8c 0x51 ], deviceToken=[ 0xb7 0xfb ], rxAdvertisement=null } : 1 times.
+02-19 17:17:45.101  3094 20863 I NearbyMediums: BleAdvertisement { version=2, socketVersion=2, isFast=true, serviceIdHash=null, data=[ 0x23 0x47 0x52 0x56 0x52 0x11 0x32 0x21 0x61 0xf6 0x94 0x9b 0x77 0x3b 0x50 0x21 0x7b 0x7e 0xec 0xba 0x57 0x3a 0x9b ], deviceToken=[ 0x1d 0x00 ], rxAdvertisement=null } : 2 times.
+02-19 17:17:45.101  3094 20863 I NearbyMediums: BleAdvertisement { version=2, socketVersion=2, isFast=true, serviceIdHash=null, data=[ 0x23 0x39 0x33 0x4b 0x4d 0x11 0x32 0xb3 0xdd 0x15 0x9d 0xa4 0xb0 0x53 0x5a 0x2d 0x63 0xf5 0xdf 0x72 0x51 0x86 0xfc ], deviceToken=[ 0x12 0xd8 ], rxAdvertisement=null } : 6 times.
+02-19 17:17:45.101  3094 20863 I NearbyMediums: Total 23 fast advertisements from 5 unique advertisers.
+02-19 17:17:45.102  3094 20863 I NearbyMediums: Current Tracked Scanning Clients are : {NearbyConnections.EnvironmentMonitor, NearbySharing, NearbyConnections.TxAdvertisement}
+02-19 17:17:45.109  3094 20966 I NearbyConnections: Processing lost BlePeripheral BlePeripheral{advertisement=BleAdvertisement { version=2, socketVersion=2, isFast=true, serviceIdHash=null, data=[ 0x23 0x57 0x53 0x33 0x37 0x11 0x32 0xd2 0xe3 0x2b 0x1d 0xbb 0x85 0x03 0x54 0x29 0x6a 0x61 0x3a 0x45 0x12 0xe9 0xda ], deviceToken=[ 0x12 0xd8 ], rxAdvertisement=[ 0xa0 0x17 0xf8 0xda 0xad 0x8b 0x9e 0x7f 0x1e 0x6b 0xf2 0xee 0x24 0x9a 0x20 0x23 0x15 0x61 0x24 0xe3 0x94 0xdc 0x27 0x78 0x67 0x62 0xa8 0xa5 0x42 0xf3 0x04 0xcd 0x0c 0x16 0x84 0x15 0x05 0x61 0x00 0x00 0x84 0x15 0x06 0x61 0x00 0x00 0x84 0x15 0x04 0x7f 0x00 0x00 0x84 0x15 0x07 0x61 0x00 0x00 0x83 0x15 0x01 0xff 0xff ] }, dctAdvertisement=null, address=null, psm=0, deviceToken=<ByteString@e8c9ca0 size=2 contents="\022\330">, isSecondProfile=false, rxInstantConnectionAdv=[-96, 23, -8, -38, -83, -117, -98, 127, 30, 107, -14, -18, 36, -102, 32, 35, 21, 97, 36, -29, -108, -36, 39, 120, 103, 98, -88, -91, 66, -13, 4, -51, 12, 22, -124, 21, 5, 97, 0, 0, -124, 21, 6, 97, 0, 0, -124, 21, 4, 127, 0, 0, -124, 21, 7, 97, 0, 0, -125, 21, 1, -1, -1]}.
+02-19 17:17:45.322  1576  1755 D ActivityManager: Stop FGS timeout: ServiceRecord{3f23990 u0 com.whatsapp/.messaging.service.GcmFGService c:com.whatsapp}
+02-19 17:17:45.334  1576  1755 W ForegroundServiceTypeLoggerModule: FGS stop call for: 10255 has no types!
+02-19 17:17:45.338  1576  2155 D BackgroundInstallControlService: Package event received: 0
+02-19 17:17:45.355  1597  1618 I pixel-thermal: USB-MINUS-USB2:-0.55 raw data: USB-MINUS-USB2:-550 usb_pwr_therm:40906 usb_pwr_therm2:41456 
+02-19 17:17:45.356  1597  1618 I pixel-thermal: VIRTUAL-USB-UI:0 raw data: USB-MINUS-NEUTRAL:-2886 USB-MINUS-USB2:-550 VIRTUAL-USB-UI:0 neutral_therm:43792 usb_pwr_therm:40906 
+02-19 17:17:45.356  1597  1618 I pixel-thermal: VIRTUAL-USB-THROTTLING:0 raw data: USB-MINUS-NEUTRAL:-2886 USB-MINUS-USB2:-550 VIRTUAL-USB-THROTTLING:0 usb_pwr_therm:40906 
+02-19 17:17:45.356  1597  1618 I pixel-thermal: USB-MINUS-NEUTRAL:-2.886 raw data: USB-MINUS-NEUTRAL:-2886 
+02-19 17:17:45.356  1597  1618 I pixel-thermal: usb_pwr_therm:40.906 raw data: usb_pwr_therm:40906 
+02-19 17:17:45.374  2346  2567 D ImpulseConnection: timeout didn't happen: com.google.android.apps.turbo
+02-19 17:17:45.377  1576  1755 D ConnectivityService: Returning BLOCKED NetworkInfo to uid=10255
+02-19 17:17:45.378  2346  2468 D TemperatureStateSource: sequence=1392 actualDelay=10001
+02-19 17:17:45.379  2346  2468 D TemperatureStateSource: Reading temperature: sequence=1393
+02-19 17:17:45.381  1597  1597 I pixel-thermal: VIRTUAL-SKIN:43.1585 raw data: VIRTUAL-GNSS-DISP:43158.5 VIRTUAL-NEUTRAL-QUIET:41800.8 VIRTUAL-QUIET-USB2:40132.7 VIRTUAL-SKIN:43158.5 VIRTUAL-USB2-QUIET:39624.6 disp_therm:40654 gnss_tcxo_therm:45748 neutral_therm:43792 quiet_therm:41319 usb_pwr_therm2:41456 
+02-19 17:17:45.382  2346  2468 D TemperatureStateSource: getDeviceTemperatures: sequence=1393 deviceTemperatureType=3 temperatureSource=0 temperatures=[43.15852]
+02-19 17:17:45.382  2346  2468 D BusinessScope: Enqueuing the block
+02-19 17:17:45.382  2346  2468 D TemperatureStateSource: sequence=1393 waitTime=10000
+02-19 17:17:45.382  2346  2454 D BusinessScope: Start running the #2860 block
+02-19 17:17:45.386  1597  1597 I pixel-thermal: VIRTUAL-SKIN:43.1585 raw data: VIRTUAL-SKIN:43158.5 
+02-19 17:17:45.387  2346  2454 I TemperatureStateSource: temperature was set
+02-19 17:17:45.387  2346  2454 D BusinessScope: Enqueuing the block
+02-19 17:17:45.387  2346  2454 D ImpulseStateSource: Notify clients: 1429
+02-19 17:17:45.387  2346  2454 D BusinessScope: Finish running the #2860 block
+02-19 17:17:45.387  2346  2454 D BusinessScope: Start running the #2861 block
+02-19 17:17:45.388  2346  2454 D BusinessScope: Finish running the #2861 block
+02-19 17:17:45.413 18833 18930 W Turbo.DeviceHealthLeversManagerImpl: applyLeversWithMaintenanceWindow: ignore the same request
+02-19 17:17:45.644  1597  1618 I pixel-thermal: quiet_therm:41.319 raw data: quiet_therm:41319 
+02-19 17:17:45.645  1597  1618 I pixel-thermal: VIRTUAL-SKIN-CPU:43.1585 raw data: VIRTUAL-SKIN:43158.5 VIRTUAL-SKIN-CPU:43158.5 
+02-19 17:17:45.645  1597  1618 I pixel-thermal: VIRTUAL-SKIN-CPU power_budget=800 err=-2.15852 s_power=800 time_elapsed_ms=7018 p=-863.408 i=184.219 d=0 dt_per_min=nan compensation=0 budget transient=0 control target=3 excluded power budget=0
+02-19 17:17:45.645  1597  1618 I pixel-thermal: VIRTUAL-SKIN-CPU binded power rails: (S4M_VDD_CPUCL0: 62.12 mW)(S3M_VDD_CPUCL1: 37.37 mW)(S2M_VDD_CPUCL2: 2.14 mW)
+02-19 17:17:45.646  1597  1618 I pixel-thermal: VIRTUAL-SKIN:43.1585 raw data: VIRTUAL-SKIN:43158.5 
+02-19 17:17:45.647  1597  1618 I pixel-thermal: VIRTUAL-SKIN-CHARGE:42.6952 raw data: VIRTUAL-SKIN-CHARGE:42695.1 qi_therm:47108 quiet_therm:41319 
+02-19 17:17:45.647  1597  1618 I pixel-thermal: VIRTUAL-SKIN-CHARGE power_budget=1104.63 err=-1.69515 s_power=2383 time_elapsed_ms=7018 p=-361.067 i=-870.016 d=0 dt_per_min=nan compensation=0 budget transient=0 control target=2 excluded power budget=47.288 (PARTIAL_SYSTEM_POWER: 225.18 mW, cdev_weight: 0.210000)
+02-19 17:17:45.648  1597  1618 I pixel-thermal: VIRTUAL-SKIN-HINT:43.1585 raw data: VIRTUAL-SKIN:43158.5 VIRTUAL-SKIN-HINT:43158.5 
+02-19 17:17:45.648  1597  1618 I pixel-thermal: VIRTUAL-SKIN-CPU-GPU:43.1585 raw data: VIRTUAL-SKIN:43158.5 VIRTUAL-SKIN-CPU-GPU:43158.5 
+02-19 17:17:45.648  1597  1618 I pixel-thermal: VIRTUAL-SKIN-CPU-GPU power_budget=1618.32 err=1.84148 s_power=800 time_elapsed_ms=7018 p=552.444 i=265.874 d=0 dt_per_min=nan compensation=0 budget transient=0 control target=3 excluded power budget=0
+02-19 17:17:45.650  1597  1618 I pixel-thermal: VIRTUAL-SKIN-CPU-GPU binded power rails: (S4M_VDD_CPUCL0: 62.12 mW)(S3M_VDD_CPUCL1: 37.37 mW)(S2S_VDD_G3D: 0.04 mW)(S2M_VDD_CPUCL2: 2.14 mW)
+02-19 17:17:45.650  1597  1618 I pixel-thermal: cellular-emergency:43.1585 raw data: VIRTUAL-SKIN:43158.5 cellular-emergency:43158.5 
+02-19 17:17:45.651  1597  1618 I pixel-thermal: Successfully update cdev thermal-cpufreq-2 sysfs to 7
+02-19 17:17:45.665  1597  1618 I pixel-thermal: Successfully update cdev chg_mdis sysfs to 24
+02-19 17:17:46.084  1032  1032 I WifiHAL : Creating message to get link statistics; iface = 48
+02-19 17:17:46.275  1576  2091 D ConnectivityService: NetReassign [no changes] [c 6] [a 8] [i 20]
+02-19 17:17:46.594 20095 20200 I BugleRcsEngine: delay time out, reset attempts 1 and process SIM event [CONTEXT thread_id=109 ]
+02-19 17:17:46.625 20095 20200 I BugleRcsEngine: process intent: android.intent.action.SIM_STATE_CHANGED [CONTEXT log_prefix="(Sim)" thread_id=109 ]
+02-19 17:17:46.759 20095 20200 I BugleRcsEngine: Processing an intent [CONTEXT log_prefix="(Sim)" thread_id=109 ]
+02-19 17:17:46.766 20095 20200 I BugleRcsEngine: Ignoring duplicate SIM state: LOADED [CONTEXT log_prefix="(Sim)" thread_id=109 ]
+02-19 17:17:46.824   950  2685 I bthal.activity: bt_power: LeAdvStat: 17:17:27:717 - 17:17:46:824, duration: 19106, le_adv_count: 168, total_le_adv_count: 42552, total_event_count: 175
+02-19 17:17:46.931   963  1021 D CHRE.HAL: Received a nanoapp message from 0x476f6f676c00100b endpoint 0x10: Type 0x401 size 25 
+02-19 17:17:46.936   963  1021 D CHRE    : @ 17604.528: Parsed nanoapp message from host: app ID 0x476f6f676c00100b endpoint 0x10 msgType 112 payload size 10
+02-19 17:17:46.938   963  1021 I CHRE    : @ 17604.529: [NanoMinion] received MSG Type 0x70, Version 1, 6 bytes
+02-19 17:17:46.938   963  1021 I CHRE    : @ 17604.529: [AR] request.query
+02-19 17:17:46.938   963  1021 I CHRE    : @ 17604.529: [NanoMinion] sent MSG Type 0x71, Version 0, 17 bytes, MessageId 188
+02-19 17:17:46.940   963  1021 I CHRE    : @ 17604.529: [AR] send response=0
+02-19 17:17:46.953   963  1021 D CHRE    : @ 17604.554: Parsed nanoapp message from host: app ID 0x476f6f676c00100b endpoint 0x10 msgType 112 payload size 10
+02-19 17:17:46.954   963  1021 D CHRE.HAL: Received a nanoapp message from 0x476f6f676c00100b endpoint 0x10: Type 0x401 size 347 
+02-19 17:17:46.956   963  1021 I CHRE    : @ 17604.554: [NanoMinion] received MSG Type 0x70, Version 1, 6 bytes
+02-19 17:17:46.957   963  1021 I CHRE    : @ 17604.555: [AR] request.flush
+02-19 17:17:46.957   963  1021 I CHRE    : @ 17604.555: [AR] send to host, reason=3, sampleSize=21, transitionSize=0, lastAccelTime = 17574456, lastAudioTime = 0 
+02-19 17:17:46.957   963  1021 I CHRE    : @ 17604.555: [NanoMinion] sent MSG Type 0x72, Version 0, 339 bytes, MessageId 189
+02-19 17:17:47.014  2332  2694 W BluetoothRemoteDevices: Address type mismatch for XX:XX:XX:XX:C1:3C, new type: 1
+02-19 17:17:47.017  1576  4809 W AppOps  : Noting op not finished: uid 10131 pkg com.google.android.gms code 113 startTime of in progress event=1771501661086
+02-19 17:17:47.018  2332  2694 W BluetoothRemoteDevices: Address type mismatch for XX:XX:XX:XX:C1:3C, new type: 1
+02-19 17:17:47.029  3094  5052 I NearbyDiscovery: (REDACTED) BloomFilterAdvManager: Detected bloom filter but too far away, ignoring. %sm, %s
+02-19 17:17:47.059  1576  1755 W AppOps  : Noting op not finished: uid 10131 pkg com.google.android.gms code 79 startTime of in progress event=1771501661086
+02-19 17:17:47.071  1576  4681 W AppOps  : Noting op not finished: uid 10131 pkg com.google.android.gms code 113 startTime of in progress event=1771501661086
+02-19 17:17:47.116  3094  4294 I ActivityScheduler: nextTriggerTime: 17843230, in 240000ms, detectorType: 0,  alarmWindowMillis: 30000
+02-19 17:17:47.124  3094  3094 D BoundBrokerSvc: onRebind: Intent { act=com.google.android.gms.auth.aang.events.services.START dat=chimera-action:/... xflg=0x4 cmp=com.google.android.gms/.chimera.PersistentApiService }
+02-19 17:17:47.140  1576  2032 D ActivityManager: freezing 20604 com.android.settings
+02-19 17:17:48.016  1576  1755 W AppOps  : Noting op not finished: uid 10131 pkg com.google.android.gms code 113 startTime of in progress event=1771501661086
+02-19 17:17:48.355  1576  1726 I ActivityManager: Test idle passed
+02-19 17:17:49.240  1032  1032 I WifiHAL : Creating message to get link statistics; iface = 48
+02-19 17:17:49.369  1032  1032 E libbinder.IPCThreadState: binder thread pool (1 threads) starved for 129 ms
+02-19 17:17:49.429  1576  2091 D ConnectivityService: NetReassign [no changes] [c 2] [a 3] [i 5]
+02-19 17:17:50.381 18987 19048 I ehof    : (REDACTED) appOpsListener %s %s
+02-19 17:17:50.382 18987 19048 I ehof    : (REDACTED) Ignoring irrelevant audio permission changes for package %s
+02-19 17:17:51.502  2332  2694 W BluetoothRemoteDevices: Address type mismatch for XX:XX:XX:XX:C1:3C, new type: 1
+02-19 17:17:51.505  2332  2694 W BluetoothRemoteDevices: Address type mismatch for XX:XX:XX:XX:C1:3C, new type: 1
+02-19 17:17:51.515  3094  5052 I NearbyDiscovery: (REDACTED) BloomFilterAdvManager: Detected bloom filter but too far away, ignoring. %sm, %s
+02-19 17:17:51.531  3094 20814 I NearbyDiscovery: (REDACTED) loadFastPairModule: checkFeaturesAreAvailable:%d
+02-19 17:17:51.531  3094 20814 I NearbyDiscovery: loadFastPairModule: FastPair module is downloaded. [CONTEXT service_id=265 ]

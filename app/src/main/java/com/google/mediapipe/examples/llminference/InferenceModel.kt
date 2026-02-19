@@ -49,7 +49,7 @@ class InferenceModel private constructor(context: Context) {
             // Load model
             val modelFilePath = modelPath(context)
             Log.i(TAG, "Loading model from: $modelFilePath")
-            engine = LiteRTInferenceEngine(modelFilePath, tokenizer, model)
+            engine = LiteRTInferenceEngine(modelFilePath, tokenizer, model, context)
             Log.i(TAG, "Engine created successfully")
         } catch (e: Exception) {
             Log.e(TAG, "Failed to create engine: ${e.message}", e)
@@ -60,19 +60,23 @@ class InferenceModel private constructor(context: Context) {
     /**
      * Generate response with streaming callback (used by ConsultationViewModel).
      */
+    private val executor = java.util.concurrent.Executors.newSingleThreadExecutor()
+
     fun generateResponseAsync(
         prompt: String,
         images: List<Bitmap>,
         progressListener: (String, Boolean) -> Unit
     ) : java.util.concurrent.Future<String> {
-        return java.util.concurrent.CompletableFuture.supplyAsync {
+        Log.i(TAG, "generateResponseAsync called")
+        return executor.submit(java.util.concurrent.Callable {
             val fullPrompt = "$SYSTEM_PROMPT\n\n$prompt"
+            Log.i(TAG, "Submitting prompt to engine: ${fullPrompt.take(20)}...")
             val result = engine.generateResponse(fullPrompt) { partial ->
                 progressListener(partial, false)
             }
             progressListener("", true)
             result
-        }
+        })
     }
 
     /**

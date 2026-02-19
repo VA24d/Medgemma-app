@@ -39,7 +39,7 @@ enum class Model(
         numLayers = 34,
         numKvHeads = 4,
         headDim = 256,
-        kvCacheMaxLen = 128,
+        kvCacheMaxLen = 2048,
         vocabSize = 262208,
     ),
 }
