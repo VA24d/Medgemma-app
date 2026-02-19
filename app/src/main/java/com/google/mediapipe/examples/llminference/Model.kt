@@ -51,11 +51,11 @@ enum class Model(
         topP = 0.95f
     ),
     MEDGEMMA_4B(
-        path = "medgemma_4b.tflite",
+        path = "medgemma_text.tflite",
         url = "https://huggingface.co/megalodon-ml/medgemma_kaggle/resolve/main/models/text/medgemma_4b_mobile_int8_q8_ekv2048.tflite",
-        visionPath = "medsiglip_vision_896.tflite",
+        visionPath = "siglip_encoder.tflite",
         visionUrl = "https://huggingface.co/megalodon-ml/medgemma_kaggle/resolve/main/models/vision/medsiglip_vision_896.tflite",
-        projectorPath = "multimodal_projector_896.tflite",
+        projectorPath = "projector.tflite",
         projectorUrl = "https://huggingface.co/megalodon-ml/medgemma_kaggle/resolve/main/models/projector/multimodal_projector_896.tflite",
         licenseUrl = "https://huggingface.co/megalodon-ml/medgemma_kaggle",
         needsAuth = true,
