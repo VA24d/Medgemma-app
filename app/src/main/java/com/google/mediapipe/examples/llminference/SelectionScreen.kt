@@ -32,7 +32,7 @@ import androidx.compose.ui.unit.dp
 internal fun SelectionRoute(
     onModelSelected: () -> Unit = {},
 ) {
-    var useGpu by remember { mutableStateOf(false) }
+
     val context = LocalContext.current
     val tokenManager = remember { com.google.mediapipe.examples.llminference.settings.TokenManager(context) }
     var showTokenDialog by remember { mutableStateOf(false) }
@@ -55,27 +55,13 @@ internal fun SelectionRoute(
         ) {
             Card(modifier = Modifier.fillMaxWidth()) {
                 Column(modifier = Modifier.padding(16.dp)) {
-                    Text("Gemma 3", style = MaterialTheme.typography.titleLarge)
+                    Text("MedGemma", style = MaterialTheme.typography.titleLarge)
                     Spacer(modifier = Modifier.height(8.dp))
                     Text("Select a backend to run the model on.", style = MaterialTheme.typography.bodyMedium)
                 }
             }
 
-            Card(modifier = Modifier.fillMaxWidth()) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Text("Use GPU backend", style = MaterialTheme.typography.bodyLarge)
-                    Switch(
-                        checked = useGpu,
-                        onCheckedChange = { useGpu = it }
-                    )
-                }
-            }
+
             
             // Authentication Section
             Text(
@@ -189,7 +175,7 @@ internal fun SelectionRoute(
                 }
             }
 
-            val licenseUrl = Model.GEMMA3_1B_IT_CPU.licenseUrl
+            val licenseUrl = Model.MEDGEMMA_4B.licenseUrl
             TextButton(onClick = {
                 val intent = Intent(Intent.ACTION_VIEW, Uri.parse(licenseUrl))
                 context.startActivity(intent)
@@ -199,7 +185,7 @@ internal fun SelectionRoute(
 
             Button(
                 onClick = {
-                    InferenceModel.model = if (useGpu) Model.GEMMA_3_1B_IT_GPU else Model.GEMMA3_1B_IT_CPU
+                    InferenceModel.model = Model.MEDGEMMA_4B
                     onModelSelected()
                 },
                 modifier = Modifier.fillMaxWidth()

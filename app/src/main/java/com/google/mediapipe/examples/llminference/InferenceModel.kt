@@ -155,7 +155,7 @@ class InferenceModel private constructor(context: Context) {
     }
 
     companion object {
-        var model: Model = Model.GEMMA_3_1B_IT_GPU
+        var model: Model = Model.MEDGEMMA_4B
         private var instance: InferenceModel? = null
 
         fun getInstance(context: Context): InferenceModel {
