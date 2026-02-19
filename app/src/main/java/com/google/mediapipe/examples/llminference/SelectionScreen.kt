@@ -18,6 +18,8 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.runtime.*
@@ -37,6 +39,19 @@ internal fun SelectionRoute(
     val tokenManager = remember { com.google.mediapipe.examples.llminference.settings.TokenManager(context) }
     var showTokenDialog by remember { mutableStateOf(false) }
     var hasToken by remember { mutableStateOf(tokenManager.hasToken()) }
+
+    // Detect local model files in /data/local/tmp/medgemma/
+    val localModelDir = "/data/local/tmp/medgemma"
+    val localFilesFound by remember {
+        mutableStateOf(
+            listOf(
+                java.io.File(localModelDir, "medgemma_text.tflite"),
+                java.io.File(localModelDir, "siglip_encoder.tflite"),
+                java.io.File(localModelDir, "projector.tflite")
+            ).count { it.exists() }
+        )
+    }
+    val hasLocalModel = localFilesFound == 3
 
     Scaffold(
         topBar = {
@@ -175,12 +190,87 @@ internal fun SelectionRoute(
                 }
             }
 
+            // Local Model Section
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                "Local Model",
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.padding(top = 4.dp)
+            )
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(
+                    containerColor = if (hasLocalModel)
+                        MaterialTheme.colorScheme.secondaryContainer
+                    else
+                        MaterialTheme.colorScheme.surfaceVariant
+                )
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                if (hasLocalModel) Icons.Default.Check else Icons.Default.Folder,
+                                contentDescription = null,
+                                modifier = Modifier.padding(end = 8.dp),
+                                tint = if (hasLocalModel)
+                                    MaterialTheme.colorScheme.onSecondaryContainer
+                                else
+                                    MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Text(
+                                "ADB Pushed Model",
+                                style = MaterialTheme.typography.titleMedium,
+                                color = if (hasLocalModel)
+                                    MaterialTheme.colorScheme.onSecondaryContainer
+                                else
+                                    MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            if (hasLocalModel)
+                                "✓ $localFilesFound/3 files found in $localModelDir"
+                            else
+                                "$localFilesFound/3 files found in $localModelDir",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = if (hasLocalModel)
+                                MaterialTheme.colorScheme.onSecondaryContainer
+                            else
+                                MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            }
+
             val licenseUrl = Model.MEDGEMMA_4B.licenseUrl
             TextButton(onClick = {
                 val intent = Intent(Intent.ACTION_VIEW, Uri.parse(licenseUrl))
                 context.startActivity(intent)
             }) {
                 Text("View model license")
+            }
+
+            // Load local model button (enabled only if all 3 files found)
+            Button(
+                onClick = {
+                    InferenceModel.model = Model.MEDGEMMA_4B
+                    onModelSelected()
+                },
+                enabled = hasLocalModel,
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.secondary
+                )
+            ) {
+                Icon(Icons.Default.Folder, contentDescription = null, modifier = Modifier.padding(end = 8.dp))
+                Text("Load Local Model")
             }
 
             Button(
@@ -190,7 +280,7 @@ internal fun SelectionRoute(
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Continue")
+                Text("Download & Continue")
             }
         }
     }
