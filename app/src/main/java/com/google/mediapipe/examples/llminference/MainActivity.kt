@@ -66,7 +66,11 @@ class MainActivity : ComponentActivity() {
                             try {
                                 if (!InferenceModel.modelExists(appContext) && InferenceModel.model.url.isNotEmpty()) {
                                     Log.d("MainActivity", "Starting background model pre-download…")
-                                    val client = OkHttpClient()
+                                    val client = OkHttpClient.Builder()
+                                        .connectTimeout(30, java.util.concurrent.TimeUnit.SECONDS)
+                                        .readTimeout(0, java.util.concurrent.TimeUnit.SECONDS)
+                                        .writeTimeout(30, java.util.concurrent.TimeUnit.SECONDS)
+                                        .build()
                                     val downloads = mutableListOf<Pair<String, String>>()
                                     if (InferenceModel.model.url.isNotEmpty()) downloads.add(InferenceModel.model.url to InferenceModel.modelPathFromUrl(appContext))
                                     if (InferenceModel.model.visionUrl.isNotEmpty()) downloads.add(InferenceModel.model.visionUrl to InferenceModel.visionModelPath(appContext))

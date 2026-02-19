@@ -19,6 +19,7 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import java.io.File
 import java.io.FileOutputStream
+import java.util.concurrent.TimeUnit
 import com.google.mediapipe.examples.llminference.settings.TokenManager
 
 private class MissingAccessTokenException :
@@ -47,7 +48,13 @@ internal fun LoadingRoute(
     var progress by remember { mutableStateOf(0) }
     var isDownloading by remember { mutableStateOf(false) }
     var job: Job? by remember { mutableStateOf(null) }
-    val client = remember { OkHttpClient() }
+    val client = remember {
+        OkHttpClient.Builder()
+            .connectTimeout(30, TimeUnit.SECONDS)
+            .readTimeout(0, TimeUnit.SECONDS)   // 0 = no timeout for large downloads
+            .writeTimeout(30, TimeUnit.SECONDS)
+            .build()
+    }
 
     if (errorMessage != "") {
         ErrorMessage(errorMessage, onGoBack)
@@ -218,6 +225,7 @@ internal fun downloadSingleFile(
             var totalBytesRead = 0L
             val contentLength = response.body?.contentLength() ?: -1
 
+            var lastProgress = -1
             while (inputStream.read(buffer).also { bytesRead = it } != -1) {
                 outputStream.write(buffer, 0, bytesRead)
                 totalBytesRead += bytesRead
@@ -226,7 +234,10 @@ internal fun downloadSingleFile(
                 } else {
                     -1
                 }
-                onProgressUpdate(progress)
+                if (progress != lastProgress) {
+                    lastProgress = progress
+                    onProgressUpdate(progress)
+                }
             }
             outputStream.flush()
         }
