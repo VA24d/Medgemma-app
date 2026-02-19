@@ -72,7 +72,7 @@ internal fun LoadingRoute(
             try {
                 if (!InferenceModel.modelExists(context)) {
                     if (InferenceModel.model.url.isEmpty()) {
-                        throw MissingUrlException("Please manually copy the model to ${InferenceModel.model.path}")
+                        throw MissingUrlException("Model not found. Push via:\nadb push <model>.gguf /data/local/tmp/medgemma/")
                     }
                     isDownloading = true
                     downloadModel(context, InferenceModel.model, client) { newProgress ->
@@ -104,7 +104,7 @@ internal fun LoadingRoute(
             } catch (e: Exception) {
                 val error = e.localizedMessage ?: "Unknown Error"
                 errorMessage =
-                    "${error}, please manually copy the model to ${InferenceModel.model.path}"
+                    "${error}\n\nPush model via:\nadb push <model>.gguf /data/local/tmp/medgemma/"
             } finally {
                 isDownloading = false
             }
