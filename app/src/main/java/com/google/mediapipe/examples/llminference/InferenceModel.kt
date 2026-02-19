@@ -4,23 +4,8 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.net.Uri
 import android.util.Log
-import com.google.common.util.concurrent.ListenableFuture
-import com.google.mediapipe.tasks.genai.llminference.LlmInference
-import com.google.mediapipe.tasks.genai.llminference.LlmInference.Backend
-import com.google.mediapipe.tasks.genai.llminference.LlmInferenceSession
-import com.google.mediapipe.tasks.genai.llminference.LlmInferenceSession.LlmInferenceSessionOptions
-import com.google.mediapipe.tasks.genai.llminference.ProgressListener
 import java.io.File
 import kotlin.math.max
-
-/** The maximum number of tokens the model can process. */
-var MAX_TOKENS = 1024
-
-/**
- * An offset in tokens that we use to ensure that the model always has the ability to respond when
- * we compute the remaining context length.
- */
-var DECODE_TOKEN_OFFSET = 256
 
 class ModelLoadFailException :
     Exception("Failed to load model, please try again")
@@ -29,11 +14,12 @@ class ModelSessionCreateFailException :
     Exception("Failed to create model session, please try again")
 
 class InferenceModel private constructor(context: Context) {
-    private lateinit var llmInference: LlmInference
-    private lateinit var llmInferenceSession: LlmInferenceSession
+    private lateinit var engine: LlamaCppEngine
     private val TAG = InferenceModel::class.qualifiedName
 
     val uiState = UiState(model.thinking)
+
+    private val SYSTEM_PROMPT = "You are a helpful medical data assistant. Provide accurate and concise answers."
 
     init {
         if (!modelExists(context)) {
@@ -41,107 +27,72 @@ class InferenceModel private constructor(context: Context) {
         }
 
         createEngine(context)
-        createSession()
     }
 
     fun close() {
-        llmInferenceSession.close()
-        llmInference.close()
+        engine.close()
     }
 
     fun resetSession() {
-        llmInferenceSession.close()
-        createSession()
+        // llama.cpp manages context internally, nothing needed here
     }
 
     private fun createEngine(context: Context) {
-        val inferenceOptions = LlmInference.LlmInferenceOptions.builder()
-            .setModelPath(modelPath(context))
-            .setMaxTokens(MAX_TOKENS)
-            .apply { model.preferredBackend?.let { setPreferredBackend(it) } }
-            .build()
-
         try {
-            llmInference = LlmInference.createFromOptions(context, inferenceOptions)
+            val modelFilePath = modelPath(context)
+            Log.i(TAG, "Loading model from: $modelFilePath")
+            engine = LlamaCppEngine(modelFilePath, model)
+            Log.i(TAG, "Engine created successfully")
         } catch (e: Exception) {
-            Log.e(TAG, "Load model error (${model.preferredBackend}): ${e.message}", e)
-
-            // Fallback: if GPU/NPU fails, retry with CPU
-            if (model.preferredBackend != Backend.CPU) {
-                Log.w(TAG, "Retrying with CPU backend as fallback…")
-                val cpuOptions = LlmInference.LlmInferenceOptions.builder()
-                    .setModelPath(modelPath(context))
-                    .setMaxTokens(MAX_TOKENS)
-                    .setPreferredBackend(Backend.CPU)
-                    .build()
-                try {
-                    llmInference = LlmInference.createFromOptions(context, cpuOptions)
-                    Log.i(TAG, "Successfully loaded model with CPU fallback")
-                    return
-                } catch (cpuError: Exception) {
-                    Log.e(TAG, "CPU fallback also failed: ${cpuError.message}", cpuError)
-                }
-            }
+            Log.e(TAG, "Failed to create engine: ${e.message}", e)
             throw ModelLoadFailException()
         }
     }
 
-    private fun createSession() {
-        val sessionOptions =  LlmInferenceSessionOptions.builder()
-            .setTemperature(model.temperature)
-            .setTopK(model.topK)
-            .setTopP(model.topP)
-            .build()
+    private val executor = java.util.concurrent.Executors.newSingleThreadExecutor()
 
-        try {
-            llmInferenceSession =
-                LlmInferenceSession.createFromOptions(llmInference, sessionOptions)
-        } catch (e: Exception) {
-            Log.e(TAG, "LlmInferenceSession create error: ${e.message}", e)
-            throw ModelSessionCreateFailException()
-        }
-    }
-
+    /**
+     * Generate response with streaming callback (used by ChatViewModel).
+     */
     fun generateResponseAsync(
         prompt: String,
         images: List<Bitmap>,
-        progressListener: ProgressListener<String>
-    ) : ListenableFuture<String> {
-        llmInferenceSession.addQueryChunk(prompt)
-        return llmInferenceSession.generateResponseAsync(progressListener)
+        progressListener: (String, Boolean) -> Unit
+    ): java.util.concurrent.Future<String> {
+        Log.i(TAG, "generateResponseAsync called")
+        return executor.submit(java.util.concurrent.Callable {
+            val fullPrompt = formatPrompt(prompt)
+            Log.i(TAG, "Submitting prompt (${fullPrompt.length} chars)")
+            val result = engine.generateResponse(fullPrompt) { partial ->
+                progressListener(partial, false)
+            }
+            progressListener("", true)
+            result
+        })
     }
 
-    suspend fun generateResponse(prompt: String): String = kotlinx.coroutines.suspendCancellableCoroutine { continuation ->
-        llmInferenceSession.addQueryChunk(prompt)
-        val future = llmInferenceSession.generateResponseAsync { _, _ -> /* progress ignored for sync */ }
-        
-        future.addListener(
-            {
-                try {
-                    continuation.resumeWith(Result.success(future.get()))
-                } catch (e: Exception) {
-                    continuation.resumeWith(Result.failure(e))
-                }
-            },
-            { command -> command.run() } // Direct executor
-        )
-        
-        continuation.invokeOnCancellation { future.cancel(true) }
+    /**
+     * Generate response synchronously (used by FhirExportManager).
+     */
+    suspend fun generateResponse(prompt: String, images: List<Bitmap> = emptyList()): String {
+        return kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+            val fullPrompt = formatPrompt(prompt)
+            engine.generateResponse(fullPrompt)
+        }
+    }
+
+    private fun formatPrompt(userPrompt: String): String {
+        return "<start_of_turn>user\n$SYSTEM_PROMPT\n\n$userPrompt<end_of_turn>\n<start_of_turn>model\n"
     }
 
     fun estimateTokensRemaining(prompt: String): Int {
-        val context = uiState.messages.joinToString { it.message } + prompt
-        if (context.isEmpty()) return -1 // Special marker if no content has been added
-
-        val sizeOfAllMessages = llmInferenceSession.sizeInTokens(context)
-        val approximateControlTokens = uiState.messages.size * 3
-        val remainingTokens = MAX_TOKENS - sizeOfAllMessages - approximateControlTokens -  DECODE_TOKEN_OFFSET
-        // Token size is approximate so, let's not return anything below 0
-        return max(0, remainingTokens)
+        // Rough estimation: ~4 chars per token for English text
+        val estimatedTokens = (SYSTEM_PROMPT.length + prompt.length) / 4
+        return max(0, model.contextSize - estimatedTokens - 10)
     }
 
     companion object {
-        var model: Model = Model.GEMMA_3_1B_IT_GPU
+        var model: Model = Model.MEDGEMMA_4B
         private var instance: InferenceModel? = null
 
         fun getInstance(context: Context): InferenceModel {
@@ -156,25 +107,40 @@ class InferenceModel private constructor(context: Context) {
             return InferenceModel(context).also { instance = it }
         }
 
-        fun modelPathFromUrl(context: Context): String {
-            if (model.url.isNotEmpty()) {
-                val urlFileName = Uri.parse(model.url).lastPathSegment
-                if (!urlFileName.isNullOrEmpty()) {
-                    return File(context.filesDir, urlFileName).absolutePath
-                }
+        /** ADB push directory */
+        private const val ADB_PUSH_DIR = "/data/local/tmp/medgemma"
+
+        private fun resolveFile(context: Context, path: String, url: String): String {
+            val pathFileName = if (path.isNotEmpty()) File(path).name else null
+            val urlFileName = if (url.isNotEmpty()) Uri.parse(url).lastPathSegment else null
+
+            // Check ADB push dir first
+            for (name in listOfNotNull(pathFileName, urlFileName)) {
+                val adbFile = File(ADB_PUSH_DIR, name)
+                if (adbFile.exists()) return adbFile.absolutePath
             }
 
-            return ""
-        }
-
-        fun modelPath(context: Context): String {
-            val modelFile = File(model.path)
-            if (modelFile.exists()) {
-                return model.path
+            // Check app internal storage
+            for (name in listOfNotNull(urlFileName, pathFileName)) {
+                val internalFile = File(context.filesDir, name)
+                if (internalFile.exists()) return internalFile.absolutePath
             }
 
-            return modelPathFromUrl(context)
+            val preferredName = urlFileName ?: pathFileName ?: return ""
+            return File(context.filesDir, preferredName).absolutePath
         }
+
+        fun modelPathFromUrl(context: Context): String =
+            resolveFile(context, model.path, model.url)
+
+        fun modelPath(context: Context): String =
+            resolveFile(context, model.path, model.url)
+
+        fun visionModelPath(context: Context): String =
+            resolveFile(context, model.visionPath, model.visionUrl)
+
+        fun projectorModelPath(context: Context): String =
+            resolveFile(context, model.projectorPath, model.projectorUrl)
 
         fun modelExists(context: Context): Boolean {
             return File(modelPath(context)).exists()

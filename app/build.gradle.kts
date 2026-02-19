@@ -6,13 +6,15 @@ plugins {
     id("com.google.devtools.ksp") version "1.9.22-1.0.17"
 }
 
+val jllamaLib = file("java-llama.cpp")
+
 android {
     namespace = "com.google.mediapipe.examples.llminference"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.google.mediapipe.examples.llminference"
-        minSdk = 24
+        minSdk = 26  // Bumped for llama.cpp ARM64 compatibility
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
@@ -32,6 +34,20 @@ android {
         }
         val hfAccessToken = properties.getProperty("HF_ACCESS_TOKEN", "")
         buildConfigField("String", "HF_ACCESS_TOKEN", "\"$hfAccessToken\"")
+
+        // NDK — only build for arm64 (mobile target)
+        ndk {
+            abiFilters += "arm64-v8a"
+        }
+        externalNativeBuild {
+            cmake {
+                cppFlags += ""
+                arguments += "-DANDROID_STL=c++_shared"
+                arguments += "-DOS_NAME=Linux"
+                arguments += "-DOS_ARCH=aarch64"
+                arguments += "-DJNI_INCLUDE_DIRS=${file("java-llama.cpp/.github/include/unix").absolutePath}"
+            }
+        }
     }
 
     buildFeatures {
@@ -65,6 +81,21 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
+
+    // Native build via java-llama.cpp submodule
+    externalNativeBuild {
+        cmake {
+            path = file("$jllamaLib/CMakeLists.txt")
+            version = "3.22.1"
+        }
+    }
+
+    // Include java-llama.cpp Java sources
+    sourceSets {
+        named("main") {
+            java.srcDir("$jllamaLib/src/main/java")
+        }
+    }
 }
 
 dependencies {
@@ -85,8 +116,6 @@ dependencies {
     implementation("androidx.compose.material:material-icons-extended")
     implementation("com.google.android.material:material:1.12.0")
 
-    implementation ("com.google.mediapipe:tasks-genai:0.10.29")
-    
     // MediaPipe Vision for medical image analysis
     implementation("com.google.mediapipe:tasks-vision:0.10.14")
 

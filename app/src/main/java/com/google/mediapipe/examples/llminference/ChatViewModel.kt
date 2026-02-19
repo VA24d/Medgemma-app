@@ -21,8 +21,6 @@ class ChatViewModel(
     private val _textInputEnabled = MutableStateFlow(true)
     val isTextInputEnabled: StateFlow<Boolean> = _textInputEnabled.asStateFlow()
 
-
-
     fun sendMessage(userMessage: String, userImages: List<Bitmap>) {
         viewModelScope.launch(Dispatchers.IO) {
             _uiState.value.addMessage(userMessage, USER_PREFIX, userImages)

@@ -189,7 +189,7 @@ internal fun SelectionRoute(
                 }
             }
 
-            val licenseUrl = Model.GEMMA3_1B_IT_CPU.licenseUrl
+            val licenseUrl = Model.MEDGEMMA_4B.licenseUrl
             TextButton(onClick = {
                 val intent = Intent(Intent.ACTION_VIEW, Uri.parse(licenseUrl))
                 context.startActivity(intent)
@@ -199,7 +199,7 @@ internal fun SelectionRoute(
 
             Button(
                 onClick = {
-                    InferenceModel.model = if (useGpu) Model.GEMMA_3_1B_IT_GPU else Model.GEMMA3_1B_IT_CPU
+                    InferenceModel.model = Model.MEDGEMMA_4B
                     onModelSelected()
                 },
                 modifier = Modifier.fillMaxWidth()
