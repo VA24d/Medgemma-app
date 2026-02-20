@@ -73,11 +73,11 @@ class LiteRTInferenceEngine(
             gpuDelegate?.close()
             gpuDelegate = null
             val cpuOpts = Interpreter.Options().apply { 
-                numThreads = 4
+                numThreads = Runtime.getRuntime().availableProcessors()
                 setUseXNNPACK(false)
             }
             val interp = Interpreter(modelFile, cpuOpts)
-            Log.i(TAG, "Model loaded with CPU")
+            Log.i(TAG, "Model loaded with CPU (XNNPACK disabled, \${cpuOpts.numThreads} threads)")
             interp
         }
 
