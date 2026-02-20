@@ -50,6 +50,7 @@ class LiteRTInferenceEngine(
     private val kvVSize: Int
 
     init {
+        val engineStart = System.currentTimeMillis()
         Log.i(TAG, "Loading model: $modelPath")
         val modelFile = File(modelPath)
 
@@ -57,7 +58,10 @@ class LiteRTInferenceEngine(
         interpreter = try {
             val gpuOpts = Interpreter.Options().apply {
                 numThreads = 4
-                val delegate = GpuDelegate()
+                val options = GpuDelegate.Options().apply {
+                    setQuantizedModelsAllowed(true)
+                }
+                val delegate = GpuDelegate(options)
                 addDelegate(delegate)
                 gpuDelegate = delegate
             }
@@ -68,7 +72,10 @@ class LiteRTInferenceEngine(
             Log.w(TAG, "GPU failed (${gpuError.message}), falling back to CPU")
             gpuDelegate?.close()
             gpuDelegate = null
-            val cpuOpts = Interpreter.Options().apply { numThreads = 4 }
+            val cpuOpts = Interpreter.Options().apply { 
+                numThreads = 4
+                setUseXNNPACK(false)
+            }
             val interp = Interpreter(modelFile, cpuOpts)
             Log.i(TAG, "Model loaded with CPU")
             interp
@@ -91,7 +98,8 @@ class LiteRTInferenceEngine(
 
         // Allocate KV cache via memory-mapped temp files
         // This bypasses the JVM DirectByteBuffer tracking limit
-        Log.i(TAG, "Allocating KV cache via mmap: 2 sets × ${model.numLayers} layers × ${kvKSize / 1024}KB")
+        val allocStart = System.currentTimeMillis()
+        Log.i(TAG, "Allocating KV cache via mmap: 2 sets x ${model.numLayers} layers x ${kvKSize / 1024}KB")
         val cacheDir = context.cacheDir
 
         for (set in 0..1) {
@@ -114,11 +122,12 @@ class LiteRTInferenceEngine(
                 kvFiles.add(vRaf)
                 vFile.deleteOnExit()
             }
-            Log.i(TAG, "KV cache set $set allocated via mmap")
+            Log.i(TAG, "KV cache set $set allocated via mmap in ${System.currentTimeMillis() - allocStart}ms")
         }
 
         resetKVCache()
-        Log.i(TAG, "Engine ready")
+        Log.i(TAG, "Model initialized successfully: ${model.path}")
+        Log.i(TAG, "Engine ready (Total creation time: ${System.currentTimeMillis() - engineStart}ms)")
     }
 
     private fun resetKVCache() {
@@ -238,11 +247,16 @@ class LiteRTInferenceEngine(
         maxTokens: Int = 64,
         onPartialResult: ((String) -> Unit)? = null
     ): String {
-        Log.i(TAG, "generateResponse called with prompt length: ${prompt.length}")
+        Log.i(TAG, "=== INFERENCE START ===")
+        Log.i(TAG, "Loaded Model: ${model.path}")
+        Log.i(TAG, "Prompt: \n$prompt\n")
+        Log.i(TAG, "Prompt length: ${prompt.length} chars")
         resetKVCache()
 
+        val encodeStart = System.currentTimeMillis()
         val inputTokens = tokenizer.encode(prompt)
-        Log.i(TAG, "Input tokens (${inputTokens.size}): ${inputTokens.take(10)}...")
+        Log.i(TAG, "Tokenized ${inputTokens.size} input tokens in ${System.currentTimeMillis() - encodeStart}ms")
+        Log.i(TAG, "Input tokens: $inputTokens")
 
         if (inputTokens.size >= model.kvCacheMaxLen) {
             Log.w(TAG, "Prompt too long (${inputTokens.size} tokens, max ${model.kvCacheMaxLen})")
