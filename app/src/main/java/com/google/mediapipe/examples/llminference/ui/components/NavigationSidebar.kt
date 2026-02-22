@@ -30,6 +30,7 @@ import com.google.mediapipe.examples.llminference.ui.theme.ThemeManager
 fun NavigationSidebar(
     isOpen: Boolean,
     onClose: () -> Unit,
+    onOpenModelSelection: () -> Unit,
     onSignOut: () -> Unit,
     onChangePin: () -> Unit,
     onExportFhir: () -> Unit,
@@ -122,7 +123,10 @@ fun NavigationSidebar(
                 icon = Icons.Default.AutoAwesome,
                 title = "Model Selection",
                 subtitle = "Gemma 3 1B",
-                onClick = { /* TODO: Model selection */ }
+                onClick = {
+                    onClose()
+                    onOpenModelSelection()
+                }
             )
             SidebarItem(
                 icon = Icons.Default.Lock,

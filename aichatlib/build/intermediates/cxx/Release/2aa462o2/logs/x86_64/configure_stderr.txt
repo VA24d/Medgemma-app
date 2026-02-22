@@ -1,0 +1,6 @@
+CMAKE_BUILD_TYPE=Release
+CMake Warning at D:/startnew/qgemma/llama-cpp/common/CMakeLists.txt:32 (message):
+  Git repository not found; to enable automatic generation of build info,
+  make sure Git is installed and the project is a Git repository.
+
+

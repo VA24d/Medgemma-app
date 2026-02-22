@@ -2,6 +2,7 @@ package com.google.mediapipe.examples.llminference
 
 import android.content.Context
 import android.content.Intent
+import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -19,6 +20,7 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import java.io.File
 import java.io.FileOutputStream
+import com.google.mediapipe.examples.llminference.settings.LocalModelFiles
 import com.google.mediapipe.examples.llminference.settings.TokenManager
 
 private class MissingAccessTokenException :
@@ -42,6 +44,8 @@ internal fun LoadingRoute(
     onGoBack: () -> Unit = {}
 ) {
     val context = LocalContext.current.applicationContext
+    val selectedModelName = remember { File(InferenceModel.modelPath(context)).name }
+    val selectedMmprojName = remember { File(InferenceModel.mmprojPath(context)).name }
     var errorMessage by remember { mutableStateOf("") }
 
     var progress by remember { mutableStateOf(0) }
@@ -64,13 +68,20 @@ internal fun LoadingRoute(
             }
         }
     } else {
-        LoadingIndicator()
+        LoadingIndicator(
+            modelName = selectedModelName,
+            mmprojName = selectedMmprojName,
+            visionEnabled = LocalModelFiles.isVisionEnabled(context)
+        )
     }
 
     LaunchedEffect(Unit) {
         job = launch(Dispatchers.IO) {
             try {
                 if (!InferenceModel.modelExists(context)) {
+                    if (LocalModelFiles.hasCustomModel(context)) {
+                        throw MissingUrlException("Selected local model file is not accessible. Please re-pick it from Model Selection.")
+                    }
                     if (InferenceModel.model.url.isEmpty()) {
                         throw MissingUrlException("Please manually copy the model to ${InferenceModel.model.path}")
                     }
@@ -86,22 +97,29 @@ internal fun LoadingRoute(
                     onModelLoaded()
                 }
             } catch (e: MissingAccessTokenException) {
+                Log.e("LoadingRoute", "Missing access token", e)
                 errorMessage = e.localizedMessage ?: "Unknown Error"
             } catch (e: MissingUrlException) {
+                Log.e("LoadingRoute", "Missing URL or local file", e)
                 errorMessage = e.localizedMessage ?: "Unknown Error"
             } catch (e: UnauthorizedAccessException) {
+                Log.e("LoadingRoute", "Unauthorized access", e)
                 errorMessage = e.localizedMessage ?: "Unknown Error"
             } catch (e: ForbiddenAccessException) {
+                Log.e("LoadingRoute", "Forbidden access", e)
                 errorMessage = e.localizedMessage ?: "Unknown Error"
             } catch (e: ModelSessionCreateFailException) {
+                Log.e("LoadingRoute", "Model session creation failed", e)
                 errorMessage = e.localizedMessage ?: "Unknown Error"
             } catch (e: ModelLoadFailException) {
+                Log.e("LoadingRoute", "Model load failed", e)
                 errorMessage = e.localizedMessage ?: "Unknown Error"
                 // Remove invalid model file
                 CoroutineScope(Dispatchers.Main).launch {
                     deleteDownloadedFile(context)
                 }
             } catch (e: Exception) {
+                Log.e("LoadingRoute", "Unexpected loading failure", e)
                 val error = e.localizedMessage ?: "Unknown Error"
                 errorMessage =
                     "${error}, please manually copy the model to ${InferenceModel.model.path}"
@@ -272,7 +290,11 @@ fun DownloadIndicator(progress: Int, onCancel: () -> Unit) {
 }
 
 @Composable
-fun LoadingIndicator() {
+fun LoadingIndicator(
+    modelName: String,
+    mmprojName: String,
+    visionEnabled: Boolean
+) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
@@ -296,6 +318,23 @@ fun LoadingIndicator() {
         Text(
             text = "Preparing the AI model for analysis…",
             style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center
+        )
+        Spacer(modifier = Modifier.height(10.dp))
+        Text(
+            text = "Model: ${if (modelName.isBlank()) "(not found)" else modelName}",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center
+        )
+        Text(
+            text = if (!visionEnabled) {
+                "Vision encoder: disabled"
+            } else {
+                "Vision encoder: ${if (mmprojName.isBlank()) "(not found)" else mmprojName}"
+            },
+            style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center
         )

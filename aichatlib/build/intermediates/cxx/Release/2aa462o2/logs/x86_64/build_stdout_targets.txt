@@ -1,0 +1,2 @@
+ninja: Entering directory `D:\startnew\Medgemma-app\aichatlib\.cxx\Release\2aa462o2\x86_64'
+ninja: no work to do.

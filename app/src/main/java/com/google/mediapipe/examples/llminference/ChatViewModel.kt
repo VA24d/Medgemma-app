@@ -29,10 +29,10 @@ class ChatViewModel(
             _uiState.value.createLoadingMessage()
             setInputEnabled(false)
             try {
-                val partialResults = mutableListOf<String>()
                 val future = inferenceModel.generateResponseAsync(userMessage, userImages) { partialResult, isDone ->
-                    partialResults.add(partialResult)
-                    _uiState.value.appendMessage(partialResults.joinToString(""))
+                    if (!isDone && partialResult.isNotEmpty()) {
+                        _uiState.value.appendMessage(partialResult)
+                    }
                 }
                 future.get()
                 setInputEnabled(true)

@@ -30,7 +30,6 @@ class NavigationRoutesTest {
     @Test
     fun legacyRoutes_arePreserved() {
         assertEquals("start_screen", START_SCREEN)
-        assertEquals("waiting_screen", WAITING_SCREEN)
         assertEquals("load_screen", LOAD_SCREEN)
         assertEquals("chat_screen", CHAT_SCREEN)
     }
@@ -41,7 +40,7 @@ class NavigationRoutesTest {
             SPLASH_SCREEN, PIN_SCREEN, PATIENTS_SCREEN, ADD_PATIENT_SCREEN,
             PATIENT_DETAIL_SCREEN, NEW_ENTRY_SCREEN, XRAY_ANALYSIS_SCREEN,
             MANUAL_NOTES_SCREEN, HISTORY_SCREEN, DIAGNOSIS_SCREEN,
-            START_SCREEN, WAITING_SCREEN, LOAD_SCREEN, CHAT_SCREEN,
+            START_SCREEN, LOAD_SCREEN, CHAT_SCREEN,
             QUICK_ANALYSIS_SCREEN
         )
         assertEquals(routes.size, routes.distinct().size)

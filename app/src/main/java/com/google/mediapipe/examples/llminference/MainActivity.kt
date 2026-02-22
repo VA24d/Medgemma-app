@@ -1,7 +1,6 @@
 package com.google.mediapipe.examples.llminference
 
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
@@ -10,7 +9,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import okhttp3.OkHttpClient
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -37,7 +35,6 @@ const val QUICK_ANALYSIS_SCREEN = "quick_analysis"
 
 // Keep old routes for model loading / chat
 const val START_SCREEN = "start_screen"
-const val WAITING_SCREEN = "waiting_screen"
 const val LOAD_SCREEN = "load_screen"
 const val CHAT_SCREEN = "chat_screen"
 
@@ -59,22 +56,7 @@ class MainActivity : ComponentActivity() {
                     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
                     val scope = rememberCoroutineScope()
 
-                    // Background model pre-download on app boot
                     val appContext = LocalContext.current.applicationContext
-                    LaunchedEffect(Unit) {
-                        launch(Dispatchers.IO) {
-                            try {
-                                if (!InferenceModel.modelExists(appContext) && InferenceModel.model.url.isNotEmpty()) {
-                                    Log.d("MainActivity", "Starting background model pre-download…")
-                                    val client = OkHttpClient()
-                                    downloadModel(appContext, InferenceModel.model, client, triggerAuth = false) { /* silent */ }
-                                    Log.d("MainActivity", "Background model pre-download complete")
-                                }
-                            } catch (e: Exception) {
-                                Log.w("MainActivity", "Background pre-download skipped: ${e.message}")
-                            }
-                        }
-                    }
 
                     // Sidebar as modal drawer
                     ModalNavigationDrawer(
@@ -83,6 +65,10 @@ class MainActivity : ComponentActivity() {
                             NavigationSidebar(
                                 isOpen = true,
                                 onClose = { scope.launch { drawerState.close() } },
+                                onOpenModelSelection = {
+                                    scope.launch { drawerState.close() }
+                                    navController.navigate(START_SCREEN)
+                                },
                                 onSignOut = {
                                     scope.launch { drawerState.close() }
                                     navController.navigate(PIN_SCREEN) {
@@ -349,23 +335,20 @@ class MainActivity : ComponentActivity() {
                                 )
                             }
 
-                            // ── Legacy: Model Selection (for Quick Analysis) ──
+                            // ── Model Selection ──
                             composable(START_SCREEN) {
                                 SelectionRoute(
                                     onModelSelected = {
-                                        navController.navigate(WAITING_SCREEN) {
+                                        navController.navigate(LOAD_SCREEN) {
+                                            popUpTo(START_SCREEN) { inclusive = true }
+                                        }
+                                    },
+                                    onResumeChat = {
+                                        navController.navigate(CHAT_SCREEN) {
                                             popUpTo(START_SCREEN) { inclusive = true }
                                         }
                                     }
                                 )
-                            }
-
-                            composable(WAITING_SCREEN) {
-                                WaitingScreen(onFinished = {
-                                    navController.navigate(LOAD_SCREEN) {
-                                        popUpTo(WAITING_SCREEN) { inclusive = true }
-                                    }
-                                })
                             }
 
                             composable(LOAD_SCREEN) {
@@ -376,7 +359,7 @@ class MainActivity : ComponentActivity() {
                                         }
                                     },
                                     onGoBack = {
-                                        navController.navigate(PATIENTS_SCREEN) {
+                                        navController.navigate(START_SCREEN) {
                                             popUpTo(LOAD_SCREEN) { inclusive = true }
                                         }
                                     }

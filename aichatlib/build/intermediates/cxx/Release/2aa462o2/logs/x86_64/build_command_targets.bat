@@ -1,0 +1,29 @@
+@echo off
+"C:\\Users\\mylil\\AppData\\Local\\Android\\Sdk\\cmake\\3.31.6\\bin\\ninja.exe" ^
+  -v ^
+  -C ^
+  "D:\\startnew\\Medgemma-app\\aichatlib\\.cxx\\Release\\2aa462o2\\x86_64" ^
+  ai-chat ^
+  ggml ^
+  ggml-base ^
+  ggml-cpu-alderlake ^
+  ggml-cpu-cannonlake ^
+  ggml-cpu-cascadelake ^
+  ggml-cpu-cooperlake ^
+  ggml-cpu-haswell ^
+  ggml-cpu-icelake ^
+  ggml-cpu-ivybridge ^
+  ggml-cpu-piledriver ^
+  ggml-cpu-sandybridge ^
+  ggml-cpu-sapphirerapids ^
+  ggml-cpu-skylakex ^
+  ggml-cpu-sse42 ^
+  ggml-cpu-x64 ^
+  ggml-cpu-zen4 ^
+  llama ^
+  llama-gemma3-cli ^
+  llama-llava-cli ^
+  llama-minicpmv-cli ^
+  llama-mtmd-cli ^
+  llama-qwen2vl-cli ^
+  mtmd

@@ -153,7 +153,7 @@ fun PatientsScreen(
                 ) {
                     Icon(Icons.Default.AutoAwesome, contentDescription = null, modifier = Modifier.size(20.dp))
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text("Quick Analysis", style = MaterialTheme.typography.labelLarge)
+                    Text("Open Chat", style = MaterialTheme.typography.labelLarge)
                 }
             }
 

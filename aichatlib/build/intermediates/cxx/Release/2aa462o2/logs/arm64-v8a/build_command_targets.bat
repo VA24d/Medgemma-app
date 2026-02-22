@@ -1,0 +1,23 @@
+@echo off
+"C:\\Users\\mylil\\AppData\\Local\\Android\\Sdk\\cmake\\3.31.6\\bin\\ninja.exe" ^
+  -v ^
+  -C ^
+  "D:\\startnew\\Medgemma-app\\aichatlib\\.cxx\\Release\\2aa462o2\\arm64-v8a" ^
+  ai-chat ^
+  ggml ^
+  ggml-base ^
+  ggml-cpu-android_armv8.0_1 ^
+  ggml-cpu-android_armv8.2_1 ^
+  ggml-cpu-android_armv8.2_2 ^
+  ggml-cpu-android_armv8.6_1 ^
+  ggml-cpu-android_armv9.0_1 ^
+  ggml-cpu-android_armv9.2_1 ^
+  ggml-cpu-android_armv9.2_2 ^
+  kleidiai ^
+  llama ^
+  llama-gemma3-cli ^
+  llama-llava-cli ^
+  llama-minicpmv-cli ^
+  llama-mtmd-cli ^
+  llama-qwen2vl-cli ^
+  mtmd

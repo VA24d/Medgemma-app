@@ -5,7 +5,6 @@ import android.os.Environment
 import android.util.Log
 import android.widget.Toast
 import com.google.mediapipe.examples.llminference.InferenceModel
-import com.google.mediapipe.tasks.genai.llminference.ProgressListener
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File

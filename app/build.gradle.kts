@@ -61,6 +61,9 @@ android {
         kotlinCompilerExtensionVersion = "1.5.9"
     }
     packaging {
+        jniLibs {
+            useLegacyPackaging = true
+        }
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
@@ -85,7 +88,7 @@ dependencies {
     implementation("androidx.compose.material:material-icons-extended")
     implementation("com.google.android.material:material:1.12.0")
 
-    implementation ("com.google.mediapipe:tasks-genai:0.10.29")
+    implementation(project(":aichatlib"))
     
     // MediaPipe Vision for medical image analysis
     implementation("com.google.mediapipe:tasks-vision:0.10.14")
