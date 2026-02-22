@@ -12,7 +12,7 @@ android {
 
     defaultConfig {
         applicationId = "com.google.mediapipe.examples.llminference"
-        minSdk = 24
+        minSdk = 28
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"

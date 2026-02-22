@@ -10,7 +10,7 @@ android {
     ndkVersion = "29.0.13113456"
 
     defaultConfig {
-        minSdk = 24
+        minSdk = 28
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
@@ -32,6 +32,15 @@ android {
                 arguments += "-DGGML_BACKEND_DL=ON"
                 arguments += "-DGGML_CPU_ALL_VARIANTS=ON"
                 arguments += "-DGGML_LLAMAFILE=OFF"
+                arguments += "-DGGML_VULKAN=ON"
+
+                // Point CMake to the NDK's glslc shader compiler for Vulkan SPIR-V compilation
+                val ndkDir = android.ndkDirectory.absolutePath
+                arguments += "-DVulkan_GLSLC_EXECUTABLE=${ndkDir}/shader-tools/windows-x86_64/glslc.exe"
+
+                // Vulkan C++ headers (vulkan.hpp) from KhronosGroup/Vulkan-Headers
+                val vulkanHppInclude = "D:/startnew/vulkan-headers/Vulkan-Headers-main/include"
+                arguments += "-DVulkan_INCLUDE_DIR=${vulkanHppInclude}"
             }
         }
     }
