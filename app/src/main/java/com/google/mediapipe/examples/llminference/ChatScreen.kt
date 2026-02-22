@@ -53,6 +53,9 @@ internal fun ChatRoute(
 ) {
     val chatViewModel: ChatViewModel = viewModel(factory = ChatViewModel.getFactory())
 
+    val context = LocalContext.current
+    val inferenceModel = try { InferenceModel.getInstance(context) } catch (_: Exception) { null }
+    val visionAvailable = inferenceModel?.isVisionAvailable ?: false
 
     // Model is initialized internally by ViewModel factory
 
@@ -62,6 +65,7 @@ internal fun ChatRoute(
     ChatScreen(
         uiState,
         textInputEnabled,
+        visionAvailable = visionAvailable,
         onSendMessage = { message, images ->
             chatViewModel.sendMessage(message, images)
         },
@@ -74,6 +78,7 @@ internal fun ChatRoute(
 fun ChatScreen(
     uiState: UiState,
     textInputEnabled: Boolean,
+    visionAvailable: Boolean = true,
     onSendMessage: (String, List<Bitmap>) -> Unit,
     onClose: () -> Unit
 ) {
@@ -83,6 +88,17 @@ fun ChatScreen(
     val view = LocalView.current
     val bitmaps = imageUris.mapNotNull { it.toBitmap(context) }
     val listState = rememberLazyListState()
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    // Warn when images picked without vision encoder
+    LaunchedEffect(imageUris) {
+        if (imageUris.isNotEmpty() && !visionAvailable) {
+            snackbarHostState.showSnackbar(
+                message = "Vision encoder not loaded — images will be ignored",
+                duration = SnackbarDuration.Short
+            )
+        }
+    }
 
     // Auto-scroll to latest message
     LaunchedEffect(uiState.messages.size) {
@@ -92,6 +108,7 @@ fun ChatScreen(
     }
 
     Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
                 title = {

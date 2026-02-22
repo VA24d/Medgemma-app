@@ -15,7 +15,16 @@ data class ChatMessage(
     val isThinking: Boolean = false
 ) {
     val message: String
-        get() = rawMessage
+        get() {
+            // Strip <think>...</think> reasoning blocks from display
+            val thinkPattern = Regex("""<think>[\s\S]*?</think>""")
+            var cleaned = thinkPattern.replace(rawMessage, "").trim()
+            // Also strip an unclosed <think> tag at the start (still streaming)
+            if (cleaned.startsWith("<think>")) {
+                cleaned = cleaned.removePrefix("<think>").trim()
+            }
+            return cleaned
+        }
     val isFromUser: Boolean
         get() = author == USER_PREFIX
     val isEmpty: Boolean

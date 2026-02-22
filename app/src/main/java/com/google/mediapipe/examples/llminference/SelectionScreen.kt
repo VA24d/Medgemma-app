@@ -343,6 +343,8 @@ internal fun SelectionRoute(
                                     onClick = {
                                         LocalModelFiles.clearMmprojPath(context)
                                         pickedMmprojPath = ""
+                                        visionEnabled = false
+                                        LocalModelFiles.setVisionEnabled(context, false)
                                         pickerStatus = "Vision encoder removed"
                                     },
                                     enabled = !isImporting,

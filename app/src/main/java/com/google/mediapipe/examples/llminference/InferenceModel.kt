@@ -23,7 +23,7 @@ var MAX_TOKENS = 1024
  * we compute the remaining context length.
  */
 var DECODE_TOKEN_OFFSET = 256
-private const val DEFAULT_PREDICT_LENGTH = 250
+private const val DEFAULT_PREDICT_LENGTH = 1024
 
 class ModelLoadFailException :
     Exception("Failed to load model, please try again")
@@ -35,6 +35,7 @@ class InferenceModel private constructor(context: Context) {
     private val appContext = context.applicationContext
     private lateinit var engine: InferenceEngine
     private var mmprojLoaded = false
+    val isVisionAvailable: Boolean get() = mmprojLoaded
     private val TAG = InferenceModel::class.qualifiedName
 
     val uiState = UiState(model.thinking)
