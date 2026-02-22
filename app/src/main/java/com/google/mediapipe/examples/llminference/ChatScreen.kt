@@ -76,8 +76,8 @@ internal fun ChatRoute(
         onToggleThinking = { enabled ->
             LocalModelFiles.setThinkingEnabled(context, enabled)
             thinkingEnabled = enabled
-            // Reset session so the system prompt is re-applied
-            inferenceModel?.resetSession()
+            // Update native skip flag — no session reset needed
+            inferenceModel?.updateThinkingMode(enabled)
         },
         onSendMessage = { message, images ->
             chatViewModel.sendMessage(message, images)

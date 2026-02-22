@@ -1,2 +1,0 @@
-ninja: Entering directory `D:\startnew\Medgemma-app\aichatlib\.cxx\Release\2aa462o2\arm64-v8a'
-ninja: no work to do.

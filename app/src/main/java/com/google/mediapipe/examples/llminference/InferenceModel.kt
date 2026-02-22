@@ -67,6 +67,11 @@ class InferenceModel private constructor(context: Context) {
         }
     }
 
+    fun updateThinkingMode(thinkingEnabled: Boolean) {
+        engine.setSkipThinking(!thinkingEnabled)
+        Log.i(TAG, "Thinking mode updated: ${if (thinkingEnabled) "enabled" else "disabled"}")
+    }
+
     private fun createEngine(context: Context) {
         try {
             engine = AiChat.getInferenceEngine(context)
@@ -90,18 +95,10 @@ class InferenceModel private constructor(context: Context) {
                     false
                 }
 
-                // Set system prompt to control thinking behavior
+                // Control thinking behavior via native prefill skip
                 val thinkingEnabled = LocalModelFiles.isThinkingEnabled(context)
-                if (!thinkingEnabled) {
-                    try {
-                        engine.setSystemPrompt("/no_think")
-                        Log.i(TAG, "System prompt set: /no_think (thinking disabled)")
-                    } catch (e: Exception) {
-                        Log.w(TAG, "Failed to set system prompt: ${e.message}")
-                    }
-                } else {
-                    Log.i(TAG, "Thinking mode enabled (no system prompt override)")
-                }
+                engine.setSkipThinking(!thinkingEnabled)
+                Log.i(TAG, "Thinking mode: ${if (thinkingEnabled) "enabled" else "disabled (prefill skip)"}")
             }
             Log.i(TAG, "GGUF backend initialized. mmprojLoaded=$mmprojLoaded")
         } catch (e: Exception) {

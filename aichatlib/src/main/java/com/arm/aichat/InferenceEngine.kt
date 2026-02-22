@@ -31,6 +31,11 @@ interface InferenceEngine {
     fun sendUserPrompt(message: String, predictLength: Int = DEFAULT_PREDICT_LENGTH): Flow<String>
 
     /**
+     * Set whether to skip the model's internal thinking/reasoning phase.
+     */
+    fun setSkipThinking(skipThinking: Boolean)
+
+    /**
      * Load mmproj file for multimodal (vision) support.
      */
     suspend fun loadMMProj(pathToMMProj: String): Boolean

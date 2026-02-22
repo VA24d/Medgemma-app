@@ -100,6 +100,9 @@ internal class InferenceEngineImpl private constructor(
     private external fun processSystemPrompt(systemPrompt: String): Int
 
     @FastNative
+    private external fun nativeSetSkipThinking(skip: Boolean)
+
+    @FastNative
     private external fun processUserPrompt(userPrompt: String, predictLength: Int): Int
 
     @FastNative
@@ -228,8 +231,12 @@ internal class InferenceEngineImpl private constructor(
         }
 
     /**
-     * Send plain text user prompt to LLM, which starts generating tokens in a [Flow]
+     * Set whether to skip the model's internal thinking/reasoning phase.
+     * When true, prefills an empty thinking block so the model responds directly.
      */
+    override fun setSkipThinking(skipThinking: Boolean) {
+        nativeSetSkipThinking(skipThinking)
+    }
     override fun sendUserPrompt(
         message: String,
         predictLength: Int,
