@@ -42,6 +42,7 @@ static common_chat_templates_ptr          g_chat_templates;
 static common_sampler                   * g_sampler;
 static mtmd_context                     * g_mtmd_ctx = nullptr;
 static mtmd_bitmap                      * g_bitmap = nullptr;
+static bool                               g_skip_thinking = false;
 
 extern "C"
 JNIEXPORT void JNICALL
@@ -58,6 +59,17 @@ Java_com_arm_aichat_internal_InferenceEngineImpl_init(JNIEnv *env, jobject /*unu
     // Initialize backends
     llama_backend_init();
     LOGi("Backend initiated; Log handler set.");
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_arm_aichat_internal_InferenceEngineImpl_nativeSetSkipThinking(
+        JNIEnv * /*env*/,
+        jobject /*unused*/,
+        jboolean skip
+) {
+    g_skip_thinking = (bool) skip;
+    LOGi("Skip thinking set to: %s", g_skip_thinking ? "true" : "false");
 }
 
 extern "C"
@@ -449,6 +461,30 @@ Java_com_arm_aichat_internal_InferenceEngineImpl_processUserPrompt(
 
     // Update position
     current_position += user_prompt_size;
+
+    // Prefill assistant with empty thinking block to skip reasoning
+    if (g_skip_thinking && has_chat_template) {
+        // Inject raw thinking-complete tokens directly (NO template wrapping!).
+        // The model uses <unused94>thought\n...<unused95> format for thinking.
+        // By prefilling open+close markers, the model sees thinking as done
+        // and generates the actual response directly.
+        // DO NOT use chat_add_and_format here — it wraps with
+        // <start_of_turn>model\n...<end_of_turn> which creates a completed turn.
+        std::string prefill_raw = "<unused94>thought\n<unused95>";
+        auto prefill_tokens = common_tokenize(g_context, prefill_raw, false, true);
+        LOGi("%s: Prefilling %d raw tokens to skip thinking", __func__, (int) prefill_tokens.size());
+        for (auto id: prefill_tokens) {
+            LOGi("prefill token: `%s`\t -> `%d`", common_token_to_piece(g_context, id).c_str(), id);
+        }
+        if (!prefill_tokens.empty()) {
+            if (decode_tokens_in_batches(g_context, g_batch, prefill_tokens, current_position, true)) {
+                LOGe("%s: llama_decode() failed for prefill!", __func__);
+                return 3;
+            }
+            current_position += (int) prefill_tokens.size();
+        }
+    }
+
     stop_generation_position = current_position + user_prompt_size + n_predict;
     return 0;
 }
@@ -704,6 +740,28 @@ Java_com_arm_aichat_internal_InferenceEngineImpl_processUserPromptWithImage(
 
     // Update position
     current_position = new_n_past;
+
+    // Prefill assistant with empty thinking block to skip reasoning
+    if (g_skip_thinking) {
+        const bool has_chat_tpl = common_chat_templates_was_explicit(g_chat_templates.get());
+        if (has_chat_tpl) {
+            // Raw injection — same approach as text-only path.
+            std::string prefill_raw = "<unused94>thought\n<unused95>";
+            auto prefill_tokens = common_tokenize(g_context, prefill_raw, false, true);
+            LOGi("%s: Prefilling %d raw tokens to skip thinking (multimodal)", __func__, (int) prefill_tokens.size());
+            for (auto id: prefill_tokens) {
+                LOGi("prefill token: `%s`\t -> `%d`", common_token_to_piece(g_context, id).c_str(), id);
+            }
+            if (!prefill_tokens.empty()) {
+                if (decode_tokens_in_batches(g_context, g_batch, prefill_tokens, current_position, true)) {
+                    LOGe("%s: llama_decode() failed for prefill!", __func__);
+                    return 4;
+                }
+                current_position += (int) prefill_tokens.size();
+            }
+        }
+    }
+
     stop_generation_position = current_position + n_predict;
 
     LOGi("%s: Multimodal prompt processed. Position: %d", __func__, current_position);

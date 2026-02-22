@@ -16,9 +16,11 @@ data class ChatMessage(
 ) {
     val message: String
         get() {
-            // Strip thinking blocks: <unused94>thought...content...<unused94> or <think>...</think>
+            // Strip thinking blocks:
+            // Model uses <unused94>thought...content...<unused95>response format
             val thinkPatterns = listOf(
-                Regex("""<unused94>thought[\s\S]*?<unused94>"""),
+                Regex("""<unused94>thought[\s\S]*?<unused95>"""),
+                Regex("""<unused94>[\s\S]*?<unused95>"""),
                 Regex("""<think>[\s\S]*?</think>""")
             )
             var cleaned = rawMessage
@@ -32,6 +34,9 @@ data class ChatMessage(
             }
             if (cleaned.startsWith("<unused94>")) {
                 cleaned = cleaned.removePrefix("<unused94>").trim()
+            }
+            if (cleaned.startsWith("<unused95>")) {
+                cleaned = cleaned.removePrefix("<unused95>").trim()
             }
             if (cleaned.startsWith("<think>")) {
                 cleaned = cleaned.removePrefix("<think>").trim()

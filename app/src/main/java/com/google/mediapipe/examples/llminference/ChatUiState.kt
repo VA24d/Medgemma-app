@@ -4,7 +4,7 @@ import androidx.compose.runtime.toMutableStateList
 
 const val USER_PREFIX = "user"
 const val MODEL_PREFIX = "model"
-const val THINKING_MARKER_END = "<unused94>"
+const val THINKING_MARKER_END = "<unused95>"
 const val THINKING_MARKER_START = "<unused94>thought"
 
 
