@@ -12,6 +12,7 @@ object LocalModelFiles {
     private const val KEY_MODEL_PATH = "model_path"
     private const val KEY_MMPROJ_PATH = "mmproj_path"
     private const val KEY_VISION_ENABLED = "vision_enabled"
+    private const val KEY_THINKING_ENABLED = "thinking_enabled"
 
     private fun prefs(context: Context) =
         context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
@@ -45,6 +46,13 @@ object LocalModelFiles {
 
     fun setVisionEnabled(context: Context, enabled: Boolean) {
         prefs(context).edit().putBoolean(KEY_VISION_ENABLED, enabled).apply()
+    }
+
+    fun isThinkingEnabled(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_THINKING_ENABLED, false)
+
+    fun setThinkingEnabled(context: Context, enabled: Boolean) {
+        prefs(context).edit().putBoolean(KEY_THINKING_ENABLED, enabled).apply()
     }
 
     fun displayName(context: Context, uri: Uri): String {

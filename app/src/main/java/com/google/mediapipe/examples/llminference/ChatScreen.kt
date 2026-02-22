@@ -29,9 +29,12 @@ import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.AddPhotoAlternate
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Psychology
+import androidx.compose.material.icons.outlined.Psychology
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
+import kotlinx.coroutines.launch
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -46,6 +49,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.google.mediapipe.examples.llminference.settings.LocalModelFiles
 
 @Composable
 internal fun ChatRoute(
@@ -62,10 +66,19 @@ internal fun ChatRoute(
     val uiState by chatViewModel.uiState.collectAsStateWithLifecycle()
     val textInputEnabled by chatViewModel.isTextInputEnabled.collectAsStateWithLifecycle()
 
+    var thinkingEnabled by remember { mutableStateOf(LocalModelFiles.isThinkingEnabled(context)) }
+
     ChatScreen(
         uiState,
         textInputEnabled,
         visionAvailable = visionAvailable,
+        thinkingEnabled = thinkingEnabled,
+        onToggleThinking = { enabled ->
+            LocalModelFiles.setThinkingEnabled(context, enabled)
+            thinkingEnabled = enabled
+            // Reset session so the system prompt is re-applied
+            inferenceModel?.resetSession()
+        },
         onSendMessage = { message, images ->
             chatViewModel.sendMessage(message, images)
         },
@@ -79,6 +92,8 @@ fun ChatScreen(
     uiState: UiState,
     textInputEnabled: Boolean,
     visionAvailable: Boolean = true,
+    thinkingEnabled: Boolean = false,
+    onToggleThinking: (Boolean) -> Unit = {},
     onSendMessage: (String, List<Bitmap>) -> Unit,
     onClose: () -> Unit
 ) {
@@ -152,6 +167,28 @@ fun ChatScreen(
                         Icon(
                             Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = stringResource(R.string.close_chat)
+                        )
+                    }
+                },
+                actions = {
+                    // Thinking mode toggle
+                    val scope = rememberCoroutineScope()
+                    IconButton(onClick = {
+                        val newValue = !thinkingEnabled
+                        onToggleThinking(newValue)
+                        scope.launch {
+                            snackbarHostState.showSnackbar(
+                                message = if (newValue) "Thinking enabled — model will reason step-by-step"
+                                          else "Thinking disabled — faster, direct responses",
+                                duration = SnackbarDuration.Short
+                            )
+                        }
+                    }) {
+                        Icon(
+                            if (thinkingEnabled) Icons.Filled.Psychology else Icons.Outlined.Psychology,
+                            contentDescription = if (thinkingEnabled) "Disable thinking" else "Enable thinking",
+                            tint = if (thinkingEnabled) MaterialTheme.colorScheme.primary
+                                   else MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 },

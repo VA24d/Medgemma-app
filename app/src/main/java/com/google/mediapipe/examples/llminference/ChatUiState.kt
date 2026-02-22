@@ -4,7 +4,8 @@ import androidx.compose.runtime.toMutableStateList
 
 const val USER_PREFIX = "user"
 const val MODEL_PREFIX = "model"
-const val THINKING_MARKER_END = "</think>"
+const val THINKING_MARKER_END = "<unused94>"
+const val THINKING_MARKER_START = "<unused94>thought"
 
 
 /** Management of the message queue. */
@@ -64,7 +65,7 @@ class UiState(
 
     private fun appendToMessage(id: String, suffix: String) : Int {
         val index = _messages.indexOfFirst { it.id == id }
-        val newText =  suffix.replace(THINKING_MARKER_END, "")
+        val newText = suffix.replace(THINKING_MARKER_END, "").replace(THINKING_MARKER_START, "")
         _messages[index] = _messages[index].copy(
             rawMessage = _messages[index].rawMessage + newText,
             isLoading = false

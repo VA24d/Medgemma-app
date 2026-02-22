@@ -89,6 +89,19 @@ class InferenceModel private constructor(context: Context) {
                 } else {
                     false
                 }
+
+                // Set system prompt to control thinking behavior
+                val thinkingEnabled = LocalModelFiles.isThinkingEnabled(context)
+                if (!thinkingEnabled) {
+                    try {
+                        engine.setSystemPrompt("/no_think")
+                        Log.i(TAG, "System prompt set: /no_think (thinking disabled)")
+                    } catch (e: Exception) {
+                        Log.w(TAG, "Failed to set system prompt: ${e.message}")
+                    }
+                } else {
+                    Log.i(TAG, "Thinking mode enabled (no system prompt override)")
+                }
             }
             Log.i(TAG, "GGUF backend initialized. mmprojLoaded=$mmprojLoaded")
         } catch (e: Exception) {

@@ -16,10 +16,23 @@ data class ChatMessage(
 ) {
     val message: String
         get() {
-            // Strip <think>...</think> reasoning blocks from display
-            val thinkPattern = Regex("""<think>[\s\S]*?</think>""")
-            var cleaned = thinkPattern.replace(rawMessage, "").trim()
-            // Also strip an unclosed <think> tag at the start (still streaming)
+            // Strip thinking blocks: <unused94>thought...content...<unused94> or <think>...</think>
+            val thinkPatterns = listOf(
+                Regex("""<unused94>thought[\s\S]*?<unused94>"""),
+                Regex("""<think>[\s\S]*?</think>""")
+            )
+            var cleaned = rawMessage
+            for (pattern in thinkPatterns) {
+                cleaned = pattern.replace(cleaned, "")
+            }
+            cleaned = cleaned.trim()
+            // Strip unclosed thinking tags at the start (still streaming)
+            if (cleaned.startsWith("<unused94>thought")) {
+                cleaned = cleaned.removePrefix("<unused94>thought").trim()
+            }
+            if (cleaned.startsWith("<unused94>")) {
+                cleaned = cleaned.removePrefix("<unused94>").trim()
+            }
             if (cleaned.startsWith("<think>")) {
                 cleaned = cleaned.removePrefix("<think>").trim()
             }
