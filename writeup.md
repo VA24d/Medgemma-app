@@ -49,7 +49,8 @@ We executed extremely rigorous tests across thousands of synthetic case interact
 | **Q6_K** | 3.0 GB | 40.80% | 28.40% | 57.40% | 41.40% | 9.80% |
 | **Q4_K_M** | 2.4 GB | 32.60% | 29.00% | 55.40% | 29.80% | 10.00% |
 
-**Key Findings:**
+
+#### **Key Findings:**
 1. **Q8_0 is lossless:** Zero meaningful accuracy drop across all 5 benchmarks, achieving a ~47% size reduction compared to the base MedGemma model.
 2. **Q6_K is near-lossless:** Accuracy remains well within the noise margin on all benchmarks, despite a ~59% reduction in model size.
 3. **Q4_K_M Trade-offs:** Shows significant degradation on knowledge-heavy retrieval tasks (MedMCQA drops by 11.2pp, MMLU Med drops by 13.2pp), but surprisingly demonstrates **zero drop on pure sequential reasoning tasks** (MedQA, PubMedQA). 
