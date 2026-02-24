@@ -1,5 +1,6 @@
 package com.google.mediapipe.examples.llminference.ui.screens
 
+import android.Manifest
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
@@ -19,15 +20,20 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
 import com.google.mediapipe.examples.llminference.data.MedicalDatabase
 import com.google.mediapipe.examples.llminference.data.MedicalEntryEntity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -53,6 +59,14 @@ fun XrayAnalysisScreen(
     var generationJob by remember { mutableStateOf<Job?>(null) }
     var generationFuture by remember { mutableStateOf<java.util.concurrent.Future<*>?>(null) }
 
+    // Date picker state
+    var selectedDateMillis by remember { mutableStateOf(System.currentTimeMillis()) }
+    var showDatePicker by remember { mutableStateOf(false) }
+    val dateFormatter = remember { SimpleDateFormat("MMM d, yyyy", Locale.getDefault()) }
+
+    // Camera permission state
+    var pendingCameraLaunch by remember { mutableStateOf(false) }
+
     val imagePickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
@@ -63,12 +77,45 @@ fun XrayAnalysisScreen(
 
     // Camera logic
     var tempCameraUri by remember { mutableStateOf<Uri?>(null) }
-    
+
     val cameraLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.TakePicture()
     ) { success ->
         if (success && tempCameraUri != null) {
             selectedImageUri = tempCameraUri
+        }
+    }
+
+    val cameraPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        if (granted && pendingCameraLaunch) {
+            pendingCameraLaunch = false
+            val uri = run {
+                val storageDir = java.io.File(context.filesDir, "medical_images").apply { mkdirs() }
+                val file = java.io.File(storageDir, "camera_capture_${System.currentTimeMillis()}.jpg")
+                androidx.core.content.FileProvider.getUriForFile(context, "${context.packageName}.provider", file)
+            }
+            tempCameraUri = uri
+            cameraLauncher.launch(uri)
+        } else {
+            pendingCameraLaunch = false
+        }
+    }
+
+    fun launchCamera() {
+        val storageDir = java.io.File(context.filesDir, "medical_images").apply { mkdirs() }
+        val file = java.io.File(storageDir, "camera_capture_${System.currentTimeMillis()}.jpg")
+        val uri = androidx.core.content.FileProvider.getUriForFile(context, "${context.packageName}.provider", file)
+        val permission = Manifest.permission.CAMERA
+        val granted = androidx.core.content.ContextCompat.checkSelfPermission(context, permission) ==
+            android.content.pm.PackageManager.PERMISSION_GRANTED
+        if (granted) {
+            tempCameraUri = uri
+            cameraLauncher.launch(uri)
+        } else {
+            pendingCameraLaunch = true
+            cameraPermissionLauncher.launch(permission)
         }
     }
 
@@ -118,7 +165,9 @@ fun XrayAnalysisScreen(
                                             title = title.ifBlank { "$typeName Analysis" },
                                             content = content,
                                             imagePaths = selectedImageUri?.toString() ?: "",
-                                            analysisResult = analysisResult ?: ""
+                                            analysisResult = analysisResult ?: "",
+                                            createdAt = selectedDateMillis,
+                                            updatedAt = selectedDateMillis
                                         )
                                     )
                                 }
@@ -162,24 +211,34 @@ fun XrayAnalysisScreen(
                     contentAlignment = Alignment.Center
                 ) {
                     if (selectedImageUri != null) {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Icon(
-                                Icons.Default.CheckCircle,
-                                null,
-                                modifier = Modifier.size(48.dp),
-                                tint = MaterialTheme.colorScheme.primary
+                        Box(modifier = Modifier.fillMaxSize()) {
+                            AsyncImage(
+                                model = selectedImageUri,
+                                contentDescription = "Selected image",
+                                contentScale = ContentScale.Crop,
+                                modifier = Modifier.fillMaxSize()
                             )
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Text("Image selected", style = MaterialTheme.typography.bodyMedium)
-                            Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                                TextButton(onClick = { imagePickerLauncher.launch("image/*") }) {
+                            // Overlay controls
+                            Row(
+                                modifier = Modifier
+                                    .align(Alignment.BottomCenter)
+                                    .padding(8.dp),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                FilledTonalButton(
+                                    onClick = { imagePickerLauncher.launch("image/*") },
+                                    modifier = Modifier.weight(1f)
+                                ) {
+                                    Icon(Icons.Default.PhotoLibrary, null, modifier = Modifier.size(16.dp))
+                                    Spacer(modifier = Modifier.width(4.dp))
                                     Text("Gallery")
                                 }
-                                TextButton(onClick = {
-                                    val uri = createImageUri()
-                                    tempCameraUri = uri
-                                    cameraLauncher.launch(uri)
-                                }) {
+                                FilledTonalButton(
+                                    onClick = { launchCamera() },
+                                    modifier = Modifier.weight(1f)
+                                ) {
+                                    Icon(Icons.Default.PhotoCamera, null, modifier = Modifier.size(16.dp))
+                                    Spacer(modifier = Modifier.width(4.dp))
                                     Text("Camera")
                                 }
                             }
@@ -206,11 +265,7 @@ fun XrayAnalysisScreen(
                                     Spacer(modifier = Modifier.width(8.dp))
                                     Text("Gallery")
                                 }
-                                OutlinedButton(onClick = {
-                                    val uri = createImageUri()
-                                    tempCameraUri = uri
-                                    cameraLauncher.launch(uri)
-                                }) {
+                                OutlinedButton(onClick = { launchCamera() }) {
                                     Icon(Icons.Default.PhotoCamera, null)
                                     Spacer(modifier = Modifier.width(8.dp))
                                     Text("Camera")
@@ -218,6 +273,39 @@ fun XrayAnalysisScreen(
                             }
                         }
                     }
+                }
+            }
+
+            // Date picker field
+            OutlinedTextField(
+                value = dateFormatter.format(Date(selectedDateMillis)),
+                onValueChange = {},
+                label = { Text("Date") },
+                modifier = Modifier.fillMaxWidth(),
+                readOnly = true,
+                singleLine = true,
+                trailingIcon = {
+                    IconButton(onClick = { showDatePicker = true }) {
+                        Icon(Icons.Default.CalendarMonth, contentDescription = "Pick date")
+                    }
+                }
+            )
+
+            if (showDatePicker) {
+                val datePickerState = rememberDatePickerState(initialSelectedDateMillis = selectedDateMillis)
+                DatePickerDialog(
+                    onDismissRequest = { showDatePicker = false },
+                    confirmButton = {
+                        TextButton(onClick = {
+                            datePickerState.selectedDateMillis?.let { selectedDateMillis = it }
+                            showDatePicker = false
+                        }) { Text("OK") }
+                    },
+                    dismissButton = {
+                        TextButton(onClick = { showDatePicker = false }) { Text("Cancel") }
+                    }
+                ) {
+                    DatePicker(state = datePickerState)
                 }
             }
 
