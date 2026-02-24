@@ -115,14 +115,23 @@ private fun pickVisionEntry(entries: List<MedicalEntryEntity>): MedicalEntryEnti
 private fun buildFullPrompt(
     entries: List<MedicalEntryEntity>,
     hasImage: Boolean,
-    pastDiagnoses: List<DiagnosisEntity> = emptyList()
+    pastDiagnoses: List<DiagnosisEntity> = emptyList(),
+    useCachedDescriptions: Boolean = false
 ): String {
     val fmt = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+    val imagingTypes = setOf("XRAY", "HISTOPATHOLOGY")
     val summary = entries.joinToString("\n") { e ->
-        val ai = if (e.analysisResult.isNotBlank()) " | AI note: ${e.analysisResult.take(120)}…" else ""
+        val isImaging = e.entryType in imagingTypes
+        val ai = when {
+            useCachedDescriptions && isImaging && e.analysisResult.isNotBlank() ->
+                "\n  [Cached Image Description]:\n${e.analysisResult.trim()}"
+            e.analysisResult.isNotBlank() ->
+                " | AI note: ${e.analysisResult.take(120)}…"
+            else -> ""
+        }
         "[${fmt.format(Date(e.createdAt))}][${e.entryType}] ${e.title}: ${e.content.take(120)}$ai"
     }
-    val imgNote = if (hasImage) "\nThe most recent imaging study is attached. Analyse it as part of the diagnosis.\n" else ""
+    val imgNote = if (hasImage && !useCachedDescriptions) "\nThe most recent imaging study is attached. Analyse it as part of the diagnosis.\n" else ""
 
     // Include context from past diagnoses for continuity of care
     val historyContext = if (pastDiagnoses.isNotEmpty()) {
@@ -153,15 +162,24 @@ private fun buildIncrementalPrompt(
     newEntries: List<MedicalEntryEntity>,
     prior: DiagnosisEntity,
     hasImage: Boolean,
-    olderDiagnoses: List<DiagnosisEntity> = emptyList()
+    olderDiagnoses: List<DiagnosisEntity> = emptyList(),
+    useCachedDescriptions: Boolean = false
 ): String {
     val fmt = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
     val priorDate = fmt.format(Date(prior.generatedAt))
+    val imagingTypes = setOf("XRAY", "HISTOPATHOLOGY")
     val summary = newEntries.joinToString("\n") { e ->
-        val ai = if (e.analysisResult.isNotBlank()) " | AI: ${e.analysisResult.take(120)}…" else ""
+        val isImaging = e.entryType in imagingTypes
+        val ai = when {
+            useCachedDescriptions && isImaging && e.analysisResult.isNotBlank() ->
+                "\n  [Cached Image Description]:\n${e.analysisResult.trim()}"
+            e.analysisResult.isNotBlank() ->
+                " | AI: ${e.analysisResult.take(120)}…"
+            else -> ""
+        }
         "[${fmt.format(Date(e.createdAt))}][${e.entryType}] ${e.title}: ${e.content.take(120)}$ai"
     }
-    val imgNote = if (hasImage) "\nThe most recent new imaging study is attached. Analyse it.\n" else ""
+    val imgNote = if (hasImage && !useCachedDescriptions) "\nThe most recent new imaging study is attached. Analyse it.\n" else ""
 
     // Include older diagnosis history for progression tracking
     val olderContext = if (olderDiagnoses.isNotEmpty()) {
@@ -216,6 +234,8 @@ fun DiagnosisScreen(
     // Per-generation toggles (initialized from global settings)
     var thinkingToggle by remember { mutableStateOf(LocalModelFiles.isThinkingEnabled(context)) }
     var visionToggle by remember { mutableStateOf(LocalModelFiles.isVisionEnabled(context)) }
+    // When ON: embed full cached image descriptions as text; no bitmap sent to encoder
+    var useDescriptionsToggle by remember { mutableStateOf(false) }
 
     // Schedule state
     var scheduleEnabled by remember { mutableStateOf(LocalModelFiles.isScheduledPrognosisEnabled(context)) }
@@ -261,11 +281,14 @@ fun DiagnosisScreen(
                     sorted.filter { it.createdAt > latestDiag.generatedAt }.takeIf { it.isNotEmpty() } ?: sorted
                 } else sorted
 
-                // Vision: only attempt if toggle is ON
-                val visionEntry = if (visionToggle) pickVisionEntry(targetEntries) else null
+                // Vision: only attempt if toggle is ON AND we're not using text descriptions
+                val useDescriptions = useDescriptionsToggle
+                val visionEntry = if (visionToggle && !useDescriptions) pickVisionEntry(targetEntries) else null
                 val bitmap: Bitmap? = visionEntry?.let { loadBitmapFromEntry(context, it) }
                 usingVision = bitmap != null
-                if (bitmap != null) {
+                if (useDescriptions) {
+                    Log.i(TAG, "Vision encoder: skipped — using cached image descriptions")
+                } else if (bitmap != null) {
                     Log.i(TAG, "Vision encoder: using image from entry id=${visionEntry?.id} type=${visionEntry?.entryType}")
                 } else {
                     Log.i(TAG, "Vision encoder: ${if (!visionToggle) "disabled by toggle" else "no readable image (entries: ${targetEntries.size})"}")
@@ -274,12 +297,12 @@ fun DiagnosisScreen(
                 val isReallyIncremental = incremental && latestDiag != null && targetEntries != sorted
                 val prompt = if (isReallyIncremental) {
                     val olderDiags = pastDiagnoses.drop(1) // skip latest (already used as "prior")
-                    buildIncrementalPrompt(targetEntries, latestDiag!!, bitmap != null, olderDiags)
+                    buildIncrementalPrompt(targetEntries, latestDiag!!, bitmap != null, olderDiags, useDescriptions)
                 } else {
-                    buildFullPrompt(sorted, bitmap != null, pastDiagnoses)
+                    buildFullPrompt(sorted, bitmap != null, pastDiagnoses, useDescriptions)
                 }
 
-                Log.i(TAG, "Generating: scope=${if (isReallyIncremental) "INCREMENTAL" else "FULL"} entries=${targetEntries.size} vision=$usingVision model=${currentModelName} thinking=$thinkingOn")
+                Log.i(TAG, "Generating: scope=${if (isReallyIncremental) "INCREMENTAL" else "FULL"} entries=${targetEntries.size} vision=$usingVision useDescriptions=$useDescriptions model=${currentModelName} thinking=$thinkingOn")
 
                 val images = if (bitmap != null) listOf(bitmap) else emptyList()
                 val future = inferenceModel.generateResponseAsync(prompt, images) { token, done ->
@@ -373,7 +396,9 @@ fun DiagnosisScreen(
                         onThinkingChange = { thinkingToggle = it },
                         visionEnabled = visionToggle,
                         onVisionChange = { visionToggle = it },
-                        visionAvailable = try { InferenceModel.getInstance(context).isVisionAvailable } catch (_: Exception) { false }
+                        visionAvailable = try { InferenceModel.getInstance(context).isVisionAvailable } catch (_: Exception) { false },
+                        useDescriptions = useDescriptionsToggle,
+                        onUseDescriptionsChange = { useDescriptionsToggle = it }
                     )
                 }
             }
@@ -678,7 +703,9 @@ private fun GenerationTogglesCard(
     onThinkingChange: (Boolean) -> Unit,
     visionEnabled: Boolean,
     onVisionChange: (Boolean) -> Unit,
-    visionAvailable: Boolean
+    visionAvailable: Boolean,
+    useDescriptions: Boolean,
+    onUseDescriptionsChange: (Boolean) -> Unit
 ) {
     Card(modifier = Modifier.fillMaxWidth()) {
         Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -719,10 +746,33 @@ private fun GenerationTogglesCard(
                     )
                 }
                 Switch(
-                    checked = visionEnabled && visionAvailable,
+                    checked = visionEnabled && visionAvailable && !useDescriptions,
                     onCheckedChange = onVisionChange,
-                    enabled = visionAvailable,
+                    enabled = visionAvailable && !useDescriptions,
                     colors = SwitchDefaults.colors(checkedTrackColor = MaterialTheme.colorScheme.secondary)
+                )
+            }
+
+            HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(Icons.Default.Description, null, modifier = Modifier.size(20.dp), tint = MaterialTheme.colorScheme.primary)
+                Spacer(Modifier.width(12.dp))
+                Column(modifier = Modifier.weight(1f)) {
+                    Text("Use Image Descriptions", style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Medium)
+                    Text(
+                        "Embed cached imaging descriptions as text — faster, no vision encoder, works even without mmproj",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                Switch(
+                    checked = useDescriptions,
+                    onCheckedChange = onUseDescriptionsChange,
+                    colors = SwitchDefaults.colors(checkedTrackColor = MaterialTheme.colorScheme.primary)
                 )
             }
         }

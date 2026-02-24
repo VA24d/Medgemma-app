@@ -57,13 +57,25 @@ fun NewEntryScreen(
 
             AnalysisTypeCard(
                 icon = Icons.Default.Image,
-                title = "X-ray / MRI Analysis",
-                description = "Upload or capture medical imaging for AI analysis",
+                title = "X-ray Analysis",
+                description = "Radiograph analysis — bones, lungs, fractures, opacities",
                 containerColor = MaterialTheme.colorScheme.primaryContainer,
                 contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
                 onClick = {
                     view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
                     onSelectType(patientId, "XRAY")
+                }
+            )
+
+            AnalysisTypeCard(
+                icon = Icons.Default.BlurOn,
+                title = "MRI Scan Analysis",
+                description = "Soft tissue, neuro & MSK — T1/T2 signal, lesion characterization",
+                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                onClick = {
+                    view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
+                    onSelectType(patientId, "MRI")
                 }
             )
 

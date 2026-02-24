@@ -13,6 +13,7 @@ object LocalModelFiles {
     private const val KEY_MMPROJ_PATH = "mmproj_path"
     private const val KEY_VISION_ENABLED = "vision_enabled"
     private const val KEY_THINKING_ENABLED = "thinking_enabled"
+    private const val KEY_LANGUAGE_EXTENSION = "language_extension"
     private const val KEY_SCHEDULED_PROGNOSIS = "scheduled_prognosis_enabled"
     private const val KEY_SCHEDULE_HOUR = "schedule_hour"
     private const val KEY_SCHEDULE_MINUTE = "schedule_minute"
@@ -56,6 +57,13 @@ object LocalModelFiles {
 
     fun setThinkingEnabled(context: Context, enabled: Boolean) {
         prefs(context).edit().putBoolean(KEY_THINKING_ENABLED, enabled).apply()
+    }
+
+    fun isLanguageExtensionEnabled(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_LANGUAGE_EXTENSION, false)
+
+    fun setLanguageExtensionEnabled(context: Context, enabled: Boolean) {
+        prefs(context).edit().putBoolean(KEY_LANGUAGE_EXTENSION, enabled).apply()
     }
 
     fun isScheduledPrognosisEnabled(context: Context): Boolean =

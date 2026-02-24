@@ -28,6 +28,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.platform.LocalContext
+import com.google.mediapipe.examples.llminference.settings.LocalModelFiles
+import com.google.mediapipe.examples.llminference.utils.LanguageExtension
 
 // ──────────────────────────────────────────────
 // Block-level AST
@@ -207,7 +210,14 @@ fun MarkdownText(
     modifier: Modifier = Modifier,
     textColor: Color = Color.Unspecified,
 ) {
-    val blocks = remember(markdown) { parseMarkdown(markdown) }
+    val context = LocalContext.current
+    
+    val processedMarkdown = remember(markdown) {
+        val isVernacularEnabled = LocalModelFiles.isLanguageExtensionEnabled(context)
+        LanguageExtension.applyVernacular(markdown, isVernacularEnabled)
+    }
+
+    val blocks = remember(processedMarkdown) { parseMarkdown(processedMarkdown) }
     val codeBackground = MaterialTheme.colorScheme.surfaceContainerHigh
 
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(3.dp)) {

@@ -22,6 +22,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.google.mediapipe.examples.llminference.settings.AppPreferences
 import com.google.mediapipe.examples.llminference.settings.TokenManager
+import com.google.mediapipe.examples.llminference.settings.LocalModelFiles
 import com.google.mediapipe.examples.llminference.ui.theme.AppTheme
 import com.google.mediapipe.examples.llminference.ui.theme.ThemeManager
 
@@ -113,6 +114,22 @@ fun NavigationSidebar(
                 title = "Theme",
                 subtitle = ThemeManager.currentTheme.displayName,
                 onClick = { showThemeDialog = true }
+            )
+
+            HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+
+            // ── Localization ──
+            var isLanguageExtEnabled by remember { mutableStateOf(LocalModelFiles.isLanguageExtensionEnabled(context)) }
+            SidebarSection("Localization")
+            SidebarItem(
+                icon = Icons.Default.Translate,
+                title = "Language Extension",
+                subtitle = if (isLanguageExtEnabled) "Telugu (Enabled)" else "Off",
+                onClick = {
+                    val newState = !isLanguageExtEnabled
+                    LocalModelFiles.setLanguageExtensionEnabled(context, newState)
+                    isLanguageExtEnabled = newState
+                }
             )
 
             HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))

@@ -64,6 +64,74 @@ fun XrayAnalysisScreen(
     var showDatePicker by remember { mutableStateOf(false) }
     val dateFormatter = remember { SimpleDateFormat("MMM d, yyyy", Locale.getDefault()) }
 
+    // Sub-agent state
+    var autoDescText by remember { mutableStateOf("") }   // Stage 1 — Observation
+    var isAutoDescribing by remember { mutableStateOf(false) }
+    var autoDescJob by remember { mutableStateOf<Job?>(null) }
+    var stage1Expanded by remember { mutableStateOf(false) }
+    var stage2Text by remember { mutableStateOf("") }      // Stage 2 — Interpretation
+    var isRunningStage2 by remember { mutableStateOf(false) }
+    var stage2StreamingText by remember { mutableStateOf("") }
+
+    // Whenever a new image is selected, kick off a background description.
+    LaunchedEffect(selectedImageUri) {
+        val uri = selectedImageUri ?: return@LaunchedEffect
+        autoDescJob?.cancel()
+        autoDescText = ""
+        isAutoDescribing = true
+        autoDescJob = scope.launch {
+            try {
+                val inferenceModel = withContext(Dispatchers.IO) {
+                    com.google.mediapipe.examples.llminference.InferenceModel.getInstance(context)
+                }
+                val bitmap: Bitmap? = withContext(Dispatchers.IO) {
+                    try {
+                        when {
+                            uri.scheme == "file" -> BitmapFactory.decodeFile(uri.path)
+                            uri.scheme == "content" -> {
+                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                                    android.graphics.ImageDecoder.decodeBitmap(
+                                        android.graphics.ImageDecoder.createSource(context.contentResolver, uri)
+                                    ) { decoder, _, _ -> decoder.isMutableRequired = true }
+                                } else {
+                                    @Suppress("DEPRECATION")
+                                    MediaStore.Images.Media.getBitmap(context.contentResolver, uri)
+                                }
+                            }
+                            else -> null
+                        }
+                    } catch (e: Exception) {
+                        Log.w("XrayAutoDesc", "Could not decode image: ${e.message}")
+                        null
+                    }
+                }
+                val descPrompt = when (analysisType) {
+                    "HISTOPATHOLOGY" -> """You are a pathology AI. Systematically describe this histopathology slide for clinical documentation.
+Report: 1) Stain type (H&E / IHC / other), 2) Tissue type and architecture, 3) Cellular morphology — size, shape, nuclear:cytoplasmic ratio, 4) Mitotic figures per HPF, 5) Inflammatory infiltrate, 6) Vascular and stromal changes, 7) Any dysplasia, atypia, or malignant features with location.
+Be precise, structured, and clinically useful. Do not wrap in a code block."""
+                    "MRI" -> """You are a radiologist AI specialising in MRI. Systematically describe this MRI image for clinical documentation.
+Report: 1) Likely MRI sequence (T1/T2/FLAIR/DWI/GRE/other) and imaging plane, 2) Body region and laterality, 3) Signal characteristics of major structures, 4) Any focal lesions — location, size, signal intensity, margins, surrounding oedema, 5) Mass effect or midline shift, 6) Enhancement patterns if contrast visible, 7) Incidental findings.
+Be precise, structured, and clinically useful. Do not wrap in a code block."""
+                    else -> """You are a radiologist AI. Systematically describe this X-ray for clinical documentation.
+Report: 1) Image orientation and quality, 2) Bony structures — cortex, density, trabeculation, 3) Soft tissue shadows, 4) Lung fields — opacities, consolidations, hyperinflation, vascularity, 5) Cardiac silhouette size and borders, 6) Mediastinum width, 7) Pleural spaces, 8) Any abnormal findings with precise location and character.
+Be precise, structured, and clinically useful. Do not wrap in a code block."""
+                }
+                val imgList = if (bitmap != null) listOf(bitmap) else emptyList()
+                var desc = ""
+                val future = inferenceModel.generateResponseAsync(descPrompt, imgList) { token, _ ->
+                    if (token.isNotEmpty()) desc += token
+                }
+                withContext(Dispatchers.IO) { future.get() }
+                autoDescText = desc.trim()
+            } catch (e: Exception) {
+                Log.w("XrayAutoDesc", "Auto-description failed: ${e.message}")
+                autoDescText = ""
+            } finally {
+                isAutoDescribing = false
+            }
+        }
+    }
+
     // Camera permission state
     var pendingCameraLaunch by remember { mutableStateOf(false) }
 
@@ -73,7 +141,11 @@ fun XrayAnalysisScreen(
         selectedImageUri = uri
     }
 
-    val typeName = if (analysisType == "HISTOPATHOLOGY") "Histopathology" else "X-ray / MRI"
+    val typeName = when (analysisType) {
+        "HISTOPATHOLOGY" -> "Histopathology"
+        "MRI" -> "MRI Scan"
+        else -> "X-ray"
+    }
 
     // Camera logic
     var tempCameraUri by remember { mutableStateOf<Uri?>(null) }
@@ -158,6 +230,12 @@ fun XrayAnalysisScreen(
                                         if (bodyPart.isNotBlank()) appendLine("Body Part: $bodyPart")
                                         if (clinicalContext.isNotBlank()) appendLine("Context: $clinicalContext")
                                     }
+                                    // Wait for background auto-description if still running
+                                    autoDescJob?.join()
+                                    val finalAnalysis = stage2Text.ifBlank { null }
+                                        ?: analysisResult
+                                        ?: autoDescText.ifBlank { null }
+                                        ?: ""
                                     db.medicalEntryDao().insertEntry(
                                         MedicalEntryEntity(
                                             patientId = patientId,
@@ -165,7 +243,7 @@ fun XrayAnalysisScreen(
                                             title = title.ifBlank { "$typeName Analysis" },
                                             content = content,
                                             imagePaths = selectedImageUri?.toString() ?: "",
-                                            analysisResult = analysisResult ?: "",
+                                            analysisResult = finalAnalysis,
                                             createdAt = selectedDateMillis,
                                             updatedAt = selectedDateMillis
                                         )
@@ -246,8 +324,11 @@ fun XrayAnalysisScreen(
                     } else {
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
                             Icon(
-                                if (analysisType == "HISTOPATHOLOGY") Icons.Default.Biotech
-                                else Icons.Default.Image,
+                                when (analysisType) {
+                                    "HISTOPATHOLOGY" -> Icons.Default.Biotech
+                                    "MRI" -> Icons.Default.BlurOn
+                                    else -> Icons.Default.Image
+                                },
                                 null,
                                 modifier = Modifier.size(48.dp),
                                 tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
@@ -273,6 +354,29 @@ fun XrayAnalysisScreen(
                             }
                         }
                     }
+                }
+            }
+
+            // Auto-description status chip
+            if (selectedImageUri != null) {
+                if (isAutoDescribing) {
+                    SuggestionChip(
+                        onClick = {},
+                        label = { Text("Generating image description…", style = MaterialTheme.typography.labelSmall) },
+                        icon = {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(14.dp),
+                                strokeWidth = 2.dp,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                    )
+                } else if (autoDescText.isNotBlank() && analysisResult == null) {
+                    SuggestionChip(
+                        onClick = {},
+                        label = { Text("Image description ready — will be used in Diagnosis", style = MaterialTheme.typography.labelSmall) },
+                        icon = { Icon(Icons.Default.AutoAwesome, null, modifier = Modifier.size(14.dp)) }
+                    )
                 }
             }
 
@@ -320,8 +424,16 @@ fun XrayAnalysisScreen(
             OutlinedTextField(
                 value = bodyPart,
                 onValueChange = { bodyPart = it },
-                label = { Text(if (analysisType == "HISTOPATHOLOGY") "Tissue Type" else "Body Part") },
-                placeholder = { Text(if (analysisType == "HISTOPATHOLOGY") "e.g., Liver biopsy" else "e.g., Chest, Left hand") },
+                label = { Text(when (analysisType) {
+                    "HISTOPATHOLOGY" -> "Tissue Type"
+                    "MRI" -> "Region / Sequence"
+                    else -> "Body Part"
+                }) },
+                placeholder = { Text(when (analysisType) {
+                    "HISTOPATHOLOGY" -> "e.g., Liver biopsy"
+                    "MRI" -> "e.g., Brain T2, Lumbar spine"
+                    else -> "e.g., Chest, Left hand"
+                }) },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true
             )
@@ -335,128 +447,317 @@ fun XrayAnalysisScreen(
                 minLines = 3
             )
 
-            // Analyze button
-            if (selectedImageUri != null && analysisResult == null) {
-                Button(
-                    onClick = {
-                        view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
-                        isAnalyzing = true
-                        streamingAnalysis = ""
-                        scope.launch {
-                            try {
-                                val inferenceModel = com.google.mediapipe.examples.llminference.InferenceModel.getInstance(context)
-                                val prompt = "You are a specialist AI medical assistant. Analyse this $typeName image.\nTitle: $title. Body part / tissue: $bodyPart. Clinical context: $clinicalContext.\nProvide: 1) Key findings, 2) Abnormalities if any, 3) Differential diagnoses, 4) Recommended next steps."
+            // ─── Sub-agent pipeline ────────────────────────────────────────────
+            if (selectedImageUri != null) {
 
-                                // Load bitmap for vision analysis
-                                val bitmap: Bitmap? = withContext(Dispatchers.IO) {
-                                    try {
-                                        val uri = selectedImageUri!!
-                                        @Suppress("DEPRECATION")
-                                        when {
-                                            uri.scheme == "file" -> BitmapFactory.decodeFile(uri.path)
-                                            uri.scheme == "content" -> {
-                                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                                                    android.graphics.ImageDecoder.decodeBitmap(
-                                                        android.graphics.ImageDecoder.createSource(context.contentResolver, uri)
-                                                    ) { decoder, _, _ -> decoder.isMutableRequired = true }
-                                                } else {
-                                                    @Suppress("DEPRECATION")
-                                                    MediaStore.Images.Media.getBitmap(context.contentResolver, uri)
-                                                }
-                                            }
-                                            else -> null
-                                        }
-                                    } catch (e: Exception) {
-                                        Log.w("XrayAnalysis", "Could not decode image: ${e.message}")
-                                        null
+                // Stage 1 card — Observation Agent (auto-desc)
+                if (isAutoDescribing || autoDescText.isNotBlank()) {
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.secondaryContainer
+                        )
+                    ) {
+                        Column(modifier = Modifier.padding(16.dp)) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                if (isAutoDescribing) {
+                                    CircularProgressIndicator(
+                                        modifier = Modifier.size(16.dp),
+                                        strokeWidth = 2.dp,
+                                        color = MaterialTheme.colorScheme.onSecondaryContainer
+                                    )
+                                } else {
+                                    Icon(
+                                        Icons.Default.Search, null,
+                                        modifier = Modifier.size(16.dp),
+                                        tint = MaterialTheme.colorScheme.onSecondaryContainer
+                                    )
+                                }
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(
+                                    "Stage 1 — Observation Agent",
+                                    style = MaterialTheme.typography.labelMedium,
+                                    color = MaterialTheme.colorScheme.onSecondaryContainer,
+                                    modifier = Modifier.weight(1f)
+                                )
+                                if (autoDescText.isNotBlank()) {
+                                    TextButton(
+                                        onClick = { stage1Expanded = !stage1Expanded },
+                                        contentPadding = PaddingValues(horizontal = 4.dp)
+                                    ) {
+                                        Text(
+                                            if (stage1Expanded) "Collapse" else "Expand",
+                                            style = MaterialTheme.typography.labelSmall
+                                        )
                                     }
                                 }
-
-                                val images = if (bitmap != null) {
-                                    Log.i("XrayAnalysis", "Vision encoder: passing image to MedGemma (${bitmap.width}x${bitmap.height})")
-                                    listOf(bitmap)
+                            }
+                            if (isAutoDescribing) {
+                                Spacer(modifier = Modifier.height(6.dp))
+                                Text(
+                                    "Extracting structured observations from image…",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.7f)
+                                )
+                            } else if (autoDescText.isNotBlank()) {
+                                if (stage1Expanded) {
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                    Text(
+                                        autoDescText,
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSecondaryContainer
+                                    )
                                 } else {
-                                    Log.w("XrayAnalysis", "Vision encoder: bitmap null, falling back to text-only")
-                                    emptyList()
+                                    Spacer(modifier = Modifier.height(6.dp))
+                                    Text(
+                                        autoDescText.take(120) + if (autoDescText.length > 120) "…" else "",
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.8f)
+                                    )
                                 }
-
-                                val future = inferenceModel.generateResponseAsync(prompt, images) { token, done ->
-                                    if (!done && token.isNotEmpty()) streamingAnalysis += token
-                                }
-                                withContext(Dispatchers.IO) { future.get() }
-                                analysisResult = streamingAnalysis
-                            } catch (e: Exception) {
-                                analysisResult = "Error generating analysis: ${e.message}"
-                            } finally {
-                                isAnalyzing = false
                             }
                         }
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                    enabled = !isAnalyzing
-                ) {
-                    if (isAnalyzing) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(20.dp),
-                            strokeWidth = 2.dp,
-                            color = MaterialTheme.colorScheme.onPrimary
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text("Analyzing…")
-                    } else {
-                        Icon(Icons.Default.AutoAwesome, null, modifier = Modifier.size(20.dp))
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text("Analyze with MedGemma")
                     }
                 }
-            }
 
-            // Streaming result (while analyzing)
-            if (isAnalyzing && streamingAnalysis.isNotBlank()) {
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)
-                ) {
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp)
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text("Generating…", style = MaterialTheme.typography.labelMedium)
+                // Analysis action buttons
+                val canRunSubAgent = autoDescText.isNotBlank() && !isAutoDescribing && !isRunningStage2 && stage2Text.isBlank()
+                val canRunQuick = !isAnalyzing && !isRunningStage2 && analysisResult == null && stage2Text.isBlank()
+
+                if (canRunSubAgent || canRunQuick) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        // Sub-agent Analysis button
+                        Button(
+                            onClick = {
+                                view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
+                                isRunningStage2 = true
+                                stage2StreamingText = ""
+                                scope.launch {
+                                    try {
+                                        val inferenceModel = com.google.mediapipe.examples.llminference.InferenceModel.getInstance(context)
+                                        // Stage 2: clinical interpretation — text only, uses Stage 1 output
+                                        val stage2Prompt = when (analysisType) {
+                                            "HISTOPATHOLOGY" -> """You are a senior pathologist AI. A junior agent produced these histopathological observations:
+
+$autoDescText
+
+Clinical context — Title: $title. Tissue: $bodyPart. Context: $clinicalContext.
+
+Provide a clinical interpretation:
+1. **Pathological Diagnosis** (primary + differentials ranked by likelihood)
+2. **WHO Classification / Grade** (if applicable)
+3. **Tumour/Lesion Characteristics** (size estimate, margins, invasion, necrosis)
+4. **IHC Markers** recommended for confirmation
+5. **Staging Implications**
+6. **Clinical Significance & Urgency**
+
+Format in Markdown. Do not wrap in a code block."""
+                                            "MRI" -> """You are a consultant neuroradiologist / MSK radiologist AI. A junior agent produced these MRI observations:
+
+$autoDescText
+
+Clinical context — Title: $title. Region/Sequence: $bodyPart. Context: $clinicalContext.
+
+Provide a clinical interpretation:
+1. **Primary Impression** (most likely diagnosis)
+2. **Differential Diagnoses** (ranked, with reasoning)
+3. **Structured Scoring** (BIRADS / PIRADS / ACR / ASPECTS as appropriate)
+4. **Key Abnormalities** (with anatomical significance)
+5. **Recommended Follow-up** (additional sequences, contrast, biopsy, MDT)
+6. **Urgency Level** (routine / urgent / emergency)
+
+Format in Markdown. Do not wrap in a code block."""
+                                            else -> """You are a consultant radiologist AI. A junior agent produced these radiographic observations:
+
+$autoDescText
+
+Clinical context — Title: $title. Body part: $bodyPart. Context: $clinicalContext.
+
+Provide a clinical interpretation:
+1. **Primary Radiological Diagnosis**
+2. **Differential Diagnoses** (ranked, with confidence levels)
+3. **Severity / Extent Assessment**
+4. **Recommended Additional Views or Imaging**
+5. **Clinical Correlation Recommendations**
+6. **Urgency Level** (routine / urgent / emergency)
+
+Format in Markdown. Do not wrap in a code block."""
+                                        }
+                                        val future = inferenceModel.generateResponseAsync(stage2Prompt, emptyList()) { token, _ ->
+                                            if (token.isNotEmpty()) stage2StreamingText += token
+                                        }
+                                        withContext(Dispatchers.IO) { future.get() }
+                                        stage2Text = stage2StreamingText.trim()
+                                    } catch (e: Exception) {
+                                        stage2Text = "Error in Stage 2: ${e.message}"
+                                    } finally {
+                                        isRunningStage2 = false
+                                    }
+                                }
+                            },
+                            enabled = canRunSubAgent,
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Icon(Icons.Default.AccountTree, null, modifier = Modifier.size(16.dp))
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text("Sub-agent", style = MaterialTheme.typography.labelMedium)
                         }
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(streamingAnalysis, style = MaterialTheme.typography.bodySmall)
+
+                        // Quick Analysis button
+                        OutlinedButton(
+                            onClick = {
+                                view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
+                                isAnalyzing = true
+                                streamingAnalysis = ""
+                                scope.launch {
+                                    try {
+                                        val inferenceModel = com.google.mediapipe.examples.llminference.InferenceModel.getInstance(context)
+                                        val prompt = when (analysisType) {
+                                            "HISTOPATHOLOGY" -> "You are a specialist pathology AI. Analyse this histopathology image.\nTissue: $bodyPart. Clinical context: $clinicalContext.\nProvide: 1) Key histopathological findings, 2) Diagnosis / differentials, 3) Grade and staging implications, 4) Recommended IHC markers."
+                                            "MRI" -> "You are a specialist radiologist AI. Analyse this MRI scan.\nRegion/Sequence: $bodyPart. Clinical context: $clinicalContext.\nProvide: 1) Key MRI findings, 2) Primary impression and differentials, 3) Relevant scoring (BIRADS/PIRADS if applicable), 4) Recommended next steps."
+                                            else -> "You are a specialist radiologist AI. Analyse this X-ray.\nBody part: $bodyPart. Clinical context: $clinicalContext.\nProvide: 1) Key radiographic findings, 2) Diagnosis / differentials, 3) Severity, 4) Recommended next steps."
+                                        }
+                                        val bitmap: Bitmap? = withContext(Dispatchers.IO) {
+                                            try {
+                                                val uri = selectedImageUri!!
+                                                when {
+                                                    uri.scheme == "file" -> BitmapFactory.decodeFile(uri.path)
+                                                    uri.scheme == "content" -> {
+                                                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                                                            android.graphics.ImageDecoder.decodeBitmap(
+                                                                android.graphics.ImageDecoder.createSource(context.contentResolver, uri)
+                                                            ) { decoder, _, _ -> decoder.isMutableRequired = true }
+                                                        } else {
+                                                            @Suppress("DEPRECATION")
+                                                            MediaStore.Images.Media.getBitmap(context.contentResolver, uri)
+                                                        }
+                                                    }
+                                                    else -> null
+                                                }
+                                            } catch (e: Exception) { null }
+                                        }
+                                        val images = if (bitmap != null) listOf(bitmap) else emptyList()
+                                        val future = inferenceModel.generateResponseAsync(prompt, images) { token, done ->
+                                            if (!done && token.isNotEmpty()) streamingAnalysis += token
+                                        }
+                                        withContext(Dispatchers.IO) { future.get() }
+                                        analysisResult = streamingAnalysis
+                                    } catch (e: Exception) {
+                                        analysisResult = "Error generating analysis: ${e.message}"
+                                    } finally {
+                                        isAnalyzing = false
+                                    }
+                                }
+                            },
+                            enabled = canRunQuick,
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Icon(Icons.Default.AutoAwesome, null, modifier = Modifier.size(16.dp))
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text("Quick", style = MaterialTheme.typography.labelMedium)
+                        }
                     }
                 }
-            }
 
-            // Analysis result
-            if (analysisResult != null) {
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.tertiaryContainer
-                    )
-                ) {
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(
-                                Icons.Default.AutoAwesome, null,
-                                modifier = Modifier.size(20.dp),
-                                tint = MaterialTheme.colorScheme.onTertiaryContainer
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
+                // Stage 2 — streaming
+                if (isRunningStage2 && stage2StreamingText.isNotBlank()) {
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.tertiaryContainer)
+                    ) {
+                        Column(modifier = Modifier.padding(16.dp)) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp)
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text("Stage 2 — Clinical Interpretation…", style = MaterialTheme.typography.labelMedium)
+                            }
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(stage2StreamingText, style = MaterialTheme.typography.bodySmall)
+                        }
+                    }
+                }
+
+                // Stage 2 — final result
+                if (stage2Text.isNotBlank()) {
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.tertiaryContainer)
+                    ) {
+                        Column(modifier = Modifier.padding(16.dp)) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(
+                                    Icons.Default.AccountTree, null,
+                                    modifier = Modifier.size(18.dp),
+                                    tint = MaterialTheme.colorScheme.onTertiaryContainer
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(
+                                    "Stage 2 — Clinical Interpretation",
+                                    style = MaterialTheme.typography.titleSmall,
+                                    color = MaterialTheme.colorScheme.onTertiaryContainer
+                                )
+                            }
+                            Spacer(modifier = Modifier.height(8.dp))
                             Text(
-                                "AI Analysis",
-                                style = MaterialTheme.typography.titleSmall,
+                                stage2Text,
+                                style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onTertiaryContainer
                             )
                         }
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            analysisResult!!,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onTertiaryContainer
-                        )
+                    }
+                }
+
+                // Quick analysis streaming
+                if (isAnalyzing && streamingAnalysis.isNotBlank()) {
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)
+                    ) {
+                        Column(modifier = Modifier.padding(16.dp)) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp)
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text("Generating…", style = MaterialTheme.typography.labelMedium)
+                            }
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(streamingAnalysis, style = MaterialTheme.typography.bodySmall)
+                        }
+                    }
+                }
+
+                // Quick analysis result
+                if (analysisResult != null) {
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.tertiaryContainer)
+                    ) {
+                        Column(modifier = Modifier.padding(16.dp)) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(
+                                    Icons.Default.AutoAwesome, null,
+                                    modifier = Modifier.size(20.dp),
+                                    tint = MaterialTheme.colorScheme.onTertiaryContainer
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(
+                                    "Quick Analysis",
+                                    style = MaterialTheme.typography.titleSmall,
+                                    color = MaterialTheme.colorScheme.onTertiaryContainer
+                                )
+                            }
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                analysisResult!!,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onTertiaryContainer
+                            )
+                        }
                     }
                 }
             }
