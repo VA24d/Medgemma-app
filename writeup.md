@@ -9,18 +9,17 @@
 
 The paradigm of healthcare artificial intelligence is undergoing a necessary transition from centralized, high-latency cloud architectures to **privacy-first, decentralized edge deployments**. While AI holds the monumental promise of alleviating administrative bloat and augmenting clinical judgment, traditional cloud-based LLM solutions fail on two critical fronts: they alienate environments lacking high-speed infrastructure, and they fundamentally compromise patient confidentiality by demanding constant data egress.
 
-We built **MedVed**, a fully functional, privacy-first Android application designed to be the ultimate clinician's companion on the edge. By natively integrating Google's powerful suite of Health AI Developer Foundations (HAI-DEF) models directly onto mobile hardware, MedVed shatters the cloud reliance paradigm. It unifies text analytics, ambient voice dictation, and multimodal diagnostic imaging into a single, breathtakingly intuitive interface. Inspired by Google's clean, user-focused visual aesthetic, the app leverages **Material Design 3 guidelines** to ensure that physicians can navigate complex longitudinal data effortlessly with zero learning curve. **Absolutely no patient data ever leaves the device.** We are not replacing clinical judgment; we are augmenting it, ensuring that the next generation of medical intelligence is as mobile, secure, and resilient as the practitioners who use it.
+We built **MedVed**, a fully functional, privacy-first Android application designed to be the ultimate clinician's companion on the edge. By natively integrating Google's MedGemma 1.5 4B Multimodal model from the Health AI Developer Foundations (HAI-DEF) directly onto mobile hardware, MedVed shatters the cloud reliance paradigm. It unifies text analytics and multimodal diagnostic imaging into a single, breathtakingly intuitive interface. Inspired by Google's clean, user-focused visual aesthetic, the app leverages **Material Design 3 guidelines** to ensure that physicians can navigate complex longitudinal data effortlessly with zero learning curve. **Absolutely no patient data ever leaves the device.** We are not replacing clinical judgment; we are augmenting it, ensuring that the next generation of medical intelligence is as mobile, secure, and resilient as the practitioners who use it.
 
 ---
 
 ## Overview of Approach: Maximizing the HAI-DEF Ecosystem
 
-To win the **Edge of AI Prize**, a solution must transition AI from the cloud to the field, specifically targeting resource-constrained hardware like mobile phones and portable scanners. MedVed achieves this by orchestrating a modular pipeline where specialized HAI-DEF models tackle their specific domains entirely on-device:
+To win the **Edge of AI Prize**, a solution must transition AI from the cloud to the field, specifically targeting resource-constrained hardware like mobile phones and portable scanners. MedVed achieves this by leveraging the **MedGemma 1.5 4B Multimodal** model—the only HAI-DEF model our application requires, used to its fullest potential:
 
-1. **MedGemma 1.5 4B (Multimodal):** Serves as the core clinical reasoning engine. We specifically chose the 4B variant over the 27B model because a 27B model (even quantized) exceeds the memory capacity of commodity smartphones. The 4B model perfectly balances deep medical knowledge with strict mobile memory envelopes. Crucially, its integrated **SigLIP image encoder** allows us to rapidly process high-dimensional radiographic imagery and complex histopathology slides locally. Because this visual data can be embedded into the patient's record without the immediate compute overhead of full text generation, it serves as the critical foundation for our application's remarkably fast longitudinal analysis.
-2. **CXR Foundation:** Provides deep image embeddings and analytical support fine-tuned for X-rays, offering high-fidelity anomaly detection that generic vision-language models consistently miss.
-3. **Path Foundation (ViT-S):** The powerhouse behind our robust histopathology feature, bringing laboratory-grade tissue classification to the mobile edge.
-4. **MedASR:** Powers the highly accurate, ambient voice dictation pipeline. In sterile environments where touching a device is impractical, MedASR allows for hands-free clinical documentation. Its specialized fine-tuning for health vernacular vastly outperforms general models (like Whisper) on complex pharmacological terminology.
+**MedGemma 1.5 4B (Multimodal):** Serves as both the clinical reasoning engine AND the medical imaging analyzer. We specifically chose the 4B variant over the 27B model because the 27B model (even quantized) exceeds the memory capacity of commodity smartphones. The 4B model perfectly balances deep medical knowledge with strict mobile memory envelopes. Crucially, its integrated **medically-tuned SigLIP vision encoder** allows us to rapidly process high-dimensional radiographic imagery and histopathology slides directly on-device. This vision encoder was trained on de-identified medical image/text pairs including chest X-rays, dermatology, ophthalmology, and histopathology—giving MedGemma native medical visual understanding without requiring separate foundation models.
+
+**Why one model is enough:** MedGemma 1.5 4B is explicitly designed as an end-to-end multimodal medical AI. Adding separate foundation models would be redundant—MedGemma already contains the medical visual understanding we need, packaged efficiently for edge deployment.
 
 ---
 
@@ -40,7 +39,6 @@ The engine dynamically routes computation paths (CPU vs. GPU vs. NPU) based on t
 | **Inference Speed (Text)** | ~18-22 Tokens / Second |
 | **VRAM / RAM Consumption** | Peak Load: 4.1 GB |
 | **Model Size on Disk** | 2.8 GB (Q4_K_M Quantized) |
-| **MedASR Word Error Rate** | 5.8% (Clinical Dictation Benchmark) |
 
 ### 4. Fine-Tuning and Formatting (QLoRA)
 To ensure the model outputs programmatic, standard medical formats (like SOAP notes) for our FHIR export engine, we fine-tuned the model using Quantized Low-Rank Adaptation (QLoRA). 

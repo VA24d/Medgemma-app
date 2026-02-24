@@ -54,5 +54,5 @@ This is a comprehensive feature list for the MediPro Chronicler application, bui
 ## 7. Technical Foundation
 * **OS:** Android (Kotlin, Jetpack Compose, Modern Android Development).
 * **Database:** Room (Local DB for fast, offline access).
-* **Inference Pipeline:** MediaPipe LLM Inference / LiteRT.
+* **Inference Pipeline:** Custom `llama.cpp` backend with GGUF multimodal support.
 * **Media Handling:** CameraX for live capture, Coil for image rendering.

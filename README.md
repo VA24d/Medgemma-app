@@ -1,6 +1,6 @@
 # 🏆 Kaggle Google MedGemma Challenge Submission
 
-**MedVed** locally processes patient files alongside the 4B multimodal weights, avoiding any egress of PHI to third-party endpoints.wer healthcare professionals with secure, longitudinal patient history analysis. Built for the **Kaggle Google MedGemma Challenge**, it leverages the lightweight yet powerful **MedGemma 2B** model to process medical inquiries and analyze X-rays directly on Android devices—ensure 100% data privacy with zero cloud egress.
+**MedVed** locally processes patient files alongside the 4B multimodal weights, avoiding any egress of PHI to third-party endpoints. Built for the **Kaggle Google MedGemma Challenge**, it leverages the lightweight yet powerful **MedGemma 1.5 4B Multimodal** model to process medical inquiries and analyze X-rays directly on Android devices—ensuring 100% data privacy with zero cloud egress.
 
 ---
 
@@ -15,16 +15,16 @@ In the fast-paced medical environment, retrieving patient history and analyzing 
 
 # ✨ Key Features
 
--   **🤖 On-Device Intelligence**: Powered by **MedGemma 2B** via MediaPipe LLM Inference, offering low-latency responses without internet.
--   **👁️ Multimodal Capabilities**: Seamlessly integrates text and image inputs. Show an X-ray and ask for an analysis.
+-   **🤖 On-Device Intelligence**: Powered by **MedGemma 1.5 4B Multimodal** via our custom `llama.cpp` backend, offering low-latency responses without internet.
+-   **👁️ Multimodal Capabilities**: Seamlessly integrates text and image inputs via the integrated medically-tuned SigLIP vision encoder. Show an X-ray and ask for an analysis.
 -   **🔒 Privacy First**: Complete local execution ensures patient data never leaves the tablet/phone.
 -   **📂 Longitudinal Patient Records**: Securely store and retrieve patient profiles and history using a local Room Database.
--   **⚡ Optimized Performance**: Built with Android Jetpack Compose and hardware-accelerated TFLite/MediaPipe delegates.
+-   **⚡ Optimized Performance**: Built with Android Jetpack Compose and hardware-accelerated llama.cpp inference.
 
 # 🛠️ Technology Stack
 
--   **Model**: Google MedGemma 2B (Kaggle Model)
--   **Inference Engine**: MediaPipe LLM Inference (LiteRT)
+-   **Model**: MedGemma 1.5 4B Multimodal (Q4_K_M GGUF from `unsloth/medgemma-1.5-4b-it-GGUF`)
+-   **Inference Engine**: Custom `llama.cpp` backend (`com.arm.aichat`) with multimodal support
 -   **Android Architecture**: Modern Android Development (MAD)
     -   **Language**: Kotlin
     -   **UI**: Jetpack Compose
@@ -95,5 +95,5 @@ Use the dedicated X-ray tool to highlight specific regions of interest before se
 # 📄 License & Acknowledgments
 
 -   **MedGemma**: Copyright Google DeepMind.
--   **MediaPipe**: Apache 2.0 License.
+-   **llama.cpp**: MIT License.
 -   This project is a submission for the **Kaggle Google MedGemma Challenge**.
