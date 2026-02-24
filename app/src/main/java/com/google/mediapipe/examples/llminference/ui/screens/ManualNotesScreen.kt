@@ -13,6 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.dp
+import com.google.mediapipe.examples.llminference.InferenceModel
 import com.google.mediapipe.examples.llminference.data.MedicalDatabase
 import com.google.mediapipe.examples.llminference.data.MedicalEntryEntity
 import kotlinx.coroutines.Dispatchers
@@ -37,6 +38,7 @@ fun ManualNotesScreen(
     var observations by remember { mutableStateOf("") }
     var notes by remember { mutableStateOf("") }
     var isSaving by remember { mutableStateOf(false) }
+    var isExtracting by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -53,13 +55,13 @@ fun ManualNotesScreen(
                             view.performHapticFeedback(HapticFeedbackConstants.CONFIRM)
                             isSaving = true
                             scope.launch {
-                                withContext(Dispatchers.IO) {
-                                    val content = buildString {
-                                        if (symptoms.isNotBlank()) appendLine("Symptoms: $symptoms")
-                                        if (vitalSigns.isNotBlank()) appendLine("Vitals: $vitalSigns")
-                                        if (observations.isNotBlank()) appendLine("Observations: $observations")
-                                        if (notes.isNotBlank()) appendLine("Notes: $notes")
-                                    }
+                                val content = buildString {
+                                    if (symptoms.isNotBlank()) appendLine("Symptoms: $symptoms")
+                                    if (vitalSigns.isNotBlank()) appendLine("Vitals: $vitalSigns")
+                                    if (observations.isNotBlank()) appendLine("Observations: $observations")
+                                    if (notes.isNotBlank()) appendLine("Notes: $notes")
+                                }
+                                val entryId = withContext(Dispatchers.IO) {
                                     db.medicalEntryDao().insertEntry(
                                         MedicalEntryEntity(
                                             patientId = patientId,
@@ -71,6 +73,31 @@ fun ManualNotesScreen(
                                 }
                                 isSaving = false
                                 onSaved()
+                                // Background clinical summarisation
+                                isExtracting = true
+                                scope.launch(Dispatchers.IO) {
+                                    try {
+                                        val inferenceModel = InferenceModel.getInstance(context)
+                                        val prompt = """You are a specialist AI medical assistant.
+Analyse these clinical notes and provide a concise structured summary.
+Title: ${title.ifBlank { "Clinical Notes" }}
+$content
+Provide: 1) **Key Findings** (symptoms, vitals, clinical signs), 2) **Clinical Assessment** (differential diagnoses), 3) **Recommended Actions** (investigations, referrals, follow-up).
+Be concise. Format in Markdown. Do not wrap in a code block."""
+                                        var result = ""
+                                        val future = inferenceModel.generateResponseAsync(prompt, emptyList()) { token, _ ->
+                                            if (token.isNotEmpty()) result += token
+                                        }
+                                        future.get()
+                                        val entry = db.medicalEntryDao().getEntry(entryId)
+                                        if (entry != null) {
+                                            db.medicalEntryDao().updateEntry(entry.copy(analysisResult = result.trim()))
+                                        }
+                                    } catch (_: Exception) {
+                                    } finally {
+                                        withContext(Dispatchers.Main) { isExtracting = false }
+                                    }
+                                }
                             }
                         },
                         enabled = !isSaving && (symptoms.isNotBlank() || observations.isNotBlank() || notes.isNotBlank())

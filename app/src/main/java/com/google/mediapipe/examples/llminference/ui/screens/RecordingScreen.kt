@@ -21,6 +21,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.dp
+import com.google.mediapipe.examples.llminference.InferenceModel
 import com.google.mediapipe.examples.llminference.data.MedicalDatabase
 import com.google.mediapipe.examples.llminference.data.MedicalEntryEntity
 import kotlinx.coroutines.Dispatchers
@@ -42,6 +43,7 @@ fun RecordingScreen(
     var title by remember { mutableStateOf("") }
     var fullText by remember { mutableStateOf("") }
     var isSaving by remember { mutableStateOf(false) }
+    var isExtracting by remember { mutableStateOf(false) }
 
     val speechRecognizerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
@@ -70,7 +72,7 @@ fun RecordingScreen(
                             view.performHapticFeedback(HapticFeedbackConstants.CONFIRM)
                             isSaving = true
                             scope.launch {
-                                withContext(Dispatchers.IO) {
+                                val entryId = withContext(Dispatchers.IO) {
                                     db.medicalEntryDao().insertEntry(
                                         MedicalEntryEntity(
                                             patientId = patientId,
@@ -84,6 +86,31 @@ fun RecordingScreen(
                                 }
                                 isSaving = false
                                 onSaved()
+                                // Background clinical summary
+                                isExtracting = true
+                                scope.launch(Dispatchers.IO) {
+                                    try {
+                                        val inferenceModel = InferenceModel.getInstance(context)
+                                        val prompt = """You are a specialist AI medical assistant.
+Analyse this voice recording transcription and provide a concise clinical summary.
+Title: ${title.ifBlank { "Voice Note" }}
+Transcription: $fullText
+Provide: 1) Key clinical findings, 2) Significance, 3) Recommended follow-up.
+Be concise. Do not wrap in a code block."""
+                                        var result = ""
+                                        val future = inferenceModel.generateResponseAsync(prompt, emptyList()) { token, _ ->
+                                            if (token.isNotEmpty()) result += token
+                                        }
+                                        future.get()
+                                        val entry = db.medicalEntryDao().getEntry(entryId)
+                                        if (entry != null) {
+                                            db.medicalEntryDao().updateEntry(entry.copy(analysisResult = result.trim()))
+                                        }
+                                    } catch (_: Exception) {
+                                    } finally {
+                                        withContext(Dispatchers.Main) { isExtracting = false }
+                                    }
+                                }
                             }
                         },
                         enabled = !isSaving && fullText.isNotBlank()
