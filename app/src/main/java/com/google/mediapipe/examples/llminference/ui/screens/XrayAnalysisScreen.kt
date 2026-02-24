@@ -1,6 +1,11 @@
 package com.google.mediapipe.examples.llminference.ui.screens
 
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.net.Uri
+import android.os.Build
+import android.provider.MediaStore
+import android.util.Log
 import android.view.HapticFeedbackConstants
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -41,6 +46,7 @@ fun XrayAnalysisScreen(
     var bodyPart by remember { mutableStateOf("") }
     var clinicalContext by remember { mutableStateOf("") }
     var analysisResult by remember { mutableStateOf<String?>(null) }
+    var streamingAnalysis by remember { mutableStateOf("") }
     var isAnalyzing by remember { mutableStateOf(false) }
     var isSaving by remember { mutableStateOf(false) }
 
@@ -235,11 +241,50 @@ fun XrayAnalysisScreen(
                     onClick = {
                         view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
                         isAnalyzing = true
+                        streamingAnalysis = ""
                         scope.launch {
                             try {
                                 val inferenceModel = com.google.mediapipe.examples.llminference.InferenceModel.getInstance(context)
-                                val prompt = "Analyze this $typeName image. Title: $title. Body Part: $bodyPart. Context: $clinicalContext. Provide a concise radiological report or histopathological assessment."
-                                analysisResult = inferenceModel.generateResponse(prompt)
+                                val prompt = "You are a specialist AI medical assistant. Analyse this $typeName image.\nTitle: $title. Body part / tissue: $bodyPart. Clinical context: $clinicalContext.\nProvide: 1) Key findings, 2) Abnormalities if any, 3) Differential diagnoses, 4) Recommended next steps."
+
+                                // Load bitmap for vision analysis
+                                val bitmap: Bitmap? = withContext(Dispatchers.IO) {
+                                    try {
+                                        val uri = selectedImageUri!!
+                                        @Suppress("DEPRECATION")
+                                        when {
+                                            uri.scheme == "file" -> BitmapFactory.decodeFile(uri.path)
+                                            uri.scheme == "content" -> {
+                                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                                                    android.graphics.ImageDecoder.decodeBitmap(
+                                                        android.graphics.ImageDecoder.createSource(context.contentResolver, uri)
+                                                    ) { decoder, _, _ -> decoder.isMutableRequired = true }
+                                                } else {
+                                                    @Suppress("DEPRECATION")
+                                                    MediaStore.Images.Media.getBitmap(context.contentResolver, uri)
+                                                }
+                                            }
+                                            else -> null
+                                        }
+                                    } catch (e: Exception) {
+                                        Log.w("XrayAnalysis", "Could not decode image: ${e.message}")
+                                        null
+                                    }
+                                }
+
+                                val images = if (bitmap != null) {
+                                    Log.i("XrayAnalysis", "Vision encoder: passing image to MedGemma (${bitmap.width}x${bitmap.height})")
+                                    listOf(bitmap)
+                                } else {
+                                    Log.w("XrayAnalysis", "Vision encoder: bitmap null, falling back to text-only")
+                                    emptyList()
+                                }
+
+                                val future = inferenceModel.generateResponseAsync(prompt, images) { token, done ->
+                                    if (!done && token.isNotEmpty()) streamingAnalysis += token
+                                }
+                                withContext(Dispatchers.IO) { future.get() }
+                                analysisResult = streamingAnalysis
                             } catch (e: Exception) {
                                 analysisResult = "Error generating analysis: ${e.message}"
                             } finally {
@@ -262,6 +307,24 @@ fun XrayAnalysisScreen(
                         Icon(Icons.Default.AutoAwesome, null, modifier = Modifier.size(20.dp))
                         Spacer(modifier = Modifier.width(8.dp))
                         Text("Analyze with MedGemma")
+                    }
+                }
+            }
+
+            // Streaming result (while analyzing)
+            if (isAnalyzing && streamingAnalysis.isNotBlank()) {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp)
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text("Generating…", style = MaterialTheme.typography.labelMedium)
+                        }
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(streamingAnalysis, style = MaterialTheme.typography.bodySmall)
                     }
                 }
             }
