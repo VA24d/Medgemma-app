@@ -34,6 +34,12 @@ In the fast-paced medical environment, retrieving patient history and analyzing 
 
 # 🚀 Getting Started
 
+## Repository Branches
+
+This repository contains two primary branches:
+- **`main`** (formerly `b2-gguf`): The robust, optimized production branch. This leverages the aggressive `llama.cpp` backend and Q4_K_M GGUF quantization for native MedGemma 1.5 4B Multimodal support. It is the recommended version to test extreme edge capabilities, longitudinal history, and background payload downloads.
+- **`ui`** (formerly `main`): The legacy UI-focused branch built on MediaPipe LiteRT. Useful for exploring initial architectural decisions and standard view implementations before the GGUF optimization pivot.
+
 ## Prerequisites
 
 -   **Hardware**: Physical Android device (SDK 24+) with developer mode enabled (Tested on Qualcomm Innovator Development Kit with Snapdragon 8 Elite Gen 5 / Pixel 7 Pro).
