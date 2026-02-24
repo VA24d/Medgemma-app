@@ -105,11 +105,17 @@ class FhirExportManager(private val context: Context) {
                     }
                 }
 
-                val uri = resolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, contentValues)
-                    ?: throw Exception("Failed to create file in Downloads")
-
-                resolver.openOutputStream(uri)?.use { outputStream ->
-                    outputStream.write(content.toByteArray())
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    val uri = resolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, contentValues)
+                        ?: throw Exception("Failed to create file in Downloads")
+                    resolver.openOutputStream(uri)?.use { outputStream ->
+                        outputStream.write(content.toByteArray())
+                    }
+                } else {
+                    @Suppress("DEPRECATION")
+                    val downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+                    val file = File(downloadsDir, fileName)
+                    file.writeText(content)
                 }
 
                 withContext(Dispatchers.Main) {
