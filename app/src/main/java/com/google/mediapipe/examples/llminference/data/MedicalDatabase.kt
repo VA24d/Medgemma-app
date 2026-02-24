@@ -10,9 +10,10 @@ import androidx.room.RoomDatabase
         PatientEntity::class,
         MedicalImageEntity::class,
         ConsultationEntity::class,
-        MedicalEntryEntity::class
+        MedicalEntryEntity::class,
+        DiagnosisEntity::class
     ],
-    version = 2,
+    version = 3,
     exportSchema = false
 )
 abstract class MedicalDatabase : RoomDatabase() {
@@ -20,6 +21,7 @@ abstract class MedicalDatabase : RoomDatabase() {
     abstract fun medicalImageDao(): MedicalImageDao
     abstract fun consultationDao(): ConsultationDao
     abstract fun medicalEntryDao(): MedicalEntryDao
+    abstract fun diagnosisDao(): DiagnosisDao
 
     companion object {
         @Volatile

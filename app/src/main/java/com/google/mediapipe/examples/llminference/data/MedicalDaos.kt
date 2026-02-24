@@ -113,3 +113,21 @@ interface MedicalEntryDao {
     @Query("DELETE FROM medical_entries")
     suspend fun deleteAllEntries()
 }
+
+@Dao
+interface DiagnosisDao {
+    @Query("SELECT * FROM diagnoses WHERE patientId = :patientId ORDER BY generatedAt DESC")
+    fun getDiagnosesForPatient(patientId: Long): Flow<List<DiagnosisEntity>>
+
+    @Query("SELECT * FROM diagnoses WHERE patientId = :patientId ORDER BY generatedAt DESC LIMIT 1")
+    suspend fun getLatestDiagnosis(patientId: Long): DiagnosisEntity?
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertDiagnosis(diagnosis: DiagnosisEntity): Long
+
+    @Delete
+    suspend fun deleteDiagnosis(diagnosis: DiagnosisEntity)
+
+    @Query("DELETE FROM diagnoses WHERE patientId = :patientId")
+    suspend fun deleteAllDiagnosesForPatient(patientId: Long)
+}
