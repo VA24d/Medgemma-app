@@ -1,0 +1,19 @@
+[
+  {
+    "name": "BF16",
+    "path": "models/medgemma-1.5-4b-it-BF16.gguf"
+  },
+  {
+    "name": "Q8_0",
+    "path": "models/medgemma-1.5-4b-it-Q8_0.gguf"
+  },
+  {
+    "name": "Q6_K",
+    "path": "models/medgemma-1.5-4b-it-Q6_K.gguf"
+  },
+  {
+    "name": "Q4_K_M",
+    "path": "models/medgemma-1.5-4b-it-Q4_K_M.gguf"
+  }
+]
+
