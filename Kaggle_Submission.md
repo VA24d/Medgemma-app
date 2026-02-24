@@ -4,10 +4,10 @@
 ---
 
 ## Title
-Med Veda: Privacy-First Multimodal Edge AI
+Secure, On-Device Multimodal AI for Healthcare Professionals
 
 ## Subtitle
-Bringing the 4B MedGemma suite directly to the clinician's pocket via optimized GGUF on the Snapdragon 8 Elite Gen 5.
+Running the 4B MedGemma suite natively on Android to analyze longitudinal patient history, automate documentation, and ease clinical workload.
 
 ---
 
