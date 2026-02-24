@@ -38,6 +38,10 @@ class InferenceModel private constructor(context: Context) {
     val isVisionAvailable: Boolean get() = mmprojLoaded || isMmprojFileAvailable()
     private val TAG = InferenceModel::class.qualifiedName
 
+    // In-memory snapshot of the thinking state last applied to the engine.
+    // Avoids enforceThinkingState() stomping on values set by updateThinkingMode().
+    @Volatile private var currentThinkingEnabled: Boolean = false
+
     /** Check if mmproj file exists on disk (even if not yet loaded into engine). */
     private fun isMmprojFileAvailable(): Boolean {
         val mmproj = mmprojPath(appContext)
@@ -74,9 +78,13 @@ class InferenceModel private constructor(context: Context) {
     }
 
     fun updateThinkingMode(thinkingEnabled: Boolean) {
+        currentThinkingEnabled = thinkingEnabled
         engine.setSkipThinking(!thinkingEnabled)
         Log.i(TAG, "Thinking mode updated: ${if (thinkingEnabled) "enabled" else "disabled"}")
     }
+
+    /** Whether thinking is currently active on the engine. */
+    fun isThinkingCurrentlyEnabled(): Boolean = currentThinkingEnabled
 
     private fun createEngine(context: Context) {
         try {
@@ -103,6 +111,7 @@ class InferenceModel private constructor(context: Context) {
 
                 // Control thinking behavior via native prefill skip
                 val thinkingEnabled = LocalModelFiles.isThinkingEnabled(context)
+                currentThinkingEnabled = thinkingEnabled
                 engine.setSkipThinking(!thinkingEnabled)
                 Log.i(TAG, "Thinking mode: ${if (thinkingEnabled) "enabled" else "disabled (prefill skip)"}")
             }
@@ -134,6 +143,16 @@ class InferenceModel private constructor(context: Context) {
         }
     }
 
+    /**
+     * Re-enforce thinking mode state right before generation.
+     * Uses the in-memory [currentThinkingEnabled] so that callers who set a specific
+     * mode via [updateThinkingMode] are not overridden by a stale prefs read.
+     */
+    private fun enforceThinkingState() {
+        engine.setSkipThinking(!currentThinkingEnabled)
+        Log.d(TAG, "enforceThinkingState: thinking=${currentThinkingEnabled} skipThinking=${!currentThinkingEnabled}")
+    }
+
     fun generateResponseAsync(
         prompt: String,
         images: List<Bitmap>,
@@ -141,6 +160,9 @@ class InferenceModel private constructor(context: Context) {
     ): java.util.concurrent.Future<String> {
         return executor.submit(java.util.concurrent.Callable {
             val response = runBlocking(Dispatchers.IO) {
+                // Always re-enforce thinking state before every generation
+                enforceThinkingState()
+
                 if (images.isNotEmpty()) {
                     // Lazy-load mmproj on first image use
                     val visionReady = ensureMmprojLoaded()

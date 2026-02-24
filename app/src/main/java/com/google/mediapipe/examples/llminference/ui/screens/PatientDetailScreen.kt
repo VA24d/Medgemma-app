@@ -38,7 +38,8 @@ fun PatientDetailScreen(
     onViewDiagnosis: (Long) -> Unit,
     onEntryClick: (Long) -> Unit,
     onEdit: (Long) -> Unit,
-    onDelete: () -> Unit = {}
+    onDelete: () -> Unit = {},
+    onChatAboutPatient: (Long) -> Unit = {}
 ) {
     val context = LocalContext.current
     val view = LocalView.current
@@ -197,6 +198,25 @@ fun PatientDetailScreen(
                         Spacer(modifier = Modifier.width(8.dp))
                         Text("Diagnosis")
                     }
+                }
+            }
+
+            // Chat about patient button
+            item {
+                Button(
+                    onClick = {
+                        view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
+                        onChatAboutPatient(patientId)
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                        contentColor = MaterialTheme.colorScheme.onTertiaryContainer
+                    )
+                ) {
+                    Icon(Icons.Default.Psychology, null, modifier = Modifier.size(18.dp))
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Ask AI about this patient")
                 }
             }
 

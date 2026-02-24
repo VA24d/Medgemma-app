@@ -13,6 +13,9 @@ object LocalModelFiles {
     private const val KEY_MMPROJ_PATH = "mmproj_path"
     private const val KEY_VISION_ENABLED = "vision_enabled"
     private const val KEY_THINKING_ENABLED = "thinking_enabled"
+    private const val KEY_SCHEDULED_PROGNOSIS = "scheduled_prognosis_enabled"
+    private const val KEY_SCHEDULE_HOUR = "schedule_hour"
+    private const val KEY_SCHEDULE_MINUTE = "schedule_minute"
 
     private fun prefs(context: Context) =
         context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
@@ -53,6 +56,23 @@ object LocalModelFiles {
 
     fun setThinkingEnabled(context: Context, enabled: Boolean) {
         prefs(context).edit().putBoolean(KEY_THINKING_ENABLED, enabled).apply()
+    }
+
+    fun isScheduledPrognosisEnabled(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_SCHEDULED_PROGNOSIS, false)
+
+    fun setScheduledPrognosisEnabled(context: Context, enabled: Boolean) {
+        prefs(context).edit().putBoolean(KEY_SCHEDULED_PROGNOSIS, enabled).apply()
+    }
+
+    fun getScheduleHour(context: Context): Int =
+        prefs(context).getInt(KEY_SCHEDULE_HOUR, 2) // default 2 AM
+
+    fun getScheduleMinute(context: Context): Int =
+        prefs(context).getInt(KEY_SCHEDULE_MINUTE, 0)
+
+    fun setScheduleTime(context: Context, hour: Int, minute: Int) {
+        prefs(context).edit().putInt(KEY_SCHEDULE_HOUR, hour).putInt(KEY_SCHEDULE_MINUTE, minute).apply()
     }
 
     fun displayName(context: Context, uri: Uri): String {

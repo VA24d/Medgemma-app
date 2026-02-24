@@ -1,5 +1,6 @@
 package com.google.mediapipe.examples.llminference.ui.screens
 
+import android.app.TimePickerDialog
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
@@ -8,6 +9,7 @@ import android.provider.MediaStore
 import android.util.Log
 import android.view.HapticFeedbackConstants
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -31,7 +33,9 @@ import com.google.mediapipe.examples.llminference.data.DiagnosisEntity
 import com.google.mediapipe.examples.llminference.data.MedicalDatabase
 import com.google.mediapipe.examples.llminference.data.MedicalEntryEntity
 import com.google.mediapipe.examples.llminference.settings.LocalModelFiles
+import com.google.mediapipe.examples.llminference.worker.ScheduledPrognosisWorker
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -39,6 +43,31 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 private const val TAG = "DiagnosisScreen"
+
+// ─── Thinking-marker stripping ───────────────────────────────────────────────────
+// These special tokens bracket the model's chain-of-thought. When thinking is
+// disabled we strip them from every token as it arrives and do a final regex
+// pass before saving, so they never appear in the UI or the database.
+
+private const val THINK_START = "<unused94>"
+private const val THINK_END   = "<unused95>"
+
+/** Strip thinking-marker tokens from a single streamed token. */
+private fun stripThinkingMarkers(token: String): String =
+    token.replace(THINK_START, "").replace(THINK_END, "").replace("thought>", "")
+
+/** Full post-pass: remove entire <unused94>…<unused95> blocks plus stray tokens. */
+private fun stripThinkingMarkersFull(text: String): String {
+    // Remove complete thought blocks (non-greedy)
+    var result = text.replace(Regex("<unused94>thought>[\\s\\S]*?<unused95>"), "")
+    // Remove any remaining stray markers
+    result = result.replace(THINK_START, "").replace(THINK_END, "")
+        .replace("thought>", "").trim()
+    return result
+}
+
+/** Clean a stored diagnosis string before embedding it back in a prompt. */
+private fun cleanDiagnosisForPrompt(text: String): String = stripThinkingMarkersFull(text)
 
 // ─── Helpers ────────────────────────────────────────────────────────────────────
 
@@ -83,18 +112,33 @@ private fun pickVisionEntry(entries: List<MedicalEntryEntity>): MedicalEntryEnti
         .filter { it.entryType in listOf("XRAY", "HISTOPATHOLOGY") && it.imagePaths.isNotBlank() }
         .maxByOrNull { it.createdAt }
 
-private fun buildFullPrompt(entries: List<MedicalEntryEntity>, hasImage: Boolean): String {
+private fun buildFullPrompt(
+    entries: List<MedicalEntryEntity>,
+    hasImage: Boolean,
+    pastDiagnoses: List<DiagnosisEntity> = emptyList()
+): String {
     val fmt = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
     val summary = entries.joinToString("\n") { e ->
         val ai = if (e.analysisResult.isNotBlank()) " | AI note: ${e.analysisResult.take(120)}…" else ""
         "[${fmt.format(Date(e.createdAt))}][${e.entryType}] ${e.title}: ${e.content.take(120)}$ai"
     }
     val imgNote = if (hasImage) "\nThe most recent imaging study is attached. Analyse it as part of the diagnosis.\n" else ""
+
+    // Include context from past diagnoses for continuity of care
+    val historyContext = if (pastDiagnoses.isNotEmpty()) {
+        val recent = pastDiagnoses.take(3)
+        val historyLines = recent.joinToString("\n\n") { d ->
+            val dDate = fmt.format(Date(d.generatedAt))
+            "--- Previous ${d.scope} diagnosis ($dDate, ${d.entryCount} entries) ---\n${cleanDiagnosisForPrompt(d.diagnosis).take(500)}"
+        }
+        "\n\nPREVIOUS DIAGNOSIS HISTORY (most recent first):\n$historyLines\n\nUse this history for continuity of care. Note any changes or progression.\n"
+    } else ""
+
     return """You are a specialist AI medical assistant helping a clinician.
 
 Patient has ${entries.size} medical record entries (oldest→newest):
 $summary
-$imgNote
+$imgNote$historyContext
 Provide:
 1. **Summary of findings**
 2. **Diagnosis / differentials** (with confidence levels)
@@ -108,7 +152,8 @@ Format in Markdown. Be concise and clinically precise."""
 private fun buildIncrementalPrompt(
     newEntries: List<MedicalEntryEntity>,
     prior: DiagnosisEntity,
-    hasImage: Boolean
+    hasImage: Boolean,
+    olderDiagnoses: List<DiagnosisEntity> = emptyList()
 ): String {
     val fmt = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
     val priorDate = fmt.format(Date(prior.generatedAt))
@@ -117,11 +162,20 @@ private fun buildIncrementalPrompt(
         "[${fmt.format(Date(e.createdAt))}][${e.entryType}] ${e.title}: ${e.content.take(120)}$ai"
     }
     val imgNote = if (hasImage) "\nThe most recent new imaging study is attached. Analyse it.\n" else ""
+
+    // Include older diagnosis history for progression tracking
+    val olderContext = if (olderDiagnoses.isNotEmpty()) {
+        val lines = olderDiagnoses.take(2).joinToString("\n\n") { d ->
+            "--- ${d.scope} diagnosis (${fmt.format(Date(d.generatedAt))}) ---\n${cleanDiagnosisForPrompt(d.diagnosis).take(400)}"
+        }
+        "\n\nOLDER DIAGNOSIS HISTORY (for progression context):\n$lines\n"
+    } else ""
+
     return """You are a specialist AI medical assistant helping a clinician.
 
-PREVIOUS DIAGNOSIS (generated $priorDate):
-${prior.diagnosis.take(700)}
-
+MOST RECENT DIAGNOSIS (generated $priorDate):
+${cleanDiagnosisForPrompt(prior.diagnosis).take(700)}
+$olderContext
 NEW entries since then (${newEntries.size} entries):
 $summary
 $imgNote
@@ -156,23 +210,49 @@ fun DiagnosisScreen(
     var tokenCount by remember { mutableStateOf(0) }
     var currentModelName by remember { mutableStateOf("") }
     var usingVision by remember { mutableStateOf(false) }
+    var generationJob by remember { mutableStateOf<Job?>(null) }
+    var generationFuture by remember { mutableStateOf<java.util.concurrent.Future<*>?>(null) }
+
+    // Per-generation toggles (initialized from global settings)
+    var thinkingToggle by remember { mutableStateOf(LocalModelFiles.isThinkingEnabled(context)) }
+    var visionToggle by remember { mutableStateOf(LocalModelFiles.isVisionEnabled(context)) }
+
+    // Schedule state
+    var scheduleEnabled by remember { mutableStateOf(LocalModelFiles.isScheduledPrognosisEnabled(context)) }
+    var scheduleHour by remember { mutableStateOf(LocalModelFiles.getScheduleHour(context)) }
+    var scheduleMinute by remember { mutableStateOf(LocalModelFiles.getScheduleMinute(context)) }
 
     LaunchedEffect(patientId) {
         launch { db.medicalEntryDao().getEntriesForPatient(patientId).collect { entries = it } }
         launch { db.diagnosisDao().getDiagnosesForPatient(patientId).collect { pastDiagnoses = it } }
     }
 
+    fun stopGeneration() {
+        generationJob?.cancel()
+        generationFuture?.cancel(true)
+        generationJob = null
+        generationFuture = null
+        isGenerating = false
+    }
+
     fun runGeneration(incremental: Boolean) {
-        scope.launch {
+        generationJob = scope.launch {
             isGenerating = true
             streamingText = ""
             tokenCount = 0
             usingVision = false
             currentModelName = modelDisplayName()
-            val thinkingOn = LocalModelFiles.isThinkingEnabled(context)
+            val thinkingOn = thinkingToggle
+
+            // State machine to suppress thinking blocks when thinking is disabled.
+            // The model surrounds chain-of-thought with <unused94>thought>…<unused95>.
+            var insideThinkingBlock = false
 
             try {
                 val inferenceModel = withContext(Dispatchers.IO) { InferenceModel.getInstance(context) }
+                // Apply per-generation thinking mode
+                inferenceModel.updateThinkingMode(thinkingOn)
+
                 val sorted = entries.sortedBy { it.createdAt }
 
                 val latestDiag = withContext(Dispatchers.IO) { db.diagnosisDao().getLatestDiagnosis(patientId) }
@@ -181,20 +261,22 @@ fun DiagnosisScreen(
                     sorted.filter { it.createdAt > latestDiag.generatedAt }.takeIf { it.isNotEmpty() } ?: sorted
                 } else sorted
 
-                val visionEntry = pickVisionEntry(targetEntries)
+                // Vision: only attempt if toggle is ON
+                val visionEntry = if (visionToggle) pickVisionEntry(targetEntries) else null
                 val bitmap: Bitmap? = visionEntry?.let { loadBitmapFromEntry(context, it) }
                 usingVision = bitmap != null
                 if (bitmap != null) {
                     Log.i(TAG, "Vision encoder: using image from entry id=${visionEntry?.id} type=${visionEntry?.entryType}")
                 } else {
-                    Log.i(TAG, "Vision encoder: no readable image found (entries checked: ${targetEntries.size})")
+                    Log.i(TAG, "Vision encoder: ${if (!visionToggle) "disabled by toggle" else "no readable image (entries: ${targetEntries.size})"}")
                 }
 
                 val isReallyIncremental = incremental && latestDiag != null && targetEntries != sorted
                 val prompt = if (isReallyIncremental) {
-                    buildIncrementalPrompt(targetEntries, latestDiag!!, bitmap != null)
+                    val olderDiags = pastDiagnoses.drop(1) // skip latest (already used as "prior")
+                    buildIncrementalPrompt(targetEntries, latestDiag!!, bitmap != null, olderDiags)
                 } else {
-                    buildFullPrompt(sorted, bitmap != null)
+                    buildFullPrompt(sorted, bitmap != null, pastDiagnoses)
                 }
 
                 Log.i(TAG, "Generating: scope=${if (isReallyIncremental) "INCREMENTAL" else "FULL"} entries=${targetEntries.size} vision=$usingVision model=${currentModelName} thinking=$thinkingOn")
@@ -202,13 +284,34 @@ fun DiagnosisScreen(
                 val images = if (bitmap != null) listOf(bitmap) else emptyList()
                 val future = inferenceModel.generateResponseAsync(prompt, images) { token, done ->
                     if (!done && token.isNotEmpty()) {
-                        streamingText += token
-                        tokenCount++
+                        if (!thinkingOn) {
+                            // State-machine: suppress everything between start and end markers.
+                            // The model wraps chain-of-thought in <unused94>thought>…<unused95>.
+                            when {
+                                token.contains(THINK_START) || token.contains("thought>") -> {
+                                    insideThinkingBlock = true
+                                }
+                                token.contains(THINK_END) -> {
+                                    insideThinkingBlock = false
+                                    // End marker discarded; don't append
+                                }
+                                !insideThinkingBlock -> {
+                                    streamingText += token
+                                    tokenCount++
+                                }
+                                // else: inside thinking block, silently discard token
+                            }
+                        } else {
+                            streamingText += token
+                            tokenCount++
+                        }
                     }
                 }
+                generationFuture = future
                 withContext(Dispatchers.IO) { future.get() }
 
-                val diagnosisText = streamingText
+                // Final strip pass — catches any multi-token marker fragments
+                val diagnosisText = if (!thinkingOn) stripThinkingMarkersFull(streamingText) else streamingText
                 withContext(Dispatchers.IO) {
                     db.diagnosisDao().insertDiagnosis(
                         DiagnosisEntity(
@@ -223,10 +326,14 @@ fun DiagnosisScreen(
                 }
                 Log.i(TAG, "Diagnosis saved (${diagnosisText.length} chars)")
             } catch (e: Exception) {
-                Log.e(TAG, "Generation failed", e)
-                streamingText += "\n\n⚠️ Error: ${e.message}"
+                if (e !is kotlinx.coroutines.CancellationException) {
+                    Log.e(TAG, "Generation failed", e)
+                    streamingText += "\n\n\u26a0\ufe0f Error: ${e.message}"
+                }
             } finally {
                 isGenerating = false
+                generationJob = null
+                generationFuture = null
             }
         }
     }
@@ -254,13 +361,27 @@ fun DiagnosisScreen(
             item {
                 ModelInfoBanner(
                     modelName = modelDisplayName(),
-                    thinkingEnabled = LocalModelFiles.isThinkingEnabled(context),
+                    thinkingEnabled = thinkingToggle,
                     visionAvailable = try { InferenceModel.getInstance(context).isVisionAvailable } catch (_: Exception) { false }
                 )
             }
+            // Per-generation toggles
+            if (!isGenerating) {
+                item {
+                    GenerationTogglesCard(
+                        thinkingEnabled = thinkingToggle,
+                        onThinkingChange = { thinkingToggle = it },
+                        visionEnabled = visionToggle,
+                        onVisionChange = { visionToggle = it },
+                        visionAvailable = try { InferenceModel.getInstance(context).isVisionAvailable } catch (_: Exception) { false }
+                    )
+                }
+            }
             if (isGenerating) {
                 item {
-                    GeneratingCard(streamingText, tokenCount, currentModelName, usingVision)
+                    GeneratingCard(streamingText, tokenCount, currentModelName, usingVision, thinkingToggle) {
+                        stopGeneration()
+                    }
                 }
             }
             if (!isGenerating) {
@@ -278,6 +399,25 @@ fun DiagnosisScreen(
                         }
                     )
                 }
+            }
+            // Scheduled prognosis
+            item {
+                ScheduleCard(
+                    enabled = scheduleEnabled,
+                    hour = scheduleHour,
+                    minute = scheduleMinute,
+                    onToggle = { enabled ->
+                        scheduleEnabled = enabled
+                        LocalModelFiles.setScheduledPrognosisEnabled(context, enabled)
+                        ScheduledPrognosisWorker.syncSchedule(context)
+                    },
+                    onTimeChange = { h, m ->
+                        scheduleHour = h
+                        scheduleMinute = m
+                        LocalModelFiles.setScheduleTime(context, h, m)
+                        if (scheduleEnabled) ScheduledPrognosisWorker.syncSchedule(context)
+                    }
+                )
             }
             if (pastDiagnoses.isNotEmpty()) {
                 item {
@@ -351,7 +491,7 @@ private fun ModelInfoBanner(modelName: String, thinkingEnabled: Boolean, visionA
 }
 
 @Composable
-private fun GeneratingCard(streamingText: String, tokenCount: Int, modelName: String, usingVision: Boolean) {
+private fun GeneratingCard(streamingText: String, tokenCount: Int, modelName: String, usingVision: Boolean, thinkingEnabled: Boolean, onStop: () -> Unit) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)
@@ -363,21 +503,36 @@ private fun GeneratingCard(streamingText: String, tokenCount: Int, modelName: St
                 Column(modifier = Modifier.weight(1f)) {
                     Text("Generating…", style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.onSecondaryContainer)
                     Text(
-                        "$modelName · $tokenCount tokens" + if (usingVision) " · 👁 vision active" else "",
+                        buildString {
+                            append("$modelName · $tokenCount tokens")
+                            if (thinkingEnabled) append(" · \uD83E\uDDE0")
+                            if (usingVision) append(" · \uD83D\uDC41 vision")
+                        },
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.7f)
                     )
+                }
+                Spacer(Modifier.width(8.dp))
+                OutlinedButton(
+                    onClick = onStop,
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error),
+                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp)
+                ) {
+                    Icon(Icons.Default.Stop, null, modifier = Modifier.size(16.dp))
+                    Spacer(Modifier.width(4.dp))
+                    Text("Stop", style = MaterialTheme.typography.labelMedium)
                 }
             }
             if (streamingText.isNotBlank()) {
                 Spacer(Modifier.height(12.dp))
                 HorizontalDivider(color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.2f))
                 Spacer(Modifier.height(12.dp))
-                Text(
-                    streamingText,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSecondaryContainer,
-                    modifier = Modifier.animateContentSize()
+                MarkdownText(
+                    markdown = streamingText,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .animateContentSize(),
+                    textColor = MaterialTheme.colorScheme.onSecondaryContainer
                 )
             }
         }
@@ -474,8 +629,9 @@ private fun DiagnosisHistoryCard(diagnosis: DiagnosisEntity, onDelete: () -> Uni
             }
 
             AnimatedVisibility(!expanded) {
+                val preview = remember(diagnosis.id) { stripThinkingMarkersFull(diagnosis.diagnosis) }
                 Text(
-                    diagnosis.diagnosis.take(180).let { if (diagnosis.diagnosis.length > 180) "$it…" else it },
+                    preview.take(180).let { if (preview.length > 180) "$it…" else it },
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(top = 8.dp)
@@ -483,10 +639,11 @@ private fun DiagnosisHistoryCard(diagnosis: DiagnosisEntity, onDelete: () -> Uni
             }
 
             AnimatedVisibility(expanded) {
+                val cleanedDiagnosis = remember(diagnosis.id) { stripThinkingMarkersFull(diagnosis.diagnosis) }
                 Column(modifier = Modifier.padding(top = 8.dp)) {
                     HorizontalDivider()
                     Spacer(Modifier.height(8.dp))
-                    MarkdownText(markdown = diagnosis.diagnosis, modifier = Modifier.fillMaxWidth())
+                    MarkdownText(markdown = cleanedDiagnosis, modifier = Modifier.fillMaxWidth())
                     Spacer(Modifier.height(12.dp))
                     OutlinedButton(
                         onClick = { showDeleteConfirm = true },
@@ -512,5 +669,133 @@ private fun DiagnosisHistoryCard(diagnosis: DiagnosisEntity, onDelete: () -> Uni
             },
             dismissButton = { TextButton(onClick = { showDeleteConfirm = false }) { Text("Cancel") } }
         )
+    }
+}
+
+@Composable
+private fun GenerationTogglesCard(
+    thinkingEnabled: Boolean,
+    onThinkingChange: (Boolean) -> Unit,
+    visionEnabled: Boolean,
+    onVisionChange: (Boolean) -> Unit,
+    visionAvailable: Boolean
+) {
+    Card(modifier = Modifier.fillMaxWidth()) {
+        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Text("Generation Settings", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
+            Spacer(Modifier.height(4.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(Icons.Default.Psychology, null, modifier = Modifier.size(20.dp), tint = MaterialTheme.colorScheme.tertiary)
+                Spacer(Modifier.width(12.dp))
+                Column(modifier = Modifier.weight(1f)) {
+                    Text("Thinking Mode", style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Medium)
+                    Text("Extended reasoning chain", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+                Switch(
+                    checked = thinkingEnabled,
+                    onCheckedChange = onThinkingChange,
+                    colors = SwitchDefaults.colors(checkedTrackColor = MaterialTheme.colorScheme.tertiary)
+                )
+            }
+
+            HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(Icons.Default.Visibility, null, modifier = Modifier.size(20.dp), tint = MaterialTheme.colorScheme.secondary)
+                Spacer(Modifier.width(12.dp))
+                Column(modifier = Modifier.weight(1f)) {
+                    Text("Vision Analysis", style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Medium)
+                    Text(
+                        if (visionAvailable) "Analyze medical images" else "Vision encoder not available",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = if (visionAvailable) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.error
+                    )
+                }
+                Switch(
+                    checked = visionEnabled && visionAvailable,
+                    onCheckedChange = onVisionChange,
+                    enabled = visionAvailable,
+                    colors = SwitchDefaults.colors(checkedTrackColor = MaterialTheme.colorScheme.secondary)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun ScheduleCard(
+    enabled: Boolean,
+    hour: Int,
+    minute: Int,
+    onToggle: (Boolean) -> Unit,
+    onTimeChange: (Int, Int) -> Unit
+) {
+    val context = LocalContext.current
+    val amPmStr = remember(hour, minute) {
+        val cal = Calendar.getInstance().apply {
+            set(Calendar.HOUR_OF_DAY, hour)
+            set(Calendar.MINUTE, minute)
+        }
+        SimpleDateFormat("hh:mm a", Locale.getDefault()).format(cal.time)
+    }
+
+    Card(modifier = Modifier.fillMaxWidth()) {
+        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(Icons.Default.Schedule, null, modifier = Modifier.size(20.dp), tint = MaterialTheme.colorScheme.primary)
+                Spacer(Modifier.width(8.dp))
+                Text("Scheduled Prognosis", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold, modifier = Modifier.weight(1f))
+                Switch(
+                    checked = enabled,
+                    onCheckedChange = onToggle,
+                    colors = SwitchDefaults.colors(checkedTrackColor = MaterialTheme.colorScheme.primary)
+                )
+            }
+            Text(
+                "Auto-generate a new prognosis daily using all patient records.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            AnimatedVisibility(enabled) {
+                Surface(
+                    shape = RoundedCornerShape(10.dp),
+                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Row(
+                        modifier = Modifier.padding(12.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(Icons.Default.AccessTime, null, modifier = Modifier.size(18.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Spacer(Modifier.width(10.dp))
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text("Daily at", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text(amPmStr, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+                        }
+                        OutlinedButton(
+                            onClick = {
+                                TimePickerDialog(
+                                    context,
+                                    { _, h, m -> onTimeChange(h, m) },
+                                    hour,
+                                    minute,
+                                    false
+                                ).show()
+                            },
+                            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 6.dp)
+                        ) {
+                            Text("Change", style = MaterialTheme.typography.labelMedium)
+                        }
+                    }
+                }
+            }
+        }
     }
 }

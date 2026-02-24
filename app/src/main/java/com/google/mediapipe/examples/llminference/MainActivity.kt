@@ -42,6 +42,7 @@ const val QUICK_ANALYSIS_SCREEN = "quick_analysis"
 const val START_SCREEN = "start_screen"
 const val LOAD_SCREEN = "load_screen"
 const val CHAT_SCREEN = "chat_screen"
+const val PATIENT_CHAT_SCREEN = "patient_chat/{patientId}"
 const val HF_LOGIN_SCREEN = "hf_login"
 
 class MainActivity : ComponentActivity() {
@@ -244,6 +245,9 @@ class MainActivity : ComponentActivity() {
                                     },
                                     onDelete = {
                                         navController.popBackStack()
+                                    },
+                                    onChatAboutPatient = { id ->
+                                        navController.navigate("patient_chat/$id")
                                     }
                                 )
                             }
@@ -410,6 +414,18 @@ class MainActivity : ComponentActivity() {
                                             popUpTo(CHAT_SCREEN) { inclusive = true }
                                         }
                                     }
+                                )
+                            }
+
+                            // ── Patient Chat (interaction mode) ──
+                            composable(
+                                PATIENT_CHAT_SCREEN,
+                                arguments = listOf(navArgument("patientId") { type = NavType.LongType })
+                            ) { backStackEntry ->
+                                val patientId = backStackEntry.arguments?.getLong("patientId") ?: return@composable
+                                ChatRoute(
+                                    onClose = { navController.popBackStack() },
+                                    patientId = patientId
                                 )
                             }
                         }

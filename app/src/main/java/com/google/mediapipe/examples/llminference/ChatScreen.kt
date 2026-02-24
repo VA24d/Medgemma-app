@@ -1,6 +1,8 @@
 package com.google.mediapipe.examples.llminference
 
+import android.Manifest
 import android.content.Context
+import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.ImageDecoder
 import android.net.Uri
@@ -31,10 +33,14 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.AddPhotoAlternate
 import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.PhotoLibrary
 import androidx.compose.material.icons.filled.Psychology
+import androidx.compose.material.icons.filled.Stop
 import androidx.compose.material.icons.outlined.Psychology
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -52,15 +58,19 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.mediapipe.examples.llminference.settings.LocalModelFiles
+import java.io.File
 
 @Composable
 internal fun ChatRoute(
-    onClose: () -> Unit
+    onClose: () -> Unit,
+    patientId: Long? = null
 ) {
-    val chatViewModel: ChatViewModel = viewModel(factory = ChatViewModel.getFactory())
+    val chatViewModel: ChatViewModel = viewModel(factory = ChatViewModel.getFactory(patientId))
 
     val context = LocalContext.current
     val inferenceModel = try { InferenceModel.getInstance(context) } catch (_: Exception) { null }
@@ -71,18 +81,23 @@ internal fun ChatRoute(
     val uiState by chatViewModel.uiState.collectAsStateWithLifecycle()
     val textInputEnabled by chatViewModel.isTextInputEnabled.collectAsStateWithLifecycle()
     val thinkingEnabled by chatViewModel.thinkingEnabled.collectAsStateWithLifecycle()
+    val isGenerating by chatViewModel.isGenerating.collectAsStateWithLifecycle()
+    val patientContext by chatViewModel.patientContext.collectAsStateWithLifecycle()
 
     ChatScreen(
         uiState,
         textInputEnabled,
         visionAvailable = visionAvailable,
         thinkingEnabled = thinkingEnabled,
+        isGenerating = isGenerating,
+        patientContext = patientContext,
         onToggleThinking = { enabled ->
             chatViewModel.setThinkingEnabled(enabled)
         },
         onSendMessage = { message, images ->
             chatViewModel.sendMessage(message, images)
         },
+        onStopGeneration = { chatViewModel.stopGeneration() },
         onClose = onClose
     )
 }
@@ -94,8 +109,11 @@ fun ChatScreen(
     textInputEnabled: Boolean,
     visionAvailable: Boolean = true,
     thinkingEnabled: Boolean = false,
+    isGenerating: Boolean = false,
+    patientContext: PatientChatContext? = null,
     onToggleThinking: (Boolean) -> Unit = {},
     onSendMessage: (String, List<Bitmap>) -> Unit,
+    onStopGeneration: () -> Unit = {},
     onClose: () -> Unit
 ) {
     var userMessage by rememberSaveable { mutableStateOf("") }
@@ -133,34 +151,72 @@ fun ChatScreen(
         topBar = {
             TopAppBar(
                 title = {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
                         Box(
                             modifier = Modifier
                                 .size(32.dp)
                                 .clip(CircleShape)
-                                .background(MaterialTheme.colorScheme.primaryContainer),
+                                .background(
+                                    if (patientContext != null) MaterialTheme.colorScheme.tertiaryContainer
+                                    else MaterialTheme.colorScheme.primaryContainer
+                                ),
                             contentAlignment = Alignment.Center
                         ) {
                             Icon(
-                                Icons.Default.AutoAwesome,
+                                if (patientContext != null) Icons.Default.Person else Icons.Default.AutoAwesome,
                                 contentDescription = null,
                                 modifier = Modifier.size(18.dp),
-                                tint = MaterialTheme.colorScheme.onPrimaryContainer
+                                tint = if (patientContext != null) MaterialTheme.colorScheme.onTertiaryContainer
+                                       else MaterialTheme.colorScheme.onPrimaryContainer
                             )
                         }
                         Spacer(modifier = Modifier.width(12.dp))
-                        Column {
+                        Column(modifier = Modifier.weight(1f)) {
                             Text(
-                                "AI Assistant",
-                                style = MaterialTheme.typography.titleMedium
+                                patientContext?.let { "Patient: ${it.patientName}" } ?: "AI Assistant",
+                                style = MaterialTheme.typography.titleMedium,
+                                maxLines = 1,
+                                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
                             )
                             Text(
-                                if (textInputEnabled) "Online" else "Thinking…",
+                                when {
+                                    isGenerating -> "Generating…"
+                                    patientContext != null -> "${patientContext.entryCount} entries loaded"
+                                    textInputEnabled -> "Online"
+                                    else -> "Thinking…"
+                                },
                                 style = MaterialTheme.typography.labelSmall,
-                                color = if (textInputEnabled)
+                                color = if (textInputEnabled && !isGenerating)
                                     MaterialTheme.colorScheme.primary
                                 else
                                     MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                        // Thinking toggle inline in the title row for reliable touch
+                        val scope = rememberCoroutineScope()
+                        IconButton(
+                            onClick = {
+                                view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
+                                val newValue = !thinkingEnabled
+                                onToggleThinking(newValue)
+                                scope.launch {
+                                    snackbarHostState.showSnackbar(
+                                        message = if (newValue) "Thinking enabled — model will reason step-by-step"
+                                                  else "Thinking disabled — faster, direct responses",
+                                        duration = SnackbarDuration.Short
+                                    )
+                                }
+                            },
+                            modifier = Modifier.size(48.dp)
+                        ) {
+                            Icon(
+                                if (thinkingEnabled) Icons.Filled.Psychology else Icons.Outlined.Psychology,
+                                contentDescription = if (thinkingEnabled) "Disable thinking" else "Enable thinking",
+                                tint = if (thinkingEnabled) MaterialTheme.colorScheme.primary
+                                       else MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
                     }
@@ -173,28 +229,6 @@ fun ChatScreen(
                         Icon(
                             Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = stringResource(R.string.close_chat)
-                        )
-                    }
-                },
-                actions = {
-                    // Thinking mode toggle
-                    val scope = rememberCoroutineScope()
-                    IconButton(onClick = {
-                        val newValue = !thinkingEnabled
-                        onToggleThinking(newValue)
-                        scope.launch {
-                            snackbarHostState.showSnackbar(
-                                message = if (newValue) "Thinking enabled — model will reason step-by-step"
-                                          else "Thinking disabled — faster, direct responses",
-                                duration = SnackbarDuration.Short
-                            )
-                        }
-                    }) {
-                        Icon(
-                            if (thinkingEnabled) Icons.Filled.Psychology else Icons.Outlined.Psychology,
-                            contentDescription = if (thinkingEnabled) "Disable thinking" else "Enable thinking",
-                            tint = if (thinkingEnabled) MaterialTheme.colorScheme.primary
-                                   else MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 },
@@ -236,6 +270,7 @@ fun ChatScreen(
             // Input area
             MessageInput(
                 textInputEnabled = textInputEnabled,
+                isGenerating = isGenerating,
                 userMessage = userMessage,
                 images = bitmaps,
                 imageUris = imageUris,
@@ -246,6 +281,7 @@ fun ChatScreen(
                         imageUris = emptyList()
                     }
                 },
+                onStopGeneration = onStopGeneration,
                 onMessageChanged = { userMessage = it },
                 onImagesChanged = { imageUris = it },
             )
@@ -290,19 +326,105 @@ private fun WelcomeMessage() {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MessageInput(
     textInputEnabled: Boolean,
+    isGenerating: Boolean = false,
     userMessage: String,
     images: List<Bitmap>,
     imageUris: List<Uri>,
     onSendMessage: () -> Unit,
+    onStopGeneration: () -> Unit = {},
     onMessageChanged: (String) -> Unit,
     onImagesChanged: (List<Uri>) -> Unit
 ) {
-    val imagePicker = rememberLauncherForActivityResult(
+    val context = LocalContext.current
+    val view = LocalView.current
+    val scope = rememberCoroutineScope()
+
+    // ── Attachment bottom-sheet state ──
+    val sheetState = rememberModalBottomSheetState()
+    var showAttachSheet by remember { mutableStateOf(false) }
+
+    // ── Gallery picker ──
+    val galleryPicker = rememberLauncherForActivityResult(
         ActivityResultContracts.GetMultipleContents()
-    ) { onImagesChanged(it) }
+    ) { uris -> if (uris.isNotEmpty()) onImagesChanged(uris) }
+
+    // ── Camera capture ──
+    var cameraImageUri by remember { mutableStateOf<Uri?>(null) }
+    val cameraLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.TakePicture()
+    ) { success ->
+        if (success && cameraImageUri != null) {
+            onImagesChanged(listOf(cameraImageUri!!))
+        }
+    }
+
+    // ── Camera permission ──
+    val cameraPermissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        if (granted) {
+            val uri = createCameraImageUri(context)
+            cameraImageUri = uri
+            cameraLauncher.launch(uri)
+        }
+    }
+
+    fun launchCamera() {
+        val hasPermission = ContextCompat.checkSelfPermission(
+            context, Manifest.permission.CAMERA
+        ) == PackageManager.PERMISSION_GRANTED
+        if (hasPermission) {
+            val uri = createCameraImageUri(context)
+            cameraImageUri = uri
+            cameraLauncher.launch(uri)
+        } else {
+            cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
+        }
+    }
+
+    // ── Attachment bottom sheet ──
+    if (showAttachSheet) {
+        ModalBottomSheet(
+            onDismissRequest = { showAttachSheet = false },
+            sheetState = sheetState
+        ) {
+            Column(modifier = Modifier.padding(bottom = 32.dp)) {
+                Text(
+                    "Add Image",
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp)
+                )
+                // Gallery option
+                ListItem(
+                    headlineContent = { Text("Choose from Gallery") },
+                    leadingContent = {
+                        Icon(Icons.Default.PhotoLibrary, contentDescription = null,
+                             tint = MaterialTheme.colorScheme.primary)
+                    },
+                    modifier = Modifier.clickable {
+                        showAttachSheet = false
+                        galleryPicker.launch("image/*")
+                    }
+                )
+                // Camera option
+                ListItem(
+                    headlineContent = { Text("Take Photo") },
+                    leadingContent = {
+                        Icon(Icons.Default.CameraAlt, contentDescription = null,
+                             tint = MaterialTheme.colorScheme.primary)
+                    },
+                    modifier = Modifier.clickable {
+                        showAttachSheet = false
+                        launchCamera()
+                    }
+                )
+            }
+        }
+    }
 
     Surface(
         tonalElevation = 3.dp,
@@ -354,37 +476,48 @@ fun MessageInput(
                 verticalAlignment = Alignment.Bottom,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                // Attach image button
-                FilledTonalIconButton(
+                // Attach image button — opens bottom sheet with gallery/camera choices
+                IconButton(
                     onClick = {
-                        imagePicker.launch("image/*")
+                        view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
+                        showAttachSheet = true
                     },
-                    enabled = textInputEnabled,
-                    modifier = Modifier.size(40.dp)
+                    enabled = textInputEnabled && !isGenerating,
+                    modifier = Modifier.size(48.dp)
                 ) {
                     Icon(
                         Icons.Default.AddPhotoAlternate,
                         contentDescription = stringResource(R.string.add_image),
-                        modifier = Modifier.size(20.dp)
+                        modifier = Modifier.size(24.dp),
+                        tint = if (textInputEnabled && !isGenerating)
+                            MaterialTheme.colorScheme.onSurfaceVariant
+                        else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.38f)
                     )
                 }
 
-                Spacer(modifier = Modifier.width(8.dp))
+                Spacer(modifier = Modifier.width(4.dp))
 
-                // Text field
+                // Text field — always enabled so user can type next prompt while waiting
                 OutlinedTextField(
                     value = userMessage,
                     onValueChange = onMessageChanged,
                     keyboardOptions = KeyboardOptions(
                         capitalization = KeyboardCapitalization.Sentences,
-                        imeAction = ImeAction.Send
+                        imeAction = if (isGenerating) ImeAction.Done else ImeAction.Send
                     ),
                     keyboardActions = KeyboardActions(
-                        onSend = { if (userMessage.isNotBlank()) onSendMessage() }
+                        onSend = {
+                            if (!isGenerating && (userMessage.isNotBlank() || images.isNotEmpty())) {
+                                view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
+                                onSendMessage()
+                            }
+                        },
+                        onDone = { /* dismiss keyboard while generating */ }
                     ),
                     placeholder = {
                         Text(
-                            stringResource(R.string.chat_label),
+                            if (isGenerating) "Type your next message…"
+                            else stringResource(R.string.chat_label),
                             style = MaterialTheme.typography.bodyMedium
                         )
                     },
@@ -395,30 +528,67 @@ fun MessageInput(
                     textStyle = MaterialTheme.typography.bodyMedium
                 )
 
-                Spacer(modifier = Modifier.width(8.dp))
+                Spacer(modifier = Modifier.width(4.dp))
 
-                // Send button
-                val canSend = textInputEnabled && (userMessage.isNotBlank() || images.isNotEmpty())
-                val view = LocalView.current
-                FilledIconButton(
-                    onClick = {
-                        view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
-                        onSendMessage()
-                    },
-                    enabled = canSend,
-                    modifier = Modifier.size(40.dp),
-                    colors = IconButtonDefaults.filledIconButtonColors(
-                        containerColor = MaterialTheme.colorScheme.primary,
-                        contentColor = MaterialTheme.colorScheme.onPrimary,
-                        disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
-                        disabledContentColor = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                ) {
-                    Icon(
-                        Icons.AutoMirrored.Filled.Send,
-                        contentDescription = stringResource(R.string.action_send),
-                        modifier = Modifier.size(18.dp)
-                    )
+                // Send or Stop button
+                if (isGenerating) {
+                    // Stop button
+                    IconButton(
+                        onClick = {
+                            view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
+                            onStopGeneration()
+                        },
+                        modifier = Modifier.size(48.dp),
+                        colors = IconButtonDefaults.iconButtonColors(
+                            contentColor = MaterialTheme.colorScheme.error
+                        )
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(40.dp)
+                                .clip(CircleShape)
+                                .background(MaterialTheme.colorScheme.errorContainer),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                Icons.Default.Stop,
+                                contentDescription = "Stop generation",
+                                modifier = Modifier.size(22.dp),
+                                tint = MaterialTheme.colorScheme.onErrorContainer
+                            )
+                        }
+                    }
+                } else {
+                    val canSend = textInputEnabled && (userMessage.isNotBlank() || images.isNotEmpty())
+                    IconButton(
+                        onClick = {
+                            if (canSend) {
+                                view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
+                                onSendMessage()
+                            }
+                        },
+                        enabled = canSend,
+                        modifier = Modifier.size(48.dp)
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(40.dp)
+                                .clip(CircleShape)
+                                .background(
+                                    if (canSend) MaterialTheme.colorScheme.primary
+                                    else MaterialTheme.colorScheme.surfaceVariant
+                                ),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                Icons.AutoMirrored.Filled.Send,
+                                contentDescription = stringResource(R.string.action_send),
+                                modifier = Modifier.size(20.dp),
+                                tint = if (canSend) MaterialTheme.colorScheme.onPrimary
+                                       else MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
                 }
             }
         }
@@ -597,10 +767,29 @@ private fun TypingIndicator() {
     }
 }
 
-private fun Uri.toBitmap(context: Context): Bitmap {
-    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-        ImageDecoder.decodeBitmap(ImageDecoder.createSource(context.contentResolver, this))
-    } else {
-        MediaStore.Images.Media.getBitmap(context.contentResolver, this)
+private fun Uri.toBitmap(context: Context): Bitmap? {
+    return try {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            ImageDecoder.decodeBitmap(ImageDecoder.createSource(context.contentResolver, this)) { decoder, _, _ ->
+                decoder.allocator = ImageDecoder.ALLOCATOR_SOFTWARE
+                decoder.isMutableRequired = true
+            }
+        } else {
+            @Suppress("DEPRECATION")
+            MediaStore.Images.Media.getBitmap(context.contentResolver, this)
+        }
+    } catch (e: Exception) {
+        android.util.Log.e("ChatScreen", "Failed to load image: $this", e)
+        null
     }
+}
+
+/** Create a temporary file URI for camera capture via FileProvider. */
+private fun createCameraImageUri(context: Context): Uri {
+    val imageFile = File(context.cacheDir, "camera_${System.currentTimeMillis()}.jpg")
+    return FileProvider.getUriForFile(
+        context,
+        "${context.packageName}.provider",
+        imageFile
+    )
 }

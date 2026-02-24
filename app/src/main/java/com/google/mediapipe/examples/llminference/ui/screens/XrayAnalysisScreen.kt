@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.dp
 import com.google.mediapipe.examples.llminference.data.MedicalDatabase
 import com.google.mediapipe.examples.llminference.data.MedicalEntryEntity
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -49,6 +50,8 @@ fun XrayAnalysisScreen(
     var streamingAnalysis by remember { mutableStateOf("") }
     var isAnalyzing by remember { mutableStateOf(false) }
     var isSaving by remember { mutableStateOf(false) }
+    var generationJob by remember { mutableStateOf<Job?>(null) }
+    var generationFuture by remember { mutableStateOf<java.util.concurrent.Future<*>?>(null) }
 
     val imagePickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
@@ -77,6 +80,15 @@ fun XrayAnalysisScreen(
             "${context.packageName}.provider",
             file
         )
+    }
+
+    fun stopAnalysis() {
+        generationJob?.cancel()
+        generationFuture?.cancel(true)
+        generationJob = null
+        generationFuture = null
+        if (streamingAnalysis.isNotBlank()) analysisResult = streamingAnalysis
+        isAnalyzing = false
     }
 
     Scaffold(

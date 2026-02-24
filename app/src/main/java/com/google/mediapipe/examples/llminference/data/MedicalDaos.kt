@@ -8,6 +8,9 @@ interface PatientDao {
     @Query("SELECT * FROM patients ORDER BY name ASC")
     fun getAllPatients(): Flow<List<PatientEntity>>
 
+    @Query("SELECT * FROM patients ORDER BY name ASC")
+    suspend fun getAllPatientsSync(): List<PatientEntity>
+
     @Query("SELECT * FROM patients WHERE id = :patientId")
     fun getPatient(patientId: Long): Flow<PatientEntity?>
 
@@ -89,6 +92,9 @@ interface MedicalEntryDao {
     @Query("SELECT * FROM medical_entries WHERE patientId = :patientId ORDER BY createdAt DESC")
     fun getEntriesForPatient(patientId: Long): Flow<List<MedicalEntryEntity>>
 
+    @Query("SELECT * FROM medical_entries WHERE patientId = :patientId ORDER BY createdAt DESC")
+    suspend fun getEntriesForPatientSync(patientId: Long): List<MedicalEntryEntity>
+
     @Query("SELECT * FROM medical_entries WHERE id = :entryId")
     suspend fun getEntry(entryId: Long): MedicalEntryEntity?
 
@@ -121,6 +127,9 @@ interface DiagnosisDao {
 
     @Query("SELECT * FROM diagnoses WHERE patientId = :patientId ORDER BY generatedAt DESC LIMIT 1")
     suspend fun getLatestDiagnosis(patientId: Long): DiagnosisEntity?
+
+    @Query("SELECT * FROM diagnoses WHERE patientId = :patientId ORDER BY generatedAt DESC LIMIT :limit")
+    suspend fun getLatestDiagnoses(patientId: Long, limit: Int): List<DiagnosisEntity>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertDiagnosis(diagnosis: DiagnosisEntity): Long
