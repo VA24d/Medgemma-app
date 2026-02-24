@@ -7,11 +7,14 @@ import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
 import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
+import com.google.mediapipe.examples.llminference.MarkdownText
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.Image
+import androidx.compose.ui.graphics.Color
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -29,6 +32,8 @@ import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.AddPhotoAlternate
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.ExpandLess
+import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.Psychology
 import androidx.compose.material.icons.outlined.Psychology
 import androidx.compose.material3.*
@@ -65,8 +70,7 @@ internal fun ChatRoute(
 
     val uiState by chatViewModel.uiState.collectAsStateWithLifecycle()
     val textInputEnabled by chatViewModel.isTextInputEnabled.collectAsStateWithLifecycle()
-
-    var thinkingEnabled by remember { mutableStateOf(LocalModelFiles.isThinkingEnabled(context)) }
+    val thinkingEnabled by chatViewModel.thinkingEnabled.collectAsStateWithLifecycle()
 
     ChatScreen(
         uiState,
@@ -74,10 +78,7 @@ internal fun ChatRoute(
         visionAvailable = visionAvailable,
         thinkingEnabled = thinkingEnabled,
         onToggleThinking = { enabled ->
-            LocalModelFiles.setThinkingEnabled(context, enabled)
-            thinkingEnabled = enabled
-            // Update native skip flag — no session reset needed
-            inferenceModel?.updateThinkingMode(enabled)
+            chatViewModel.setThinkingEnabled(enabled)
         },
         onSendMessage = { message, images ->
             chatViewModel.sendMessage(message, images)
@@ -109,7 +110,12 @@ fun ChatScreen(
     LaunchedEffect(imageUris) {
         if (imageUris.isNotEmpty() && !visionAvailable) {
             snackbarHostState.showSnackbar(
-                message = "Vision encoder not loaded — images will be ignored",
+                message = "No vision encoder found — images will be ignored. Add mmproj in Model Setup.",
+                duration = SnackbarDuration.Short
+            )
+        } else if (imageUris.isNotEmpty() && visionAvailable) {
+            snackbarHostState.showSnackbar(
+                message = "Image attached — vision encoder will load when you send",
                 duration = SnackbarDuration.Short
             )
         }
@@ -295,7 +301,7 @@ fun MessageInput(
     onImagesChanged: (List<Uri>) -> Unit
 ) {
     val imagePicker = rememberLauncherForActivityResult(
-        ActivityResultContracts.PickMultipleVisualMedia()
+        ActivityResultContracts.GetMultipleContents()
     ) { onImagesChanged(it) }
 
     Surface(
@@ -351,11 +357,7 @@ fun MessageInput(
                 // Attach image button
                 FilledTonalIconButton(
                     onClick = {
-                        imagePicker.launch(
-                            PickVisualMediaRequest(
-                                ActivityResultContracts.PickVisualMedia.ImageOnly
-                            )
-                        )
+                        imagePicker.launch("image/*")
                     },
                     enabled = textInputEnabled,
                     modifier = Modifier.size(40.dp)
@@ -445,58 +447,119 @@ fun ChatBubble(chatMessage: ChatMessage) {
         RoundedCornerShape(20.dp, 20.dp, 20.dp, 4.dp)
     }
 
+    // Thinking bubbles are collapsed by default
+    var isThinkingExpanded by remember { mutableStateOf(false) }
+
     Column(
         horizontalAlignment = if (isUser) Alignment.End else Alignment.Start,
         modifier = Modifier
             .padding(vertical = 4.dp)
             .fillMaxWidth()
     ) {
-        // Author label
-        Text(
-            text = when {
-                chatMessage.isFromUser -> stringResource(R.string.user_label)
-                chatMessage.isThinking -> stringResource(R.string.thinking_label)
-                else -> stringResource(R.string.model_label)
-            },
-            style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(
-                start = if (!isUser) 8.dp else 0.dp,
-                end = if (isUser) 8.dp else 0.dp,
-                bottom = 2.dp
+        // Author label — hidden for thinking bubbles to keep them minimal
+        if (!chatMessage.isThinking) {
+            Text(
+                text = if (chatMessage.isFromUser) stringResource(R.string.user_label)
+                       else stringResource(R.string.model_label),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(
+                    start = if (!isUser) 8.dp else 0.dp,
+                    end = if (isUser) 8.dp else 0.dp,
+                    bottom = 2.dp
+                )
             )
-        )
+        }
 
-        Surface(
-            color = bubbleColor,
-            shape = bubbleShape,
-            tonalElevation = if (isUser) 0.dp else 1.dp,
-            modifier = Modifier.widthIn(max = 300.dp)
-        ) {
-            if (chatMessage.isLoading) {
-                // Typing indicator
-                TypingIndicator()
-            } else {
+        // If this is a thinking bubble, show a collapsed summary that can be expanded
+        if (chatMessage.isThinking && !chatMessage.isLoading) {
+            Surface(
+                color = bubbleColor,
+                shape = bubbleShape,
+                tonalElevation = 1.dp,
+                modifier = Modifier
+                    .widthIn(max = 300.dp)
+                    .clickable { isThinkingExpanded = !isThinkingExpanded }
+            ) {
                 Column(modifier = Modifier.padding(12.dp)) {
-                    if (chatMessage.images.isNotEmpty()) {
-                        chatMessage.images.forEach { bitmap ->
-                            Image(
-                                bitmap = bitmap.asImageBitmap(),
-                                contentDescription = "",
-                                modifier = Modifier
-                                    .padding(bottom = 8.dp)
-                                    .heightIn(max = 200.dp)
-                                    .fillMaxWidth()
-                                    .clip(RoundedCornerShape(12.dp)),
-                                contentScale = ContentScale.Fit
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        Icon(
+                            Icons.Filled.Psychology,
+                            contentDescription = null,
+                            modifier = Modifier.size(16.dp),
+                            tint = textColor.copy(alpha = 0.7f)
+                        )
+                        Text(
+                            text = if (isThinkingExpanded) "Thinking (tap to hide)" else "Thought process (tap to show)",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = textColor.copy(alpha = 0.7f),
+                            modifier = Modifier.weight(1f)
+                        )
+                        Icon(
+                            if (isThinkingExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
+                            contentDescription = if (isThinkingExpanded) "Collapse" else "Expand",
+                            modifier = Modifier.size(18.dp),
+                            tint = textColor.copy(alpha = 0.7f)
+                        )
+                    }
+                    AnimatedVisibility(
+                        visible = isThinkingExpanded,
+                        enter = expandVertically(),
+                        exit = shrinkVertically()
+                    ) {
+                        Column(modifier = Modifier.padding(top = 8.dp)) {
+                            Text(
+                                text = chatMessage.message,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = textColor.copy(alpha = 0.85f)
                             )
                         }
                     }
-                    Text(
-                        text = chatMessage.message,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = textColor
-                    )
+                }
+            }
+        } else {
+            // Normal message bubble (user, model response, or still-loading thinking)
+            Surface(
+                color = bubbleColor,
+                shape = bubbleShape,
+                tonalElevation = if (isUser) 0.dp else 1.dp,
+                modifier = Modifier.widthIn(max = 300.dp)
+            ) {
+                if (chatMessage.isLoading) {
+                    // Typing indicator
+                    TypingIndicator()
+                } else {
+                    Column(modifier = Modifier.padding(12.dp)) {
+                        if (chatMessage.images.isNotEmpty()) {
+                            chatMessage.images.forEach { bitmap ->
+                                Image(
+                                    bitmap = bitmap.asImageBitmap(),
+                                    contentDescription = "",
+                                    modifier = Modifier
+                                        .padding(bottom = 8.dp)
+                                        .heightIn(max = 200.dp)
+                                        .fillMaxWidth()
+                                        .clip(RoundedCornerShape(12.dp)),
+                                    contentScale = ContentScale.Fit
+                                )
+                            }
+                        }
+                        if (isUser) {
+                            Text(
+                                text = chatMessage.message,
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = textColor
+                            )
+                        } else {
+                            MarkdownText(
+                                markdown = chatMessage.message,
+                                textColor = textColor,
+                            )
+                        }
+                    }
                 }
             }
         }

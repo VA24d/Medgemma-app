@@ -37,7 +37,7 @@ In the fast-paced medical environment, retrieving patient history and analyzing 
 
 ## Prerequisites
 
--   **Hardware**: Physical Android device (SDK 24+) with developer mode enabled. *GPU acceleration recommended.*
+-   **Hardware**: Physical Android device (SDK 24+) with developer mode enabled (Tested on Qualcomm Innovator Development Kit with Snapdragon 8 Elite Gen 5 / Pixel 7 Pro).
 -   **Software**: [Android Studio](https://developer.android.com/studio) (Hedgehog or newer).
 
 ## Installation
@@ -50,19 +50,29 @@ In the fast-paced medical environment, retrieving patient history and analyzing 
 
 2.  **Open in Android Studio**
     -   Select **File > Open** and navigate to the project directory.
-    -   Allow Gradle to sync.
+    -   Allow Gradle to sync. Ensure NDK is installed for the `llama.cpp` wrapper.
 
 3.  **Build the Project**
     -   Go to **Build > Make Project**.
     -   Connect your Android device via USB.
     -   Select **Run > Run 'app'**.
 
-## Model Setup
+## Local Model Deployment (`llama.cpp` backend)
 
-Upon first launch, the app requires the MedGemma model weights:
-1.  The app will prompt you to download the model from **Hugging Face**.
-2.  Log in with your Hugging Face account if required (ensure you have accepted the MedGemma license terms).
-3.  The model (~2GB) will download directly to the device storage.
+This project has migrated away from standard MediaPipe to a highly optimized custom `llama.cpp` wrapper (`com.arm.aichat`) capable of running Q4_K_M GGUF models directly on Android. Upon first launch:
+
+1.  The app will prompt you to download the **MedGemma 1.5 4B Multimodal** (`.gguf`) model from Hugging Face.
+2.  Log in with your provided Hugging Face account tokens if required.
+3.  The compressed model (~2.8GB) will download directly to the device storage via background services.
+
+### Model Conversion & Fine-Tuning (QLoRA)
+If you wish to replicate our specific formatting (SOAP structure), vernacular translation capabilities, and model conversion:
+-   Our exact training scripts and synthetic teacher-model datasets are located in the `fine_tuning/` directory.
+-   Our fine-tuning pipeline utilizes **QLoRA** with a rank ($r$) of 32 applied to the attention matrices (`q_proj`, `v_proj`).
+-   Compute precision must be set to `torch.float32`.
+-   To package the fine-tuned model for the Android edge, use the provided official `convert_hf_to_gguf.py` script (located in the `fine_tuning/` directory) to transition the Hugging Face `.safetensors` into the required `Q4_K_M` `.gguf` format.
+
+All code and methodologies provided are rigorously tested and validated per our final submission parameters. Licensed under **CC BY 4.0**.
 
 # 📱 Usage Guide
 

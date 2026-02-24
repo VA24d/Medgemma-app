@@ -35,8 +35,14 @@ class InferenceModel private constructor(context: Context) {
     private val appContext = context.applicationContext
     private lateinit var engine: InferenceEngine
     private var mmprojLoaded = false
-    val isVisionAvailable: Boolean get() = mmprojLoaded
+    val isVisionAvailable: Boolean get() = mmprojLoaded || isMmprojFileAvailable()
     private val TAG = InferenceModel::class.qualifiedName
+
+    /** Check if mmproj file exists on disk (even if not yet loaded into engine). */
+    private fun isMmprojFileAvailable(): Boolean {
+        val mmproj = mmprojPath(appContext)
+        return mmproj.isNotBlank() && File(mmproj).exists()
+    }
 
     val uiState = UiState(model.thinking)
 
@@ -88,11 +94,11 @@ class InferenceModel private constructor(context: Context) {
 
                 engine.loadModel(localModelPath)
 
+                // Skip loading mmproj at init — it will be loaded lazily when an image is first sent
+                mmprojLoaded = false
                 val mmproj = mmprojPath(context)
-                mmprojLoaded = if (mmproj.isNotBlank() && File(mmproj).exists()) {
-                    engine.loadMMProj(mmproj)
-                } else {
-                    false
+                if (mmproj.isNotBlank() && File(mmproj).exists()) {
+                    Log.i(TAG, "Vision encoder available at $mmproj (will load on first image)")
                 }
 
                 // Control thinking behavior via native prefill skip
@@ -107,6 +113,27 @@ class InferenceModel private constructor(context: Context) {
         }
     }
 
+    /**
+     * Lazily loads the vision encoder (mmproj) on first use.
+     * Returns true if mmproj is now loaded and ready.
+     */
+    suspend fun ensureMmprojLoaded(): Boolean {
+        if (mmprojLoaded) return true
+        val mmproj = mmprojPath(appContext)
+        if (mmproj.isBlank() || !File(mmproj).exists()) return false
+        return withContext(Dispatchers.IO) {
+            try {
+                Log.i(TAG, "Lazy-loading vision encoder: $mmproj")
+                mmprojLoaded = engine.loadMMProj(mmproj)
+                Log.i(TAG, "Vision encoder loaded: $mmprojLoaded")
+                mmprojLoaded
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to load vision encoder: ${e.message}", e)
+                false
+            }
+        }
+    }
+
     fun generateResponseAsync(
         prompt: String,
         images: List<Bitmap>,
@@ -114,8 +141,15 @@ class InferenceModel private constructor(context: Context) {
     ): java.util.concurrent.Future<String> {
         return executor.submit(java.util.concurrent.Callable {
             val response = runBlocking(Dispatchers.IO) {
-                if (images.isNotEmpty() && mmprojLoaded) {
-                    generateMultimodalResponse(prompt, images.first(), progressListener)
+                if (images.isNotEmpty()) {
+                    // Lazy-load mmproj on first image use
+                    val visionReady = ensureMmprojLoaded()
+                    if (visionReady) {
+                        generateMultimodalResponse(prompt, images.first(), progressListener)
+                    } else {
+                        // Fall back to text-only if vision encoder can't be loaded
+                        generateTextResponse(prompt, progressListener)
+                    }
                 } else {
                     generateTextResponse(prompt, progressListener)
                 }

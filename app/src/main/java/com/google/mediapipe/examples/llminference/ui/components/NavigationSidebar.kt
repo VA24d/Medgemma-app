@@ -31,6 +31,7 @@ fun NavigationSidebar(
     isOpen: Boolean,
     onClose: () -> Unit,
     onOpenModelSelection: () -> Unit,
+    onOpenHfLogin: () -> Unit = {},
     onSignOut: () -> Unit,
     onChangePin: () -> Unit,
     onExportFhir: () -> Unit,
@@ -42,7 +43,6 @@ fun NavigationSidebar(
 
     // Settings states
     var showThemeDialog by remember { mutableStateOf(false) }
-    var showTokenDialog by remember { mutableStateOf(false) }
     var showEnergyDialog by remember { mutableStateOf(false) }
     var showBackendDialog by remember { mutableStateOf(false) }
     var showDoctorDialog by remember { mutableStateOf(false) }
@@ -131,8 +131,14 @@ fun NavigationSidebar(
             SidebarItem(
                 icon = Icons.Default.Lock,
                 title = "Hugging Face Token",
-                subtitle = if (tokenManager.hasToken()) "Token saved ✓" else "Not configured",
-                onClick = { showTokenDialog = true }
+                subtitle = if (tokenManager.hasToken()) {
+                    val username = tokenManager.getUsername()
+                    if (username != null) "@$username ✓" else "Token saved ✓"
+                } else "Not configured",
+                onClick = {
+                    onClose()
+                    onOpenHfLogin()
+                }
             )
 
             HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
@@ -260,15 +266,7 @@ fun NavigationSidebar(
         )
     }
 
-    // Token dialog
-    if (showTokenDialog) {
-        com.google.mediapipe.examples.llminference.ui.TokenSettingsDialog(
-            currentToken = tokenManager.getToken(),
-            onSaveToken = { tokenManager.saveToken(it) },
-            onClearToken = { tokenManager.clearToken() },
-            onDismiss = { showTokenDialog = false }
-        )
-    }
+    // Token dialog removed — now handled by HfLoginScreen navigation
 
     // Energy mode dialog
     if (showEnergyDialog) {

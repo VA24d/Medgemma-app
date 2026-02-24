@@ -11,7 +11,6 @@
 #include "common.h"
 #include "llama.h"
 #include "mtmd.h"
-#include "mtmd-helper.h"
 
 template<class T>
 static std::string join(const std::vector<T> &values, const std::string &delim) {
@@ -188,7 +187,7 @@ Java_com_arm_aichat_internal_InferenceEngineImpl_benchModel(JNIEnv *env, jobject
         }
 
         g_batch.logits[g_batch.n_tokens - 1] = true;
-        llama_memory_clear(llama_get_memory(context), false);
+        llama_kv_self_clear(context);
 
         const auto t_pp_start = ggml_time_us();
         if (llama_decode(context, g_batch) != 0) {
@@ -200,7 +199,7 @@ Java_com_arm_aichat_internal_InferenceEngineImpl_benchModel(JNIEnv *env, jobject
 
         LOGi("Benchmark text generation (tg = %d)", tg);
 
-        llama_memory_clear(llama_get_memory(context), false);
+        llama_kv_self_clear(context);
         const auto t_tg_start = ggml_time_us();
         for (i = 0; i < tg; i++) {
             common_batch_clear(g_batch);
@@ -214,7 +213,7 @@ Java_com_arm_aichat_internal_InferenceEngineImpl_benchModel(JNIEnv *env, jobject
         }
         const auto t_tg_end = ggml_time_us();
 
-        llama_memory_clear(llama_get_memory(context), false);
+        llama_kv_self_clear(context);
 
         const auto t_pp = double(t_pp_end - t_pp_start) / 1000000.0;
         const auto t_tg = double(t_tg_end - t_tg_start) / 1000000.0;
@@ -282,7 +281,7 @@ static void reset_long_term_states(const bool clear_kv_cache = true) {
     current_position = 0;
 
     if (clear_kv_cache)
-        llama_memory_clear(llama_get_memory(g_context), false);
+        llama_kv_self_clear(g_context);
 }
 
 /**
@@ -296,8 +295,8 @@ static void reset_long_term_states(const bool clear_kv_cache = true) {
 static void shift_context() {
     const int n_discard = (current_position - system_prompt_position) / 2;
     LOGi("%s: Discarding %d tokens", __func__, n_discard);
-    llama_memory_seq_rm(llama_get_memory(g_context), 0, system_prompt_position, system_prompt_position + n_discard);
-    llama_memory_seq_add(llama_get_memory(g_context), 0, system_prompt_position + n_discard, current_position, -n_discard);
+    llama_kv_self_seq_rm(g_context, 0, system_prompt_position, system_prompt_position + n_discard);
+    llama_kv_self_seq_add(g_context, 0, system_prompt_position + n_discard, current_position, -n_discard);
     current_position -= n_discard;
     LOGi("%s: Context shifting done! Current position: %d", __func__, current_position);
 }
@@ -646,7 +645,7 @@ Java_com_arm_aichat_internal_InferenceEngineImpl_nativeLoadImage(
     LOGi("%s: ⏱️ START Loading image from: %s", __func__, image_path);
     
     int64_t t_start = ggml_time_ms();
-    g_bitmap = mtmd_helper_bitmap_init_from_file(g_mtmd_ctx, image_path);
+    g_bitmap = mtmd_helper_bitmap_init_from_file(image_path);
     int64_t t_end = ggml_time_ms();
     
     env->ReleaseStringUTFChars(jimage_path, image_path);

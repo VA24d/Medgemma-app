@@ -58,3 +58,6 @@ Desktop.ini
 
 # Model files (large binaries)
 *.gguf
+models/*.tflite
+models/*.tflite
+aichatlib/build/

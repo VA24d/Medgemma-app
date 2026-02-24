@@ -37,6 +37,7 @@ const val QUICK_ANALYSIS_SCREEN = "quick_analysis"
 const val START_SCREEN = "start_screen"
 const val LOAD_SCREEN = "load_screen"
 const val CHAT_SCREEN = "chat_screen"
+const val HF_LOGIN_SCREEN = "hf_login"
 
 class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalMaterial3Api::class)
@@ -68,6 +69,10 @@ class MainActivity : ComponentActivity() {
                                 onOpenModelSelection = {
                                     scope.launch { drawerState.close() }
                                     navController.navigate(START_SCREEN)
+                                },
+                                onOpenHfLogin = {
+                                    scope.launch { drawerState.close() }
+                                    navController.navigate(HF_LOGIN_SCREEN)
                                 },
                                 onSignOut = {
                                     scope.launch { drawerState.close() }
@@ -347,6 +352,19 @@ class MainActivity : ComponentActivity() {
                                         navController.navigate(CHAT_SCREEN) {
                                             popUpTo(START_SCREEN) { inclusive = true }
                                         }
+                                    },
+                                    onSetupToken = {
+                                        navController.navigate(HF_LOGIN_SCREEN)
+                                    }
+                                )
+                            }
+
+                            // ── HF Login / Token Setup ──
+                            composable(HF_LOGIN_SCREEN) {
+                                com.google.mediapipe.examples.llminference.ui.screens.HfLoginScreen(
+                                    onBack = { navController.popBackStack() },
+                                    onAuthenticated = {
+                                        navController.popBackStack() // Return to SelectionScreen
                                     }
                                 )
                             }

@@ -137,43 +137,31 @@ internal fun downloadModel(
     triggerAuth: Boolean = true,
     onProgressUpdate: (Int) -> Unit
 ) {
-    val requestBuilder = Request.Builder().url(model.url)
+    // Resolve token from the unified chain: TokenManager → SecureStorage
+    val token = com.google.mediapipe.examples.llminference.network.HfApiClient.resolveToken(context)
 
     if (model.needsAuth) {
-        val tokenManager = TokenManager(context)
-        val savedToken = tokenManager.getToken()
-
-        val accessToken = if (!savedToken.isNullOrBlank()) {
-            // Use saved token
-            savedToken
-        } else {
-            // Fall back to OAuth
-            SecureStorage.getToken(context) // Assuming getAccessToken(context) refers to this
-        }
-
-        if (accessToken.isNullOrBlank()) {
+        if (token.isNullOrBlank()) {
             if (triggerAuth) {
-                // Trigger LoginActivity if no access token is found
                 val intent = Intent(context, LoginActivity::class.java).apply {
                     flags = Intent.FLAG_ACTIVITY_NEW_TASK
                 }
                 context.startActivity(intent)
             }
             throw MissingAccessTokenException()
-        } else {
-            requestBuilder.addHeader("Authorization", "Bearer $accessToken")
         }
+    }
+
+    val requestBuilder = Request.Builder().url(model.url)
+    if (!token.isNullOrBlank()) {
+        requestBuilder.addHeader("Authorization", "Bearer $token")
     }
 
     val outputFile = File(InferenceModel.modelPathFromUrl(context))
     val response = client.newCall(requestBuilder.build()).execute()
     if (!response.isSuccessful) {
         if (response.code == UNAUTHORIZED_CODE) {
-            val accessToken = SecureStorage.getToken(context)
-            if (!accessToken.isNullOrEmpty()) {
-                // Remove invalid or expired token
-                SecureStorage.removeToken(context)
-            }
+            SecureStorage.removeToken(context)
             throw UnauthorizedAccessException()
         } else if (response.code == FORBIDDEN_CODE) {
             throw ForbiddenAccessException()
@@ -183,7 +171,7 @@ internal fun downloadModel(
 
     response.body?.byteStream()?.use { inputStream ->
         FileOutputStream(outputFile).use { outputStream ->
-            val buffer = ByteArray(4096)
+            val buffer = ByteArray(8192)
             var bytesRead: Int
             var totalBytesRead = 0L
             val contentLength = response.body?.contentLength() ?: -1
