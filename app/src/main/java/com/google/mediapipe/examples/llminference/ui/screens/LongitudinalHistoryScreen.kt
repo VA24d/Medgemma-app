@@ -173,6 +173,12 @@ private fun TimelineEntryCard(
     var subAgentStage by remember { mutableStateOf(0) }  // 0=idle 1=stage1 2=stage2
     var streamingText by remember { mutableStateOf("") }
     var stage1Result by remember { mutableStateOf("") }
+    var usingCachedDesc by remember { mutableStateOf(false) }
+
+    // A cached raw description exists if analysisResult is non-blank and is NOT already
+    // a combined sub-agent result (which would contain the "Observations (Stage 1):" header).
+    val hasCachedDescription = entry.analysisResult.isNotBlank() &&
+        !entry.analysisResult.contains("**Observations (Stage 1):**")
     val scope = rememberCoroutineScope()
     val dateFormat = remember { SimpleDateFormat("MMM dd, yyyy", Locale.getDefault()) }
     val timeFormat = remember { SimpleDateFormat("HH:mm", Locale.getDefault()) }
@@ -300,9 +306,10 @@ private fun TimelineEntryCard(
                                     )
                                     Spacer(modifier = Modifier.width(8.dp))
                                     Text(
-                                        when (subAgentStage) {
-                                            1 -> "Stage 1 — Observing image…"
-                                            2 -> "Stage 2 — Clinical interpretation…"
+                                        when {
+                                            subAgentStage == 1 && usingCachedDesc -> "Stage 1 — Using cached description…"
+                                            subAgentStage == 1 -> "Stage 1 — Observing image…"
+                                            subAgentStage == 2 -> "Stage 2 — Clinical interpretation…"
                                             else -> "Analysing…"
                                         },
                                         style = MaterialTheme.typography.labelSmall,
@@ -335,50 +342,59 @@ private fun TimelineEntryCard(
                                             subAgentStage = 1
                                             streamingText = ""
                                             stage1Result = ""
+                                            usingCachedDesc = hasCachedDescription
                                             scope.launch {
                                                 try {
                                                     val inferenceModel = withContext(Dispatchers.IO) {
                                                         InferenceModel.getInstance(context)
                                                     }
-                                                    // Load bitmap for Stage 1
-                                                    val bitmap: android.graphics.Bitmap? = withContext(Dispatchers.IO) {
-                                                        try {
-                                                            val uri = android.net.Uri.parse(entry.imagePaths)
-                                                            when {
-                                                                uri.scheme == "file" -> android.graphics.BitmapFactory.decodeFile(uri.path)
-                                                                uri.scheme == "content" -> {
-                                                                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P) {
-                                                                        android.graphics.ImageDecoder.decodeBitmap(
-                                                                            android.graphics.ImageDecoder.createSource(context.contentResolver, uri)
-                                                                        ) { dec, _, _ -> dec.isMutableRequired = true }
-                                                                    } else {
-                                                                        @Suppress("DEPRECATION")
-                                                                        android.provider.MediaStore.Images.Media.getBitmap(context.contentResolver, uri)
+
+                                                    if (hasCachedDescription) {
+                                                        // ── Cached-description path ──
+                                                        // Stage 1 is already done: the auto-description from XrayAnalysisScreen
+                                                        // is stored in entry.analysisResult. Show it briefly, then go to Stage 2.
+                                                        stage1Result = entry.analysisResult
+                                                        streamingText = stage1Result
+                                                    } else {
+                                                        // ── Vision path: load bitmap and run Stage 1 ──
+                                                        val bitmap: android.graphics.Bitmap? = withContext(Dispatchers.IO) {
+                                                            try {
+                                                                val uri = android.net.Uri.parse(entry.imagePaths)
+                                                                when {
+                                                                    uri.scheme == "file" -> android.graphics.BitmapFactory.decodeFile(uri.path)
+                                                                    uri.scheme == "content" -> {
+                                                                        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P) {
+                                                                            android.graphics.ImageDecoder.decodeBitmap(
+                                                                                android.graphics.ImageDecoder.createSource(context.contentResolver, uri)
+                                                                            ) { dec, _, _ -> dec.isMutableRequired = true }
+                                                                        } else {
+                                                                            @Suppress("DEPRECATION")
+                                                                            android.provider.MediaStore.Images.Media.getBitmap(context.contentResolver, uri)
+                                                                        }
                                                                     }
+                                                                    else -> null
                                                                 }
-                                                                else -> null
-                                                            }
-                                                        } catch (e: Exception) { null }
-                                                    }
-                                                    // == Stage 1: vision observation ==
-                                                    val stage1Prompt = when (entry.entryType) {
-                                                        "HISTOPATHOLOGY" -> """You are a pathology AI. Systematically describe this histopathology slide for clinical documentation.
+                                                            } catch (e: Exception) { null }
+                                                        }
+                                                        val stage1Prompt = when (entry.entryType) {
+                                                            "HISTOPATHOLOGY" -> """You are a pathology AI. Systematically describe this histopathology slide for clinical documentation.
 Report: 1) Stain type, 2) Tissue type and architecture, 3) Cellular morphology, 4) Mitotic figures per HPF, 5) Inflammatory infiltrate, 6) Vascular/stromal changes, 7) Dysplasia/atypia/malignant features.
 Be precise, structured, and clinically useful. Do not wrap in a code block."""
-                                                        "MRI" -> """You are a radiologist AI specialising in MRI. Systematically describe this MRI image for clinical documentation.
+                                                            "MRI" -> """You are a radiologist AI specialising in MRI. Systematically describe this MRI image for clinical documentation.
 Report: 1) Likely sequence and plane, 2) Body region and laterality, 3) Signal characteristics, 4) Focal lesions (location, size, signal, margins, oedema), 5) Mass effect, 6) Enhancement if visible, 7) Incidental findings.
 Be precise. Do not wrap in a code block."""
-                                                        else -> """You are a radiologist AI. Systematically describe this X-ray for clinical documentation.
+                                                            else -> """You are a radiologist AI. Systematically describe this X-ray for clinical documentation.
 Report: 1) Image quality, 2) Bony structures, 3) Soft tissue, 4) Lung fields, 5) Cardiac silhouette, 6) Mediastinum, 7) Pleural spaces, 8) Any abnormal findings with location.
 Be precise. Do not wrap in a code block."""
+                                                        }
+                                                        val imgList = if (bitmap != null) listOf(bitmap) else emptyList()
+                                                        var s1 = ""
+                                                        val fut1 = inferenceModel.generateResponseAsync(stage1Prompt, imgList) { token, _ ->
+                                                            if (token.isNotEmpty()) { s1 += token; streamingText = s1 }
+                                                        }
+                                                        withContext(Dispatchers.IO) { fut1.get() }
+                                                        stage1Result = s1.trim()
                                                     }
-                                                    val imgList = if (bitmap != null) listOf(bitmap) else emptyList()
-                                                    var s1 = ""
-                                                    val fut1 = inferenceModel.generateResponseAsync(stage1Prompt, imgList) { token, _ ->
-                                                        if (token.isNotEmpty()) { s1 += token; streamingText = s1 }
-                                                    }
-                                                    withContext(Dispatchers.IO) { fut1.get() }
-                                                    stage1Result = s1.trim()
 
                                                     // == Stage 2: clinical interpretation (text only) ==
                                                     subAgentStage = 2
@@ -423,6 +439,7 @@ Format in Markdown. Do not wrap in a code block."""
                                                     isAnalyzing = false
                                                     subAgentStage = 0
                                                     streamingText = ""
+                                                    usingCachedDesc = false
                                                 }
                                             }
                                         }
@@ -470,11 +487,20 @@ Format in Markdown. Do not wrap in a code block."""
                                                         "MRI" -> "MRI scan"
                                                         else -> "X-ray"
                                                     }
-                                                    val prompt = if (bitmap != null)
-                                                        "You are a specialist AI. Analyse this $typeLabel image.\nTitle: ${entry.title}\nContext: ${entry.content}\nProvide: 1) Key imaging findings, 2) Diagnosis/differentials, 3) Urgency. Be concise."
-                                                    else
-                                                        "You are a specialist AI. Analyse this $typeLabel entry.\nTitle: ${entry.title}\nContext: ${entry.content}\nProvide: 1) Key findings, 2) Diagnosis/differentials, 3) Urgency. Be concise."
-                                                    val imgList = if (bitmap != null) listOf(bitmap) else emptyList()
+                                                    val prompt = when {
+                                                        hasCachedDescription ->
+                                                            """You are a specialist AI. Analyse this $typeLabel entry using the existing image description.
+Title: ${entry.title}
+Context: ${entry.content}
+Image description: ${entry.analysisResult}
+Provide: 1) Key imaging findings, 2) Diagnosis/differentials, 3) Urgency. Be concise."""
+                                                        bitmap != null ->
+                                                            "You are a specialist AI. Analyse this $typeLabel image.\nTitle: ${entry.title}\nContext: ${entry.content}\nProvide: 1) Key imaging findings, 2) Diagnosis/differentials, 3) Urgency. Be concise."
+                                                        else ->
+                                                            "You are a specialist AI. Analyse this $typeLabel entry.\nTitle: ${entry.title}\nContext: ${entry.content}\nProvide: 1) Key findings, 2) Diagnosis/differentials, 3) Urgency. Be concise."
+                                                    }
+                                                    // If using cached description, no bitmap needed — text carries the image info
+                                                    val imgList = if (bitmap != null && !hasCachedDescription) listOf(bitmap) else emptyList()
                                                     var result = ""
                                                     val future = inferenceModel.generateResponseAsync(prompt, imgList) { token, _ ->
                                                         if (token.isNotEmpty()) { result += token; streamingText = result }
