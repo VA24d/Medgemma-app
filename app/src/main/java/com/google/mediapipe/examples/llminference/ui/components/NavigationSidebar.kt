@@ -48,6 +48,7 @@ fun NavigationSidebar(
     var showBackendDialog by remember { mutableStateOf(false) }
     var showDoctorDialog by remember { mutableStateOf(false) }
     var showLocationDialog by remember { mutableStateOf(false) }
+    var showLanguageDialog by remember { mutableStateOf(false) }
     var showDeleteConfirm by remember { mutableStateOf(false) }
     var showEncryptionDialog by remember { mutableStateOf(false) }
 
@@ -119,17 +120,13 @@ fun NavigationSidebar(
             HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
 
             // ── Localization ──
-            var isLanguageExtEnabled by remember { mutableStateOf(LocalModelFiles.isLanguageExtensionEnabled(context)) }
+            var selectedLanguage by remember { mutableStateOf(LocalModelFiles.getLanguageExtension(context)) }
             SidebarSection("Localization")
             SidebarItem(
                 icon = Icons.Default.Translate,
                 title = "Language Extension",
-                subtitle = if (isLanguageExtEnabled) "Telugu (Enabled)" else "Off",
-                onClick = {
-                    val newState = !isLanguageExtEnabled
-                    LocalModelFiles.setLanguageExtensionEnabled(context, newState)
-                    isLanguageExtEnabled = newState
-                }
+                subtitle = if (selectedLanguage == "Off") "Off" else "$selectedLanguage (Enabled)",
+                onClick = { showLanguageDialog = true }
             )
 
             HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
@@ -279,6 +276,43 @@ fun NavigationSidebar(
             },
             confirmButton = {
                 TextButton(onClick = { showThemeDialog = false }) { Text("Cancel") }
+            }
+        )
+    }
+
+    // Language extension dialog
+    if (showLanguageDialog) {
+        AlertDialog(
+            onDismissRequest = { showLanguageDialog = false },
+            title = { Text("Language Extension") },
+            text = {
+                Column {
+                    listOf("Off", "Telugu", "Hindi").forEach { lang ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    LocalModelFiles.setLanguageExtension(context, lang)
+                                    showLanguageDialog = false
+                                }
+                                .padding(12.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            RadioButton(
+                                selected = LocalModelFiles.getLanguageExtension(context) == lang,
+                                onClick = {
+                                    LocalModelFiles.setLanguageExtension(context, lang)
+                                    showLanguageDialog = false
+                                }
+                            )
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Text(lang)
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showLanguageDialog = false }) { Text("Cancel") }
             }
         )
     }

@@ -7,10 +7,13 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
 import com.google.mediapipe.examples.llminference.data.MedicalDatabase
 import com.google.mediapipe.examples.llminference.data.MedicalEntryEntity
 import kotlinx.coroutines.Dispatchers
@@ -66,6 +69,22 @@ fun EntryDetailScreen(
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.onTertiaryContainer
                     )
+                }
+
+                // Image preview
+                if (currentEntry.imagePaths.isNotBlank()) {
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(260.dp)
+                    ) {
+                        AsyncImage(
+                            model = currentEntry.imagePaths,
+                            contentDescription = "Medical image",
+                            contentScale = ContentScale.Fit,
+                            modifier = Modifier.fillMaxSize()
+                        )
+                    }
                 }
 
                 // Content

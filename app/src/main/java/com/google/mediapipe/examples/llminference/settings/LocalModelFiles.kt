@@ -59,11 +59,11 @@ object LocalModelFiles {
         prefs(context).edit().putBoolean(KEY_THINKING_ENABLED, enabled).apply()
     }
 
-    fun isLanguageExtensionEnabled(context: Context): Boolean =
-        prefs(context).getBoolean(KEY_LANGUAGE_EXTENSION, false)
+    fun getLanguageExtension(context: Context): String =
+        prefs(context).getString(KEY_LANGUAGE_EXTENSION, "Off") ?: "Off"
 
-    fun setLanguageExtensionEnabled(context: Context, enabled: Boolean) {
-        prefs(context).edit().putBoolean(KEY_LANGUAGE_EXTENSION, enabled).apply()
+    fun setLanguageExtension(context: Context, language: String) {
+        prefs(context).edit().putString(KEY_LANGUAGE_EXTENSION, language).apply()
     }
 
     fun isScheduledPrognosisEnabled(context: Context): Boolean =

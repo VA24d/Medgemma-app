@@ -15,8 +15,10 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
 import com.google.mediapipe.examples.llminference.InferenceModel
 import com.google.mediapipe.examples.llminference.data.MedicalDatabase
 import com.google.mediapipe.examples.llminference.data.MedicalEntryEntity
@@ -166,6 +168,7 @@ private fun TimelineEntryCard(
     val timeFormat = remember { SimpleDateFormat("HH:mm", Locale.getDefault()) }
     val icon = when (entry.entryType) {
         "XRAY" -> Icons.Default.Image
+        "MRI" -> Icons.Default.BlurOn
         "HISTOPATHOLOGY" -> Icons.Default.Biotech
         "RECORDING" -> Icons.Default.Mic
         "DOCUMENT" -> Icons.Default.Description
@@ -226,6 +229,22 @@ private fun TimelineEntryCard(
 
                 if (isExpanded) {
                     Spacer(modifier = Modifier.height(12.dp))
+                    // Image thumbnail
+                    if (entry.imagePaths.isNotBlank()) {
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(180.dp)
+                        ) {
+                            AsyncImage(
+                                model = entry.imagePaths,
+                                contentDescription = "Medical image",
+                                contentScale = ContentScale.Fit,
+                                modifier = Modifier.fillMaxSize()
+                            )
+                        }
+                        Spacer(modifier = Modifier.height(8.dp))
+                    }
                     if (entry.content.isNotBlank()) {
                         Text(
                             entry.content,

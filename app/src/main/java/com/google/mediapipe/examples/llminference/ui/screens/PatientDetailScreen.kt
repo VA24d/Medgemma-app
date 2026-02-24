@@ -16,8 +16,10 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
+import coil.compose.AsyncImage
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.Dispatchers
@@ -311,6 +313,7 @@ private fun EntryCard(entry: MedicalEntryEntity, onClick: () -> Unit) {
     val dateFormat = remember { SimpleDateFormat("MMM dd, yyyy HH:mm", Locale.getDefault()) }
     val icon = when (entry.entryType) {
         "XRAY" -> Icons.Default.Image
+        "MRI" -> Icons.Default.BlurOn
         "HISTOPATHOLOGY" -> Icons.Default.Biotech
         "RECORDING" -> Icons.Default.Mic
         "DOCUMENT" -> Icons.Default.Description
@@ -318,7 +321,8 @@ private fun EntryCard(entry: MedicalEntryEntity, onClick: () -> Unit) {
         else -> Icons.AutoMirrored.Filled.Article
     }
     val typeLabel = when (entry.entryType) {
-        "XRAY" -> "X-ray / MRI"
+        "XRAY" -> "X-ray"
+        "MRI" -> "MRI Scan"
         "HISTOPATHOLOGY" -> "Histopathology"
         "RECORDING" -> "Recording"
         "DOCUMENT" -> "Document"
@@ -355,19 +359,32 @@ private fun EntryCard(entry: MedicalEntryEntity, onClick: () -> Unit) {
                 }
             },
             leadingContent = {
-                Box(
-                    modifier = Modifier
-                        .size(40.dp)
-                        .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.secondaryContainer),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        icon,
+                val hasImage = entry.imagePaths.isNotBlank() &&
+                    entry.entryType in listOf("XRAY", "MRI", "HISTOPATHOLOGY")
+                if (hasImage) {
+                    AsyncImage(
+                        model = entry.imagePaths,
                         contentDescription = null,
-                        modifier = Modifier.size(20.dp),
-                        tint = MaterialTheme.colorScheme.onSecondaryContainer
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .size(40.dp)
+                            .clip(CircleShape)
                     )
+                } else {
+                    Box(
+                        modifier = Modifier
+                            .size(40.dp)
+                            .clip(CircleShape)
+                            .background(MaterialTheme.colorScheme.secondaryContainer),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            icon,
+                            contentDescription = null,
+                            modifier = Modifier.size(20.dp),
+                            tint = MaterialTheme.colorScheme.onSecondaryContainer
+                        )
+                    }
                 }
             },
             trailingContent = {

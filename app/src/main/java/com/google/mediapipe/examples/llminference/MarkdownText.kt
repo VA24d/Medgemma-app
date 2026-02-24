@@ -213,8 +213,8 @@ fun MarkdownText(
     val context = LocalContext.current
     
     val processedMarkdown = remember(markdown) {
-        val isVernacularEnabled = LocalModelFiles.isLanguageExtensionEnabled(context)
-        LanguageExtension.applyVernacular(markdown, isVernacularEnabled)
+        val selectedLanguage = LocalModelFiles.getLanguageExtension(context)
+        LanguageExtension.applyVernacular(markdown, selectedLanguage)
     }
 
     val blocks = remember(processedMarkdown) { parseMarkdown(processedMarkdown) }
