@@ -67,3 +67,7 @@ Kaggle_Submission.md
 GGUF-UI-INTEGRATION-PLAN.md
 todo.md
 docs/
+
+# CMake bloat (accidentally committed)
+cmake-3.31.6-macos-universal/
+cmake-3.31.6.tar.gz
