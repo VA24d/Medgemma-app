@@ -72,12 +72,12 @@ internal fun SelectionRoute(
     var selectedHfModel by remember { mutableStateOf<HfGgufFile?>(null) }
     var downloadMmproj by remember { mutableStateOf(false) }
     var isDownloading by remember { mutableStateOf(false) }
-    var downloadProgress by remember { mutableStateOf(0) }
+    var downloadProgress by remember { mutableIntStateOf(0) }
     var downloadFileName by remember { mutableStateOf("") }
     var downloadError by remember { mutableStateOf("") }
 
     // ── Tab State (0 = Download from HF, 1 = Load Local) ──
-    var selectedTab by remember { mutableStateOf(0) }
+    var selectedTab by remember { mutableIntStateOf(0) }
 
     // Check model file exists AND if model already loaded
     val modelFileExists = remember(pickedModelPath) {

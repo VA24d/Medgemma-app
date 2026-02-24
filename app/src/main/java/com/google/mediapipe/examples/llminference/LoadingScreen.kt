@@ -48,7 +48,7 @@ internal fun LoadingRoute(
     val selectedMmprojName = remember { File(InferenceModel.mmprojPath(context)).name }
     var errorMessage by remember { mutableStateOf("") }
 
-    var progress by remember { mutableStateOf(0) }
+    var progress by remember { mutableIntStateOf(0) }
     var isDownloading by remember { mutableStateOf(false) }
     var job: Job? by remember { mutableStateOf(null) }
     val client = remember { OkHttpClient() }

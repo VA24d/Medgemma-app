@@ -55,7 +55,7 @@ fun XrayAnalysisScreen(
     var isSaving by remember { mutableStateOf(false) }
 
     // Date picker state
-    var selectedDateMillis by remember { mutableStateOf(System.currentTimeMillis()) }
+    var selectedDateMillis by remember { mutableLongStateOf(System.currentTimeMillis()) }
     var showDatePicker by remember { mutableStateOf(false) }
     val dateFormatter = remember { SimpleDateFormat("MMM d, yyyy", Locale.getDefault()) }
 

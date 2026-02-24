@@ -225,7 +225,7 @@ fun DiagnosisScreen(
 
     var isGenerating by remember { mutableStateOf(false) }
     var streamingText by remember { mutableStateOf("") }
-    var tokenCount by remember { mutableStateOf(0) }
+    var tokenCount by remember { mutableIntStateOf(0) }
     var currentModelName by remember { mutableStateOf("") }
     var usingVision by remember { mutableStateOf(false) }
     var generationJob by remember { mutableStateOf<Job?>(null) }
@@ -239,8 +239,8 @@ fun DiagnosisScreen(
 
     // Schedule state
     var scheduleEnabled by remember { mutableStateOf(LocalModelFiles.isScheduledPrognosisEnabled(context)) }
-    var scheduleHour by remember { mutableStateOf(LocalModelFiles.getScheduleHour(context)) }
-    var scheduleMinute by remember { mutableStateOf(LocalModelFiles.getScheduleMinute(context)) }
+    var scheduleHour by remember { mutableIntStateOf(LocalModelFiles.getScheduleHour(context)) }
+    var scheduleMinute by remember { mutableIntStateOf(LocalModelFiles.getScheduleMinute(context)) }
 
     LaunchedEffect(patientId) {
         launch { db.medicalEntryDao().getEntriesForPatient(patientId).collect { entries = it } }

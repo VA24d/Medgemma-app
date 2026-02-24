@@ -170,7 +170,7 @@ private fun TimelineEntryCard(
     var localAnalysis by remember(entry.id) { mutableStateOf(entry.analysisResult) }
     var isAnalyzing by remember { mutableStateOf(false) }
     // Sub-agent state
-    var subAgentStage by remember { mutableStateOf(0) }  // 0=idle 1=stage1 2=stage2
+    var subAgentStage by remember { mutableIntStateOf(0) }  // 0=idle 1=stage1 2=stage2
     var streamingText by remember { mutableStateOf("") }
     var stage1Result by remember { mutableStateOf("") }
     var usingCachedDesc by remember { mutableStateOf(false) }

@@ -3,6 +3,7 @@ package com.google.mediapipe.examples.llminference
 import android.content.Context
 import android.graphics.Bitmap
 import android.net.Uri
+import android.os.Environment
 import android.util.Log
 import com.arm.aichat.AiChat
 import com.arm.aichat.InferenceEngine
@@ -337,11 +338,12 @@ class InferenceModel private constructor(context: Context) {
         }
 
         private fun findFromKnownFolders(fileName: String): String? {
+            val extRoot = Environment.getExternalStorageDirectory().path
             val candidateDirs = listOf(
                 "/storage/emulated/0/Download/medgemma",
                 "/storage/emulated/0/Download/MedGemma",
-                "/sdcard/Download/medgemma",
-                "/sdcard/Download/MedGemma"
+                "$extRoot/Download/medgemma",
+                "$extRoot/Download/MedGemma"
             )
 
             for (dir in candidateDirs) {
@@ -363,11 +365,12 @@ class InferenceModel private constructor(context: Context) {
             findFromKnownFolders(preferredName)?.let { return it }
 
             // Fall back to any readable mmproj-like GGUF in the known dirs
+            val extRoot = Environment.getExternalStorageDirectory().path
             val candidateDirs = listOf(
                 "/storage/emulated/0/Download/medgemma",
                 "/storage/emulated/0/Download/MedGemma",
-                "/sdcard/Download/medgemma",
-                "/sdcard/Download/MedGemma"
+                "$extRoot/Download/medgemma",
+                "$extRoot/Download/MedGemma"
             )
             for (dir in candidateDirs) {
                 val folder = File(dir)
