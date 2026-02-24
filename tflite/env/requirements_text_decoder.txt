@@ -1,0 +1,32 @@
+# requirements_text_decoder.txt
+# ─────────────────────────────────────────────────────────────────────────────
+# Pinned dependencies for converting MedGemma 4B text decoder to TFLite
+# via the LiteRT Generative converter (STABLEHLO_COMPOSITE ops).
+#
+# Tested environment:
+#   Kaggle TPU v5e-8 notebook (Python 3.12, ~100 GB RAM)
+#   OR any Linux machine with >= 32 GB RAM
+#
+# Install:
+#   pip install -r requirements_text_decoder.txt
+# ─────────────────────────────────────────────────────────────────────────────
+
+# Core conversion stack
+tensorflow-cpu              # TFLite flatbuffer ops support
+litert-torch==0.8.0         # LiteRT Generative API (Gemma3 decoder builder + converter)
+ai-edge-torch               # Optional: used by convert_ai_edge_torch.py (XNNPACK path)
+
+# Model loading
+safetensors                 # Load HuggingFace .safetensors weights
+huggingface_hub             # snapshot_download + HfApi upload
+transformers                # AutoTokenizer + AutoModelForCausalLM (ai_edge_torch path only)
+
+# Utilities
+torch                       # PyTorch (weight manipulation)
+numpy
+psutil
+py-cpuinfo
+
+# NOTE: For the ai_edge_torch path (convert_ai_edge_torch.py) you also need:
+#   pip install transformers torch
+# The HF model loads do NOT require litert-torch's Gemma3 decoder module.

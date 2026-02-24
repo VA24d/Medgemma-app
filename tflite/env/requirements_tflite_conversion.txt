@@ -1,0 +1,20 @@
+# Core TFLite Conversion Dependencies (Tested on WSL Ubuntu with Python 3.10.12)
+# Use system Python3 (/usr/bin/python3), NOT a virtual environment
+
+litert-torch==0.8.0
+ai-edge-litert==2.1.2
+ai-edge-quantizer==0.4.2
+
+# TensorFlow (for conversion backend)
+ai-edge-tensorflow==2.22.0
+keras-nightly>=3.10.0.dev
+tf-nightly>=2.21.0.dev20251110
+
+# PyTorch (for model loading)
+torch==2.10.0
+torchvision==0.24.1
+
+# Additional required dependencies
+numpy>=1.26.4
+protobuf==3.20.3
+transformers>=5.1.0
