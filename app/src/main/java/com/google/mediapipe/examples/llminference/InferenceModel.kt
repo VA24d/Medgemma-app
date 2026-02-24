@@ -286,7 +286,7 @@ class InferenceModel private constructor(context: Context) {
                 return model.mmprojPath
             }
 
-            val localFromPath = findFromKnownFolders(File(model.mmprojPath).name)
+            val localFromPath = findMmprojFromKnownFolders(File(model.mmprojPath).name)
             if (localFromPath != null) {
                 return localFromPath
             }
@@ -310,7 +310,8 @@ class InferenceModel private constructor(context: Context) {
         }
 
         fun modelExists(context: Context): Boolean {
-            return File(modelPath(context)).exists()
+            val f = File(modelPath(context))
+            return f.exists() && f.canRead()
         }
 
         private fun findFromKnownFolders(fileName: String): String? {
@@ -323,9 +324,36 @@ class InferenceModel private constructor(context: Context) {
 
             for (dir in candidateDirs) {
                 val candidate = File(dir, fileName)
-                if (candidate.exists()) {
+                if (candidate.exists() && candidate.canRead()) {
                     return candidate.absolutePath
                 }
+            }
+            return null
+        }
+
+        /**
+         * Finds a vision encoder (mmproj) file in the known download folders by pattern,
+         * falling back to any *.gguf file whose name contains "mmproj" when the exact
+         * [preferredName] is not present or not readable.
+         */
+        private fun findMmprojFromKnownFolders(preferredName: String): String? {
+            // First try the exact preferred name
+            findFromKnownFolders(preferredName)?.let { return it }
+
+            // Fall back to any readable mmproj-like GGUF in the known dirs
+            val candidateDirs = listOf(
+                "/storage/emulated/0/Download/medgemma",
+                "/storage/emulated/0/Download/MedGemma",
+                "/sdcard/Download/medgemma",
+                "/sdcard/Download/MedGemma"
+            )
+            for (dir in candidateDirs) {
+                val folder = File(dir)
+                val mmproj = folder.listFiles { f ->
+                    f.isFile && f.name.contains("mmproj", ignoreCase = true) &&
+                        f.name.endsWith(".gguf", ignoreCase = true) && f.canRead()
+                }?.firstOrNull()
+                if (mmproj != null) return mmproj.absolutePath
             }
             return null
         }

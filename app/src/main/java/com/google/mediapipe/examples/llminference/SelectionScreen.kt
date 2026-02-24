@@ -162,7 +162,7 @@ internal fun SelectionRoute(
             try {
                 val path = withContext(Dispatchers.IO) {
                     val directPath = LocalModelFiles.resolveUriToFilePath(uri)
-                    if (!directPath.isNullOrBlank() && File(directPath).exists()) {
+                    if (!directPath.isNullOrBlank() && File(directPath).exists() && File(directPath).canRead()) {
                         directPath
                     } else {
                         LocalModelFiles.copyUriToInternalFile(context, uri)
@@ -188,7 +188,7 @@ internal fun SelectionRoute(
             try {
                 val path = withContext(Dispatchers.IO) {
                     val directPath = LocalModelFiles.resolveUriToFilePath(uri)
-                    if (!directPath.isNullOrBlank() && File(directPath).exists()) {
+                    if (!directPath.isNullOrBlank() && File(directPath).exists() && File(directPath).canRead()) {
                         directPath
                     } else {
                         LocalModelFiles.copyUriToInternalFile(context, uri)
