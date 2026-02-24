@@ -502,10 +502,25 @@ Provide: 1) Key imaging findings, 2) Diagnosis/differentials, 3) Urgency. Be con
                                                     // If using cached description, no bitmap needed — text carries the image info
                                                     val imgList = if (bitmap != null && !hasCachedDescription) listOf(bitmap) else emptyList()
                                                     var result = ""
+                                                    var tokenCount = 0
+                                                    val inferenceStartMs = System.currentTimeMillis()
                                                     val future = inferenceModel.generateResponseAsync(prompt, imgList) { token, _ ->
-                                                        if (token.isNotEmpty()) { result += token; streamingText = result }
+                                                        if (token.isNotEmpty()) {
+                                                            result += token
+                                                            tokenCount++
+                                                            streamingText = result
+                                                        }
                                                     }
                                                     withContext(Dispatchers.IO) { future.get() }
+                                                    val elapsedMs = System.currentTimeMillis() - inferenceStartMs
+                                                    val elapsedSec = elapsedMs / 1000.0
+                                                    val tokensPerSec = if (elapsedSec > 0) tokenCount / elapsedSec else 0.0
+                                                    Log.i("QuickAnalysis",
+                                                        "Quick analysis done — $tokenCount tokens in " +
+                                                        "${"%.2f".format(elapsedSec)}s " +
+                                                        "(${"%.1f".format(tokensPerSec)} tok/s) " +
+                                                        "| entry='${entry.title}' mode=${if (hasCachedDescription) "cached-desc" else if (imgList.isNotEmpty()) "vision" else "text"}"
+                                                    )
                                                     localAnalysis = result.trim()
                                                     onAnalyze(entry.copy(analysisResult = localAnalysis))
                                                 } catch (e: Exception) {
@@ -552,10 +567,25 @@ Content: ${entry.content}
 Provide: 1) Key clinical findings, 2) Significance, 3) Recommended follow-up.
 Be concise. Do not wrap in a code block."""
                                                 var result = ""
+                                                var tokenCount = 0
+                                                val inferenceStartMs = System.currentTimeMillis()
                                                 val future = inferenceModel.generateResponseAsync(prompt, emptyList()) { token, _ ->
-                                                    if (token.isNotEmpty()) { result += token; streamingText = result }
+                                                    if (token.isNotEmpty()) {
+                                                        result += token
+                                                        tokenCount++
+                                                        streamingText = result
+                                                    }
                                                 }
                                                 withContext(Dispatchers.IO) { future.get() }
+                                                val elapsedMs = System.currentTimeMillis() - inferenceStartMs
+                                                val elapsedSec = elapsedMs / 1000.0
+                                                val tokensPerSec = if (elapsedSec > 0) tokenCount / elapsedSec else 0.0
+                                                Log.i("QuickAnalysis",
+                                                    "Text analysis done — $tokenCount tokens in " +
+                                                    "${"%.2f".format(elapsedSec)}s " +
+                                                    "(${"%.1f".format(tokensPerSec)} tok/s) " +
+                                                    "| entry='${entry.title}' mode=text"
+                                                )
                                                 localAnalysis = result.trim()
                                                 onAnalyze(entry.copy(analysisResult = localAnalysis))
                                             } catch (e: Exception) {
