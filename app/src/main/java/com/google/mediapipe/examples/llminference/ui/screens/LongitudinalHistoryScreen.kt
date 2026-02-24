@@ -445,9 +445,38 @@ Format in Markdown. Do not wrap in a code block."""
                                                     val inferenceModel = withContext(Dispatchers.IO) {
                                                         InferenceModel.getInstance(context)
                                                     }
-                                                    val prompt = "You are a specialist radiologist AI. Analyse this ${entry.entryType.lowercase()} imaging entry.\nTitle: ${entry.title}\nContext: ${entry.content}\nProvide: 1) Key findings, 2) Diagnosis/differentials, 3) Urgency."
+                                                    // Load bitmap for Quick vision analysis
+                                                    val bitmap: android.graphics.Bitmap? = withContext(Dispatchers.IO) {
+                                                        try {
+                                                            val uri = android.net.Uri.parse(entry.imagePaths)
+                                                            when {
+                                                                uri.scheme == "file" -> android.graphics.BitmapFactory.decodeFile(uri.path)
+                                                                uri.scheme == "content" -> {
+                                                                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P) {
+                                                                        android.graphics.ImageDecoder.decodeBitmap(
+                                                                            android.graphics.ImageDecoder.createSource(context.contentResolver, uri)
+                                                                        ) { dec, _, _ -> dec.isMutableRequired = true }
+                                                                    } else {
+                                                                        @Suppress("DEPRECATION")
+                                                                        android.provider.MediaStore.Images.Media.getBitmap(context.contentResolver, uri)
+                                                                    }
+                                                                }
+                                                                else -> null
+                                                            }
+                                                        } catch (e: Exception) { null }
+                                                    }
+                                                    val typeLabel = when (entry.entryType) {
+                                                        "HISTOPATHOLOGY" -> "histopathology slide"
+                                                        "MRI" -> "MRI scan"
+                                                        else -> "X-ray"
+                                                    }
+                                                    val prompt = if (bitmap != null)
+                                                        "You are a specialist AI. Analyse this $typeLabel image.\nTitle: ${entry.title}\nContext: ${entry.content}\nProvide: 1) Key imaging findings, 2) Diagnosis/differentials, 3) Urgency. Be concise."
+                                                    else
+                                                        "You are a specialist AI. Analyse this $typeLabel entry.\nTitle: ${entry.title}\nContext: ${entry.content}\nProvide: 1) Key findings, 2) Diagnosis/differentials, 3) Urgency. Be concise."
+                                                    val imgList = if (bitmap != null) listOf(bitmap) else emptyList()
                                                     var result = ""
-                                                    val future = inferenceModel.generateResponseAsync(prompt, emptyList()) { token, _ ->
+                                                    val future = inferenceModel.generateResponseAsync(prompt, imgList) { token, _ ->
                                                         if (token.isNotEmpty()) { result += token; streamingText = result }
                                                     }
                                                     withContext(Dispatchers.IO) { future.get() }
