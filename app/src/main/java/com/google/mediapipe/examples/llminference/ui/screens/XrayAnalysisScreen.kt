@@ -52,26 +52,17 @@ fun XrayAnalysisScreen(
     var title by remember { mutableStateOf("") }
     var bodyPart by remember { mutableStateOf("") }
     var clinicalContext by remember { mutableStateOf("") }
-    var analysisResult by remember { mutableStateOf<String?>(null) }
-    var streamingAnalysis by remember { mutableStateOf("") }
-    var isAnalyzing by remember { mutableStateOf(false) }
     var isSaving by remember { mutableStateOf(false) }
-    var generationJob by remember { mutableStateOf<Job?>(null) }
-    var generationFuture by remember { mutableStateOf<java.util.concurrent.Future<*>?>(null) }
 
     // Date picker state
     var selectedDateMillis by remember { mutableStateOf(System.currentTimeMillis()) }
     var showDatePicker by remember { mutableStateOf(false) }
     val dateFormatter = remember { SimpleDateFormat("MMM d, yyyy", Locale.getDefault()) }
 
-    // Sub-agent state
-    var autoDescText by remember { mutableStateOf("") }   // Stage 1 — Observation
+    // Background observation extraction state
+    var autoDescText by remember { mutableStateOf("") }
     var isAutoDescribing by remember { mutableStateOf(false) }
     var autoDescJob by remember { mutableStateOf<Job?>(null) }
-    var stage1Expanded by remember { mutableStateOf(false) }
-    var stage2Text by remember { mutableStateOf("") }      // Stage 2 — Interpretation
-    var isRunningStage2 by remember { mutableStateOf(false) }
-    var stage2StreamingText by remember { mutableStateOf("") }
 
     // Whenever a new image is selected, kick off a background description.
     LaunchedEffect(selectedImageUri) {
@@ -201,15 +192,6 @@ Be precise, structured, and clinically useful. Do not wrap in a code block."""
         )
     }
 
-    fun stopAnalysis() {
-        generationJob?.cancel()
-        generationFuture?.cancel(true)
-        generationJob = null
-        generationFuture = null
-        if (streamingAnalysis.isNotBlank()) analysisResult = streamingAnalysis
-        isAnalyzing = false
-    }
-
     Scaffold(
         topBar = {
             TopAppBar(
@@ -230,12 +212,8 @@ Be precise, structured, and clinically useful. Do not wrap in a code block."""
                                         if (bodyPart.isNotBlank()) appendLine("Body Part: $bodyPart")
                                         if (clinicalContext.isNotBlank()) appendLine("Context: $clinicalContext")
                                     }
-                                    // Wait for background auto-description if still running
-                                    autoDescJob?.join()
-                                    val finalAnalysis = stage2Text.ifBlank { null }
-                                        ?: analysisResult
-                                        ?: autoDescText.ifBlank { null }
-                                        ?: ""
+                                    // Save immediately — background observation will be ready in longitudinal view
+                                    val finalAnalysis = autoDescText.ifBlank { "" }
                                     db.medicalEntryDao().insertEntry(
                                         MedicalEntryEntity(
                                             patientId = patientId,
@@ -371,10 +349,10 @@ Be precise, structured, and clinically useful. Do not wrap in a code block."""
                             )
                         }
                     )
-                } else if (autoDescText.isNotBlank() && analysisResult == null) {
+                } else if (autoDescText.isNotBlank()) {
                     SuggestionChip(
                         onClick = {},
-                        label = { Text("Image description ready — will be used in Diagnosis", style = MaterialTheme.typography.labelSmall) },
+                        label = { Text("Image observations extracted — will be used in Diagnosis", style = MaterialTheme.typography.labelSmall) },
                         icon = { Icon(Icons.Default.AutoAwesome, null, modifier = Modifier.size(14.dp)) }
                     )
                 }
@@ -447,8 +425,28 @@ Be precise, structured, and clinically useful. Do not wrap in a code block."""
                 minLines = 3
             )
 
-            // ─── Sub-agent pipeline ────────────────────────────────────────────
-            if (selectedImageUri != null) {
+            // Observation extraction status
+            if (selectedImageUri != null && isAutoDescribing) {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 10.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        CircularProgressIndicator(modifier = Modifier.size(14.dp), strokeWidth = 2.dp,
+                            color = MaterialTheme.colorScheme.onSecondaryContainer)
+                        Spacer(modifier = Modifier.width(10.dp))
+                        Text("Extracting image observations in background…",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSecondaryContainer)
+                    }
+                }
+            }
+
+            // ─── DEAD CODE placeholder below kept only for compilation — replaced by SUBAGENT_PLACEHOLDER
+            if (false) {
 
                 // Stage 1 card — Observation Agent (auto-desc)
                 if (isAutoDescribing || autoDescText.isNotBlank()) {
