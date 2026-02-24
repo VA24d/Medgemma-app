@@ -19,13 +19,13 @@ To win the **Edge of AI Prize**, a solution must transition AI from the cloud to
 
 **MedGemma 1.5 4B (Multimodal):** Serves as both the clinical reasoning engine AND the medical imaging analyzer. We specifically chose the 4B variant over the 27B model because the 27B model (even quantized) exceeds the memory capacity of commodity smartphones. The 4B model perfectly balances deep medical knowledge with strict mobile memory envelopes. Crucially, its integrated **medically-tuned SigLIP vision encoder** allows us to rapidly process high-dimensional radiographic imagery and histopathology slides directly on-device. This vision encoder was trained on de-identified medical image/text pairs including chest X-rays, dermatology, ophthalmology, and histopathology—giving MedGemma native medical visual understanding without requiring separate foundation models.
 
-**Why one model is enough:** MedGemma 1.5 4B is explicitly designed as an end-to-end multimodal medical AI. Adding separate foundation models would be redundant—MedGemma already contains the medical visual understanding we need, packaged efficiently for edge deployment.
+**Why one model is enough:** MedGemma 1.5 4B is explicitly designed as an end-to-end multimodal medical AI. Adding separate foundation models would be redundant—MedGemma already contains the medical visual understanding we need, packaged efficiently for edge deployment. Additionally, we have carefully tuned system prompts for different tasks to maximize the model's zero-shot performance across various clinical scenarios (Histopathology, Radiography, EHR synthesis, etc.).
 
 ---
 
 ## Technical Documentation: Model Compression & Efficient Local Inference
 
-Deploying this massive multimodal intelligence on an Android tablet requires extreme technical optimization. Our proof of work lies in drastically reducing the model's footprint while maintaining strict clinical reliability.
+Deploying this massive multimodal intelligence on an Android phone requires extreme technical optimization. Our proof of work lies in drastically reducing the model's footprint while maintaining strict clinical reliability.
 
 ### 1. Quantization and the GGUF Backend
 We built the core "brain" of the app using a highly optimized, custom **llama.cpp** backend wrapped via `com.arm.aichat`. To package and optimize the model, we utilized the official `convert_hf_to_gguf.py` script (provided in our repository) to transition the weights into the **Q4_K_M GGUF format**. We also specifically utilized the uniquely optimized **Unsloth MedGemma 1.5 4B** base structures hosted on Hugging Face (`unsloth/medgemma-1.5-4b-it-GGUF`). By leveraging these advanced quantization techniques, we achieved a massive reduction in model size and memory footprint, allowing the 4B parameters to fit comfortably within the DRAM of standard Android tablets without sacrificing the fidelity of its medical knowledge graph.

@@ -56,7 +56,7 @@ To win the **Edge of AI Prize**, a solution must transition AI from the cloud to
 
 **MedGemma 1.5 4B (Multimodal):** Serves as both the clinical reasoning engine AND the medical imaging analyzer. We specifically chose the 4B variant over the 27B model because the 27B model (even quantized) exceeds the memory capacity of commodity smartphones. The 4B model perfectly balances deep medical knowledge with strict mobile memory envelopes. Crucially, its integrated **medically-tuned SigLIP vision encoder** allows us to rapidly process high-dimensional radiographic imagery and histopathology slides directly on-device. This vision encoder was trained on de-identified medical image/text pairs including chest X-rays, dermatology, ophthalmology, and histopathology—giving MedGemma native medical visual understanding without requiring separate foundation models.
 
-**Why one model is enough:** MedGemma 1.5 4B is explicitly designed as an end-to-end multimodal medical AI. Adding separate foundation models would be redundant—MedGemma already contains the medical visual understanding we need, packaged efficiently for edge deployment.
+**Why one model is enough:** MedGemma 1.5 4B is explicitly designed as an end-to-end multimodal medical AI. Adding separate foundation models would be redundant—MedGemma already contains the medical visual understanding we need, packaged efficiently for edge deployment. Additionally, we have carefully tuned system prompts for different tasks to maximize the model's zero-shot performance across various clinical scenarios (Histopathology, Radiography, EHR synthesis, etc.).
 
 ---
 
