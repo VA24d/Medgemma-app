@@ -1,4 +1,4 @@
-# 🏆 Kaggle Google MedGemma Challenge Submission
+# Kaggle Google MedGemma Challenge Submission
 
 **Med Veda** locally processes patient files alongside the 4B multimodal weights, avoiding any egress of PHI to third-party endpoints. Built for the **Kaggle Google MedGemma Challenge**, it leverages the lightweight yet powerful **MedGemma 1.5 4B Multimodal** model to process medical inquiries and analyze X-rays directly on Android devices—ensuring 100% data privacy with zero cloud egress.
 
@@ -36,9 +36,9 @@ In the fast-paced medical environment, retrieving patient history and analyzing 
 
 ## Repository Branches
 
-This repository contains two primary branches:
-- **`main`** (formerly `b2-gguf`): The robust, optimized production branch. This leverages the aggressive `llama.cpp` backend and Q4_K_M GGUF quantization for native MedGemma 1.5 4B Multimodal support. It is the recommended version to test extreme edge capabilities, longitudinal history, and background payload downloads.
-- **`ui`** (formerly `main`): The legacy UI-focused branch built on MediaPipe LiteRT. Useful for exploring initial architectural decisions and standard view implementations before the GGUF optimization pivot.
+This repository contains a main branch and multiple feature branches:
+- **`main`**: The robust, optimized production branch. This leverages the aggressive `llama.cpp` backend and Q4_K_M GGUF quantization for native MedGemma 1.5 4B Multimodal support. It is the recommended version to test extreme edge capabilities, longitudinal history, and background payload downloads.
+- **`Feature Branches`**: These branches contain various features and bug fixes that are not yet merged into the main branch. These branches are not recommended for production use.
 
 ## Prerequisites
 
