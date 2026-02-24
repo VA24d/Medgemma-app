@@ -151,71 +151,73 @@ fun AddPatientScreen(
 
             // ── Identity section ─────────────────────────────────────────
             SectionCard {
-                FormField(
-                    value = name, onValueChange = { name = it }, label = "Full name",
-                    required = true, icon = Icons.Default.Person,
-                    keyboardOptions = KeyboardOptions(
-                        capitalization = KeyboardCapitalization.Words, imeAction = ImeAction.Next
-                    )
-                )
-                FieldDivider()
-                Box(modifier = Modifier.fillMaxWidth().clickable { showDatePicker = true }) {
+                Column {
                     FormField(
-                        value = dob, onValueChange = {}, label = "Date of birth",
-                        required = true, icon = Icons.Default.Cake,
-                        placeholder = "YYYY-MM-DD", readOnly = true,
-                        trailingIcon = {
-                            Icon(
-                                Icons.Default.EditCalendar, contentDescription = "Pick date",
-                                tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.clickable { showDatePicker = true }
-                            )
-                        }
-                    )
-                }
-                FieldDivider()
-                // Gender chips
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 10.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(
-                        Icons.Default.Wc, null,
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.size(20.dp)
-                    )
-                    Spacer(Modifier.width(4.dp))
-                    Text(
-                        "Gender *",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.width(72.dp)
-                    )
-                    GENDER_OPTIONS.forEach { option ->
-                        val selected = gender == option
-                        val chipBg by animateColorAsState(
-                            if (selected) MaterialTheme.colorScheme.primaryContainer
-                            else MaterialTheme.colorScheme.surfaceVariant, label = "chip"
+                        value = name, onValueChange = { name = it }, label = "Full name",
+                        required = true, icon = Icons.Default.Person,
+                        keyboardOptions = KeyboardOptions(
+                            capitalization = KeyboardCapitalization.Words, imeAction = ImeAction.Next
                         )
-                        val chipFg by animateColorAsState(
-                            if (selected) MaterialTheme.colorScheme.onPrimaryContainer
-                            else MaterialTheme.colorScheme.onSurfaceVariant, label = "chipFg"
+                    )
+                    FieldDivider()
+                    Box(modifier = Modifier.fillMaxWidth().clickable { showDatePicker = true }) {
+                        FormField(
+                            value = dob, onValueChange = {}, label = "Date of birth",
+                            required = true, icon = Icons.Default.Cake,
+                            placeholder = "YYYY-MM-DD", readOnly = true,
+                            trailingIcon = {
+                                Icon(
+                                    Icons.Default.EditCalendar, contentDescription = "Pick date",
+                                    tint = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.clickable { showDatePicker = true }
+                                )
+                            }
                         )
-                        Surface(
-                            shape = RoundedCornerShape(50),
-                            color = chipBg,
-                            modifier = Modifier.clickable { gender = option }
-                        ) {
-                            Text(
-                                option,
-                                modifier = Modifier.padding(horizontal = 14.dp, vertical = 6.dp),
-                                style = MaterialTheme.typography.labelMedium,
-                                color = chipFg,
-                                fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal
+                    }
+                    FieldDivider()
+                    // Gender chips
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 10.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            Icons.Default.Wc, null,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Spacer(Modifier.width(4.dp))
+                        Text(
+                            "Gender *",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.width(72.dp)
+                        )
+                        GENDER_OPTIONS.forEach { option ->
+                            val selected = gender == option
+                            val chipBg by animateColorAsState(
+                                if (selected) MaterialTheme.colorScheme.primaryContainer
+                                else MaterialTheme.colorScheme.surfaceVariant, label = "chip"
                             )
+                            val chipFg by animateColorAsState(
+                                if (selected) MaterialTheme.colorScheme.onPrimaryContainer
+                                else MaterialTheme.colorScheme.onSurfaceVariant, label = "chipFg"
+                            )
+                            Surface(
+                                shape = RoundedCornerShape(50),
+                                color = chipBg,
+                                modifier = Modifier.clickable { gender = option }
+                            ) {
+                                Text(
+                                    option,
+                                    modifier = Modifier.padding(horizontal = 14.dp, vertical = 6.dp),
+                                    style = MaterialTheme.typography.labelMedium,
+                                    color = chipFg,
+                                    fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal
+                                )
+                            }
                         }
                     }
                 }
@@ -224,104 +226,108 @@ fun AddPatientScreen(
             // ── Contact section ──────────────────────────────────────────
             SectionHeader("Contact")
             SectionCard {
-                FormField(
-                    value = mrn, onValueChange = { mrn = it }, label = "Medical record number",
-                    icon = Icons.Default.Badge,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Next)
-                )
-                FieldDivider()
-                FormField(
-                    value = phone, onValueChange = { phone = it }, label = "Phone number",
-                    icon = Icons.Default.Phone,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone, imeAction = ImeAction.Next)
-                )
-                FieldDivider()
-                FormField(
-                    value = email, onValueChange = { email = it }, label = "Email address",
-                    icon = Icons.Default.Email,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email, imeAction = ImeAction.Next)
-                )
-                FieldDivider()
-                FormField(
-                    value = address, onValueChange = { address = it }, label = "Address",
-                    icon = Icons.Default.Home, singleLine = false, minLines = 2,
-                    keyboardOptions = KeyboardOptions(
-                        capitalization = KeyboardCapitalization.Sentences, imeAction = ImeAction.Next
+                Column {
+                    FormField(
+                        value = mrn, onValueChange = { mrn = it }, label = "Medical record number",
+                        icon = Icons.Default.Badge,
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Next)
                     )
-                )
+                    FieldDivider()
+                    FormField(
+                        value = phone, onValueChange = { phone = it }, label = "Phone number",
+                        icon = Icons.Default.Phone,
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone, imeAction = ImeAction.Next)
+                    )
+                    FieldDivider()
+                    FormField(
+                        value = email, onValueChange = { email = it }, label = "Email address",
+                        icon = Icons.Default.Email,
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email, imeAction = ImeAction.Next)
+                    )
+                    FieldDivider()
+                    FormField(
+                        value = address, onValueChange = { address = it }, label = "Address",
+                        icon = Icons.Default.Home, singleLine = false, minLines = 2,
+                        keyboardOptions = KeyboardOptions(
+                            capitalization = KeyboardCapitalization.Sentences, imeAction = ImeAction.Next
+                        )
+                    )
+                }
             }
 
             // ── Medical section ──────────────────────────────────────────
             SectionHeader("Medical")
             SectionCard {
-                // Blood group dropdown
-                ExposedDropdownMenuBox(
-                    expanded = bloodGroupExpanded,
-                    onExpandedChange = { bloodGroupExpanded = !bloodGroupExpanded },
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .menuAnchor()
-                            .padding(horizontal = 16.dp, vertical = 12.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(
-                            Icons.Default.Bloodtype, null,
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.size(20.dp)
-                        )
-                        Spacer(Modifier.width(12.dp))
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(
-                                "Blood group",
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                            Text(
-                                bloodGroup.ifBlank { "Select" },
-                                style = MaterialTheme.typography.bodyLarge,
-                                color = if (bloodGroup.isBlank())
-                                    MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
-                                else MaterialTheme.colorScheme.onSurface
-                            )
-                        }
-                        ExposedDropdownMenuDefaults.TrailingIcon(expanded = bloodGroupExpanded)
-                    }
-                    ExposedDropdownMenu(
+                Column {
+                    // Blood group dropdown
+                    ExposedDropdownMenuBox(
                         expanded = bloodGroupExpanded,
-                        onDismissRequest = { bloodGroupExpanded = false }
+                        onExpandedChange = { bloodGroupExpanded = !bloodGroupExpanded },
+                        modifier = Modifier.fillMaxWidth()
                     ) {
-                        BLOOD_GROUP_OPTIONS.forEach { option ->
-                            DropdownMenuItem(
-                                text = { Text(option) },
-                                onClick = { bloodGroup = option; bloodGroupExpanded = false },
-                                leadingIcon = if (bloodGroup == option) ({
-                                    Icon(Icons.Default.Check, null, tint = MaterialTheme.colorScheme.primary)
-                                }) else null
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .menuAnchor()
+                                .padding(horizontal = 16.dp, vertical = 12.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                Icons.Default.Bloodtype, null,
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.size(20.dp)
                             )
+                            Spacer(Modifier.width(12.dp))
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    "Blood group",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                                Text(
+                                    bloodGroup.ifBlank { "Select" },
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    color = if (bloodGroup.isBlank())
+                                        MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
+                                    else MaterialTheme.colorScheme.onSurface
+                                )
+                            }
+                            ExposedDropdownMenuDefaults.TrailingIcon(expanded = bloodGroupExpanded)
+                        }
+                        ExposedDropdownMenu(
+                            expanded = bloodGroupExpanded,
+                            onDismissRequest = { bloodGroupExpanded = false }
+                        ) {
+                            BLOOD_GROUP_OPTIONS.forEach { option ->
+                                DropdownMenuItem(
+                                    text = { Text(option) },
+                                    onClick = { bloodGroup = option; bloodGroupExpanded = false },
+                                    leadingIcon = if (bloodGroup == option) ({
+                                        Icon(Icons.Default.Check, null, tint = MaterialTheme.colorScheme.primary)
+                                    }) else null
+                                )
+                            }
                         }
                     }
+                    FieldDivider()
+                    FormField(
+                        value = allergies, onValueChange = { allergies = it }, label = "Known allergies",
+                        icon = Icons.Default.Warning, singleLine = false, minLines = 2,
+                        placeholder = "e.g. Penicillin, Aspirin",
+                        keyboardOptions = KeyboardOptions(
+                            capitalization = KeyboardCapitalization.Sentences, imeAction = ImeAction.Next
+                        )
+                    )
+                    FieldDivider()
+                    FormField(
+                        value = notes, onValueChange = { notes = it }, label = "Clinical notes",
+                        icon = Icons.Default.Notes, singleLine = false, minLines = 3,
+                        placeholder = "Any additional notes…",
+                        keyboardOptions = KeyboardOptions(
+                            capitalization = KeyboardCapitalization.Sentences, imeAction = ImeAction.Done
+                        )
+                    )
                 }
-                FieldDivider()
-                FormField(
-                    value = allergies, onValueChange = { allergies = it }, label = "Known allergies",
-                    icon = Icons.Default.Warning, singleLine = false, minLines = 2,
-                    placeholder = "e.g. Penicillin, Aspirin",
-                    keyboardOptions = KeyboardOptions(
-                        capitalization = KeyboardCapitalization.Sentences, imeAction = ImeAction.Next
-                    )
-                )
-                FieldDivider()
-                FormField(
-                    value = notes, onValueChange = { notes = it }, label = "Clinical notes",
-                    icon = Icons.Default.Notes, singleLine = false, minLines = 3,
-                    placeholder = "Any additional notes…",
-                    keyboardOptions = KeyboardOptions(
-                        capitalization = KeyboardCapitalization.Sentences, imeAction = ImeAction.Done
-                    )
-                )
             }
 
             // ── Save button ──────────────────────────────────────────────
