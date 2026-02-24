@@ -1,7 +1,44 @@
-# 1st Place Solution for the MedGemma Impact Challenge: MedVed
-**Submission Track: The Edge of AI Prize**
+# Kaggle Submission Copy-Paste Guide
+*Use this document to easily copy and paste your final submission details into the Kaggle competition form.*
 
 ---
+
+## Title
+MedVed: Privacy-First Multimodal Edge AI
+
+## Subtitle
+Bringing the 4B MedGemma suite directly to the clinician's pocket via optimized GGUF on the Snapdragon 8 Elite Gen 5.
+
+---
+
+## Card and Thumbnail Image
+*(Upload a high-quality 16:9 image representing your project. We recommend a stylized photo of the app running on the Qualcomm Development Kit or a clean promotional graphic of the UI. Save it locally as `assets/thumbnail.png` and drag-and-drop it into the Kaggle form.)*
+
+## Images
+*(Upload up to 10 supporting screenshots or architectural diagrams. Recommended sequence:)*
+1. **App Interface:** A screenshot showing the longitudinal analysis screen.
+2. **Multimodal Input:** A screenshot illustrating X-ray or Histopathology image processing.
+3. **Voice UI:** A screenshot showing the ambient voice dictation feature.
+4. **Architecture Diagram:** A flowchart visualizing the `llama.cpp` + GGUF orchestration and the 4 HAI-DEF models used.
+5. **Hardware:** A photo of the app running securely on the Qualcomm Innovator Development Kit.
+
+## Video
+*(Link your <= 3-minute YouTube/Vimeo demonstration video here. Ensure the video highlights the offline, no-data-egress capabilities and steps through a complete patient scanning/dictation workflow.)*
+- **Video Link:** `[Insert Public Video URL Here]`
+
+---
+
+## Project Description
+*(A brief summary of your project, often limited in characters. This serves as the elevator pitch.)*
+
+MedVed addresses the dual healthcare crises of clinical burnout and data privacy by moving AI from the cloud to the extreme edge. Designed for the "Edge of AI Prize," our Android application natively orchestrates a suite of Google HAI-DEF models—centered on the MedGemma 1.5 4B Multimodal model with its integrated SigLIP encoder. By utilizing an optimized `llama.cpp` backend and Q4_K_M GGUF quantization, we achieve fast, strictly local inference on hardware like the Snapdragon 8 Elite Gen 5. It empowers clinicians in environments ranging from low-connectivity rural clinics to hyper-compliant metropolitan hospitals to perform multimodal triage, voice dictation, and FHIR export—all through a beautifully intuitive, zero-learning-curve **Google Material Design 3 UI**—ensuring absolutely no patient data ever leaves the device.
+
+---
+
+## Content
+*(This is the main body of your submission. Copy the contents of `writeup.md` exactly as it appears below.)*
+
+**(Paste the entire text from `writeup.md` here. Below is the final rendered version for convenience.)**
 
 ## Context: The Unmet Need of Privacy and Connectivity
 
@@ -57,10 +94,10 @@ India is a linguistic mosaic. To maximize patient comprehension and utility for 
 **2. The "Negative Sign" Nuance:**
 A major clinical complaint regarding AI is that it often fails to note the *absence* of a finding, which can be just as crucial as the presence of a tumor. MedVed’s system prompts explicitly force MedGemma to report both positive findings *and* critical negative signs (e.g., "No evidence of pleural effusion"). This demonstrates a nuanced clinical understanding that builds immediate trust with doctors.
 
-**2. FHIR Export & Interoperability:**
+**3. FHIR Export & Interoperability:**
 While processing must be local, data cannot remain siloed. MedVed features a robust export engine that synthesizes rich longitudinal records natively into the Fast Healthcare Interoperability Resources (FHIR) format. Coupled with unbreakable local encryption and localized QR-code sharing, it handles secure handoffs to centralized hospital networks without ever sending data to a third-party cloud.
 
-**3. Intelligent Longitudinal Analysis:**
+**4. Intelligent Longitudinal Analysis:**
 Instead of a standard chat box, the app securely stores chronological patient profiles using a local Room Database (SQLite). The temporal architecture allows the clinician to "click to expand" at any specific point in the timeline, triggering MedGemma to fluidly bridge years of historical records with current presenting symptoms.
 
 ---
