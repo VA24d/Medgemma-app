@@ -103,8 +103,6 @@ internal fun SelectionRoute(
         val dirs = listOfNotNull(
             "/storage/emulated/0/Download/medgemma",
             "/storage/emulated/0/Download/MedGemma",
-            "/sdcard/Download/medgemma",
-            "/sdcard/Download/MedGemma",
             "/storage/emulated/0/Download",
             context.filesDir.absolutePath,
             context.getExternalFilesDir(null)?.absolutePath
@@ -116,7 +114,7 @@ internal fun SelectionRoute(
                 d.listFiles()?.filter { it.name.endsWith(".gguf") }?.let { files.addAll(it) }
             }
         }
-        files.distinctBy { it.absolutePath }
+        files.distinctBy { it.canonicalPath }
     }
 
     // ── Auto-select models found in app storage ──
@@ -946,7 +944,7 @@ internal fun SelectionRoute(
                         pickerStatus = "Please wait for file import to finish."
                         return@Button
                     }
-                    InferenceModel.model = if (useGpu) Model.GEMMA_3_1B_IT_GPU else Model.GEMMA3_1B_IT_CPU
+                    InferenceModel.model = if (useGpu) Model.MEDGEMMA_4B_IT_GPU else Model.MEDGEMMA_4B_IT_CPU
                     onModelSelected()
                 },
                 enabled = hasModel && !isImporting,

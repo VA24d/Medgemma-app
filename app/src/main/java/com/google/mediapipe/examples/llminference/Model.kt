@@ -14,7 +14,7 @@ enum class Model(
     val topK: Int,
     val topP: Float,
 ) {
-    GEMMA3_1B_IT_CPU(
+    MEDGEMMA_4B_IT_CPU(
         path = "medgemma-1.5-4b-it-Q4_K_M.gguf",
         url = "https://huggingface.co/unsloth/medgemma-1.5-4b-it-GGUF/resolve/main/medgemma-1.5-4b-it-Q4_K_M.gguf",
         mmprojPath = "mmproj-F16.gguf",
@@ -26,7 +26,7 @@ enum class Model(
         topK = 40,
         topP = 0.95f
     ),
-    GEMMA_3_1B_IT_GPU(
+    MEDGEMMA_4B_IT_GPU(
         path = "medgemma-1.5-4b-it-Q4_K_M.gguf",
         url = "https://huggingface.co/unsloth/medgemma-1.5-4b-it-GGUF/resolve/main/medgemma-1.5-4b-it-Q4_K_M.gguf",
         mmprojPath = "mmproj-F16.gguf",
@@ -38,7 +38,7 @@ enum class Model(
         topK = 40,
         topP = 0.95f
     ),
-    GEMMA_3_1B_IT_NPU(
+    MEDGEMMA_4B_IT_NPU(
         path = "medgemma-1.5-4b-it-Q4_K_M.gguf",
         url = "https://huggingface.co/unsloth/medgemma-1.5-4b-it-GGUF/resolve/main/medgemma-1.5-4b-it-Q4_K_M.gguf",
         mmprojPath = "mmproj-F16.gguf",

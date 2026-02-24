@@ -113,7 +113,7 @@ class ConsultationViewModel(application: Application) : AndroidViewModel(applica
 
     /**
      * Generate AI prognosis suggestions with multimodal analysis
-     * Combines MediaPipe Vision image analysis with Gemma 3 text generation
+     * Combines MediaPipe Vision image analysis with MedGemma 1.5 4B text generation
      */
     fun generateAIPrognosis() {
         val currentPatient = _patient.value ?: return
@@ -164,7 +164,7 @@ class ConsultationViewModel(application: Application) : AndroidViewModel(applica
                     )
                 }
 
-                // Step 3: Generate AI text response with Gemma 3
+                // Step 3: Generate AI text response with MedGemma 1.5 4B
                 model.generateResponseAsync(prompt, emptyList()) { partialResult, isDone ->
                     _aiSuggestions.value += partialResult
                 }.get()

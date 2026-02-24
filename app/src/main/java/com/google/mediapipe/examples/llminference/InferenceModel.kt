@@ -237,7 +237,7 @@ class InferenceModel private constructor(context: Context) {
     private val executor = java.util.concurrent.Executors.newSingleThreadExecutor()
 
     companion object {
-        var model: Model = Model.GEMMA_3_1B_IT_GPU
+        var model: Model = Model.MEDGEMMA_4B_IT_GPU
         private var instance: InferenceModel? = null
 
         /** True when engine is already loaded and ready for chat. */

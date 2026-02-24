@@ -122,7 +122,7 @@ fun NavigationSidebar(
             SidebarItem(
                 icon = Icons.Default.AutoAwesome,
                 title = "Model Selection",
-                subtitle = "Gemma 3 1B",
+                subtitle = "MedGemma 1.5 4B",
                 onClick = {
                     onClose()
                     onOpenModelSelection()
