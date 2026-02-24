@@ -42,7 +42,7 @@ By aggressively compressing Google's MedGemma 1.5 4B Multimodal model using Q4_K
 
 **(Paste the entire text from `writeup.md` here. Below is the final rendered version for convenience.)**
 
-## Context: The Unmet Need of Privacy and Connectivity
+# Context: The Unmet Need of Privacy and Connectivity
 
 *Dr. Anaya Sharma manages a high-volume Primary Health Centre (PHC) outside of Nagpur, India, where internet connectivity is notoriously unreliable. She frequently spends more time battling legacy, cloud-bound Electronic Health Record (EHR) systems than engaging directly with her patients. When a complex case arrives—requiring the immediate synthesis of remote X-rays, years of handwritten notes, and rapid triage—the latency of a buffering cloud AI becomes a critical bottleneck. Furthermore, even in top-tier metropolitan hospitals with flawless infrastructure, routing sensitive patient data to third-party cloud servers introduces massive privacy risks and severe compliance hurdles under evolving data protection laws (e.g., India's DPDP Act).*
 
@@ -52,7 +52,7 @@ We built **Med Veda**, a fully functional, privacy-first Android application des
 
 ---
 
-## Overview of Approach: Maximizing the HAI-DEF Ecosystem
+# Overview of Approach: Maximizing the HAI-DEF Ecosystem
 
 To win the **Edge of AI Prize**, a solution must transition AI from the cloud directly into the field, specifically targeting resource-constrained hardware like mobile phones and portable scanners. Med Veda achieves this by leveraging the **MedGemma 1.5 4B Multimodal** model—the only HAI-DEF model our application requires, utilized to its absolute fullest potential:
 
@@ -62,7 +62,7 @@ To win the **Edge of AI Prize**, a solution must transition AI from the cloud di
 
 ---
 
-## Technical Documentation: Model Compression & Efficient Local Inference
+# Technical Documentation: Model Compression & Efficient Local Inference
 
 Deploying massive multimodal intelligence onto an Android tablet requires extreme technical optimization. Our core engineering achievement lies in drastically reducing the model's footprint while maintaining strict clinical reliability and reasoning coherence.
 
@@ -108,7 +108,7 @@ To ensure the model outputs programmatic, standard medical formats (like structu
 
 ---
 
-## Submission Details: What Was Impactful and Creative?
+# Submission Details: What Was Impactful and Creative?
 
 **1. Smart Localization & Vernacular Renaming (Low-Resource Optimization):**
 India is a linguistic mosaic. To maximize patient comprehension and utility for local health workers (ASHA workers) without increasing LLM inference load, the app implements smart renaming at the presentation layer. We originally attempted to fine-tune the model to output purely in local languages, but realized that rural workers generally understand basic English structure—the actual friction point is purely complex medical jargon. Rather than wasting precious compute tokens or distracting the model's core reasoning engine with translation tasks, a highly efficient, zero-overhead regex interceptor dynamically cross-references complex clinical output to common disease names in local vernaculars (e.g., injecting Hindi or Telugu translations directly into the text stream for complex symptoms like "dengue shock syndrome"). This approach is vastly faster, significantly more robust, and crucially, ensures that our core MedMCQA benchmark performance is perfectly preserved because we never pull the model's focus away from primary clinical reasoning.
@@ -136,7 +136,7 @@ Beyond the presentation-layer Vernacular Injection, Med Veda directly leverages 
 
 ---
 
-## Real-World Deployment Challenges (and Solutions)
+# Real-World Deployment Challenges (and Solutions)
 
 Deploying a 4B model into a rural clinical workflow presents harsh physical constraints that we actively designed against:
 1. **Network Reality vs App Size:** Downloading a massive AI locally is intensely difficult in poor network environments. **Our Solution:** The aforementioned WorkManager background scheduling system downloads payloads intelligently and silently during optimal network windows. 
@@ -145,7 +145,7 @@ Deploying a 4B model into a rural clinical workflow presents harsh physical cons
 
 ---
 
-## Failed Attempts: What Didn't Work and Why
+# Failed Attempts: What Didn't Work and Why
 
 Absolute transparency is vital in medical AI. During development, we encountered several dead ends that intimately shaped our final architecture:
 1. **Relying on MediaPipe LLM Inference for Multimodal Processing:** We initially attempted to use the standard MediaPipe GenAI wrappers. However, we found that handling complex, high-resolution X-ray image ingestion alongside heavy text generation caused frequent Out-Of-Memory (OOM) crashes on older Android devices. Switching the backend entirely to a custom **llama.cpp** implementation natively loading GGUF models permanently solved the memory orchestration issues and allowed us to dynamically offload to the GPU safely.
@@ -154,7 +154,7 @@ Absolute transparency is vital in medical AI. During development, we encountered
 
 ---
 
-## Conclusion & Reproducibility
+# Conclusion & Reproducibility
 
 Med Veda is a highly feasible, production-ready application poised to redefine the point-of-care experience. By prioritizing aggressive model compression (QLoRA, GGUF 4-bit), we successfully fit the massively powerful MedGemma 1.5 4B Multimodal model into the strict memory envelopes of mobile hardware. We comprehensively solved the latency, privacy, and clinical burnout challenges by providing doctors with a secure, zero-latency co-pilot wrapped in a consumer-grade, user-focused interface. 
 
