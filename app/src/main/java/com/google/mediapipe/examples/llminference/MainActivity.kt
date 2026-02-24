@@ -260,7 +260,8 @@ class MainActivity : ComponentActivity() {
                                 val entryId = backStackEntry.arguments?.getLong("entryId") ?: return@composable
                                 EntryDetailScreen(
                                     entryId = entryId,
-                                    onBack = { navController.popBackStack() }
+                                    onBack = { navController.popBackStack() },
+                                    onDeleted = { navController.popBackStack() }
                                 )
                             }
 

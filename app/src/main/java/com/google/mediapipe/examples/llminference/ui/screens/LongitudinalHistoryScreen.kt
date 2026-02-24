@@ -87,6 +87,12 @@ fun LongitudinalHistoryScreen(
                     leadingIcon = { Icon(Icons.Default.Image, null, Modifier.size(16.dp)) }
                 )
                 FilterChip(
+                    selected = filterType == "MRI",
+                    onClick = { filterType = if (filterType == "MRI") null else "MRI" },
+                    label = { Text("MRI") },
+                    leadingIcon = { Icon(Icons.Default.BlurOn, null, Modifier.size(16.dp)) }
+                )
+                FilterChip(
                     selected = filterType == "HISTOPATHOLOGY",
                     onClick = { filterType = if (filterType == "HISTOPATHOLOGY") null else "HISTOPATHOLOGY" },
                     label = { Text("Histo") },

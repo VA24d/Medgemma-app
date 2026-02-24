@@ -109,7 +109,7 @@ private suspend fun loadBitmapFromEntry(
 
 private fun pickVisionEntry(entries: List<MedicalEntryEntity>): MedicalEntryEntity? =
     entries
-        .filter { it.entryType in listOf("XRAY", "HISTOPATHOLOGY") && it.imagePaths.isNotBlank() }
+        .filter { it.entryType in listOf("XRAY", "MRI", "HISTOPATHOLOGY") && it.imagePaths.isNotBlank() }
         .maxByOrNull { it.createdAt }
 
 private fun buildFullPrompt(
@@ -119,7 +119,7 @@ private fun buildFullPrompt(
     useCachedDescriptions: Boolean = false
 ): String {
     val fmt = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-    val imagingTypes = setOf("XRAY", "HISTOPATHOLOGY")
+    val imagingTypes = setOf("XRAY", "MRI", "HISTOPATHOLOGY")
     val summary = entries.joinToString("\n") { e ->
         val isImaging = e.entryType in imagingTypes
         val ai = when {
@@ -167,7 +167,7 @@ private fun buildIncrementalPrompt(
 ): String {
     val fmt = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
     val priorDate = fmt.format(Date(prior.generatedAt))
-    val imagingTypes = setOf("XRAY", "HISTOPATHOLOGY")
+    val imagingTypes = setOf("XRAY", "MRI", "HISTOPATHOLOGY")
     val summary = newEntries.joinToString("\n") { e ->
         val isImaging = e.entryType in imagingTypes
         val ai = when {
@@ -447,14 +447,44 @@ fun DiagnosisScreen(
             if (pastDiagnoses.isNotEmpty()) {
                 item {
                     Text(
-                        "Saved Diagnoses (${pastDiagnoses.size})",
+                        "Latest Diagnosis",
                         style = MaterialTheme.typography.titleSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
-                items(pastDiagnoses, key = { it.id }) { diag ->
-                    DiagnosisHistoryCard(diag) {
-                        scope.launch(Dispatchers.IO) { db.diagnosisDao().deleteDiagnosis(diag) }
+                // Show only the most recent diagnosis on this screen
+                item {
+                    val latest = pastDiagnoses.first()
+                    DiagnosisHistoryCard(latest) {
+                        scope.launch(Dispatchers.IO) { db.diagnosisDao().deleteDiagnosis(latest) }
+                    }
+                }
+                if (pastDiagnoses.size > 1) {
+                    item {
+                        var showOlder by remember { mutableStateOf(false) }
+                        Column {
+                            TextButton(
+                                onClick = { showOlder = !showOlder },
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Icon(
+                                    if (showOlder) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
+                                    null,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                                Spacer(Modifier.width(4.dp))
+                                Text(if (showOlder) "Hide older (${pastDiagnoses.size - 1})" else "Show older diagnoses (${pastDiagnoses.size - 1})")
+                            }
+                            if (showOlder) {
+                                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                                    pastDiagnoses.drop(1).forEach { diag ->
+                                        DiagnosisHistoryCard(diag) {
+                                            scope.launch(Dispatchers.IO) { db.diagnosisDao().deleteDiagnosis(diag) }
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }

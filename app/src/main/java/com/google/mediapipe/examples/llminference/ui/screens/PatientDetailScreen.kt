@@ -1,7 +1,9 @@
 package com.google.mediapipe.examples.llminference.ui.screens
 
 import android.view.HapticFeedbackConstants
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -267,7 +269,15 @@ fun PatientDetailScreen(
                 }
             } else {
                 items(entries, key = { it.id }) { entry ->
-                    EntryCard(entry = entry, onClick = { onEntryClick(entry.id) })
+                    EntryCard(
+                        entry = entry,
+                        onClick = { onEntryClick(entry.id) },
+                        onDelete = {
+                            scope.launch(Dispatchers.IO) {
+                                db.medicalEntryDao().deleteEntry(entry)
+                            }
+                        }
+                    )
                 }
             }
         }
@@ -308,8 +318,9 @@ fun PatientDetailScreen(
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun EntryCard(entry: MedicalEntryEntity, onClick: () -> Unit) {
+private fun EntryCard(entry: MedicalEntryEntity, onClick: () -> Unit, onDelete: () -> Unit) {
     val dateFormat = remember { SimpleDateFormat("MMM dd, yyyy HH:mm", Locale.getDefault()) }
     val icon = when (entry.entryType) {
         "XRAY" -> Icons.Default.Image
@@ -330,9 +341,19 @@ private fun EntryCard(entry: MedicalEntryEntity, onClick: () -> Unit) {
         else -> entry.entryType
     }
 
+    val view = LocalView.current
+    var showDeleteDialog by remember { mutableStateOf(false) }
+
     Card(
-        modifier = Modifier.fillMaxWidth(),
-        onClick = onClick
+        modifier = Modifier
+            .fillMaxWidth()
+            .combinedClickable(
+                onClick = onClick,
+                onLongClick = {
+                    view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
+                    showDeleteDialog = true
+                }
+            )
     ) {
         ListItem(
             headlineContent = {
@@ -408,6 +429,28 @@ private fun EntryCard(entry: MedicalEntryEntity, onClick: () -> Unit) {
                         }
                     )
                 }
+            }
+        )
+    }
+
+    if (showDeleteDialog) {
+        AlertDialog(
+            onDismissRequest = { showDeleteDialog = false },
+            title = { Text("Delete Entry?") },
+            text = { Text("This will permanently delete this entry. This action cannot be undone.") },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        showDeleteDialog = false
+                        onDelete()
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
+                ) {
+                    Text("Delete")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDeleteDialog = false }) { Text("Cancel") }
             }
         )
     }

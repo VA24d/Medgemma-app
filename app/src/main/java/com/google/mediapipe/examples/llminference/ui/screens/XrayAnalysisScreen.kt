@@ -129,7 +129,26 @@ Be precise, structured, and clinically useful. Do not wrap in a code block."""
     val imagePickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
-        selectedImageUri = uri
+        if (uri != null) {
+            // picker_get_content URIs expire after the activity result — copy to internal storage immediately
+            scope.launch(Dispatchers.IO) {
+                try {
+                    val storageDir = java.io.File(context.filesDir, "medical_images").apply { mkdirs() }
+                    val destFile = java.io.File(storageDir, "picked_${System.currentTimeMillis()}.jpg")
+                    context.contentResolver.openInputStream(uri)?.use { input ->
+                        destFile.outputStream().use { output -> input.copyTo(output) }
+                    }
+                    val localUri = androidx.core.content.FileProvider.getUriForFile(
+                        context, "${context.packageName}.provider", destFile
+                    )
+                    selectedImageUri = localUri
+                } catch (e: Exception) {
+                    selectedImageUri = uri // fallback
+                }
+            }
+        } else {
+            selectedImageUri = null
+        }
     }
 
     val typeName = when (analysisType) {

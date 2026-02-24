@@ -5,6 +5,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -17,17 +18,21 @@ import coil.compose.AsyncImage
 import com.google.mediapipe.examples.llminference.data.MedicalDatabase
 import com.google.mediapipe.examples.llminference.data.MedicalEntryEntity
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EntryDetailScreen(
     entryId: Long,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    onDeleted: () -> Unit = {}
 ) {
     val context = LocalContext.current
     val db = remember { MedicalDatabase.getDatabase(context) }
+    val scope = rememberCoroutineScope()
     var entry by remember { mutableStateOf<MedicalEntryEntity?>(null) }
+    var showDeleteDialog by remember { mutableStateOf(false) }
 
     LaunchedEffect(entryId) {
         withContext(Dispatchers.IO) {
@@ -42,6 +47,11 @@ fun EntryDetailScreen(
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                    }
+                },
+                actions = {
+                    IconButton(onClick = { showDeleteDialog = true }) {
+                        Icon(Icons.Default.Delete, contentDescription = "Delete entry", tint = MaterialTheme.colorScheme.error)
                     }
                 }
             )
@@ -137,5 +147,35 @@ fun EntryDetailScreen(
                  CircularProgressIndicator()
              }
         }
+    }
+
+    if (showDeleteDialog) {
+        val currentEntry = entry
+        AlertDialog(
+            onDismissRequest = { showDeleteDialog = false },
+            title = { Text("Delete Entry?") },
+            text = { Text("This will permanently delete this entry and its data. This action cannot be undone.") },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        if (currentEntry != null) {
+                            scope.launch {
+                                withContext(Dispatchers.IO) {
+                                    db.medicalEntryDao().deleteEntry(currentEntry)
+                                }
+                                showDeleteDialog = false
+                                onDeleted()
+                            }
+                        }
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
+                ) {
+                    Text("Delete")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDeleteDialog = false }) { Text("Cancel") }
+            }
+        )
     }
 }
