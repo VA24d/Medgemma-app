@@ -4,7 +4,7 @@
 ---
 
 ## Title
-MedVed: Privacy-First Multimodal Edge AI
+Med Veda: Privacy-First Multimodal Edge AI
 
 ## Subtitle
 Bringing the 4B MedGemma suite directly to the clinician's pocket via optimized GGUF on the Snapdragon 8 Elite Gen 5.
@@ -31,7 +31,7 @@ Bringing the 4B MedGemma suite directly to the clinician's pocket via optimized 
 ## Project Description
 *(A brief summary of your project, often limited in characters. This serves as the elevator pitch.)*
 
-MedVed addresses the dual healthcare crises of clinical burnout and data privacy by moving AI from the cloud to the extreme edge. Designed for the "Edge of AI Prize," our Android application natively orchestrates a suite of Google HAI-DEF models—centered on the MedGemma 1.5 4B Multimodal model with its integrated SigLIP encoder. By utilizing an optimized `llama.cpp` backend and Q4_K_M GGUF quantization, we achieve fast, strictly local inference on hardware like the Snapdragon 8 Elite Gen 5. It empowers clinicians in environments ranging from low-connectivity rural clinics to hyper-compliant metropolitan hospitals to perform multimodal triage, voice dictation, and FHIR export—all through a beautifully intuitive, zero-learning-curve **Google Material Design 3 UI**—ensuring absolutely no patient data ever leaves the device.
+Med Veda addresses the dual healthcare crises of clinical burnout and data privacy by moving AI from the cloud to the extreme edge. Designed for the "Edge of AI Prize," our Android application natively orchestrates a suite of Google HAI-DEF models—centered on the MedGemma 1.5 4B Multimodal model with its integrated SigLIP encoder. By utilizing an optimized `llama.cpp` backend and Q4_K_M GGUF quantization, we achieve fast, strictly local inference on hardware like the Snapdragon 8 Elite Gen 5. It empowers clinicians in environments ranging from low-connectivity rural clinics to hyper-compliant metropolitan hospitals to perform multimodal triage, voice dictation, and FHIR export—all through a beautifully intuitive, zero-learning-curve **Google Material Design 3 UI**—ensuring absolutely no patient data ever leaves the device.
 
 ---
 
@@ -46,13 +46,13 @@ MedVed addresses the dual healthcare crises of clinical burnout and data privacy
 
 The paradigm of healthcare artificial intelligence is undergoing a necessary transition from centralized, high-latency cloud architectures to **privacy-first, decentralized edge deployments**. While AI holds the monumental promise of alleviating administrative bloat and augmenting clinical judgment, traditional cloud-based LLM solutions fail on two critical fronts: they alienate environments lacking high-speed infrastructure, and they fundamentally compromise patient confidentiality by demanding constant data egress.
 
-We built **MedVed**, a fully functional, privacy-first Android application designed to be the ultimate clinician's companion on the edge. By natively integrating Google's MedGemma 1.5 4B Multimodal model from the Health AI Developer Foundations (HAI-DEF) directly onto mobile hardware, MedVed shatters the cloud reliance paradigm. It unifies text analytics and multimodal diagnostic imaging into a single, breathtakingly intuitive interface. Inspired by Google's clean, user-focused visual aesthetic, the app leverages **Material Design 3 guidelines** to ensure that physicians can navigate complex longitudinal data effortlessly with zero learning curve. **Absolutely no patient data ever leaves the device.** We are not replacing clinical judgment; we are augmenting it, ensuring that the next generation of medical intelligence is as mobile, secure, and resilient as the practitioners who use it.
+We built **Med Veda**, a fully functional, privacy-first Android application designed to be the ultimate clinician's companion on the edge. By natively integrating Google's MedGemma 1.5 4B Multimodal model from the Health AI Developer Foundations (HAI-DEF) directly onto mobile hardware, Med Veda shatters the cloud reliance paradigm. It unifies text analytics and multimodal diagnostic imaging into a single, breathtakingly intuitive interface. Inspired by Google's clean, user-focused visual aesthetic, the app leverages **Material Design 3 guidelines** to ensure that physicians can navigate complex longitudinal data effortlessly with zero learning curve. **Absolutely no patient data ever leaves the device.** We are not replacing clinical judgment; we are augmenting it, ensuring that the next generation of medical intelligence is as mobile, secure, and resilient as the practitioners who use it.
 
 ---
 
 ## Overview of Approach: Maximizing the HAI-DEF Ecosystem
 
-To win the **Edge of AI Prize**, a solution must transition AI from the cloud to the field, specifically targeting resource-constrained hardware like mobile phones and portable scanners. MedVed achieves this by leveraging the **MedGemma 1.5 4B Multimodal** model—the only HAI-DEF model our application requires, used to its fullest potential:
+To win the **Edge of AI Prize**, a solution must transition AI from the cloud to the field, specifically targeting resource-constrained hardware like mobile phones and portable scanners. Med Veda achieves this by leveraging the **MedGemma 1.5 4B Multimodal** model—the only HAI-DEF model our application requires, used to its fullest potential:
 
 **MedGemma 1.5 4B (Multimodal):** Serves as both the clinical reasoning engine AND the medical imaging analyzer. We specifically chose the 4B variant over the 27B model because the 27B model (even quantized) exceeds the memory capacity of commodity smartphones. The 4B model perfectly balances deep medical knowledge with strict mobile memory envelopes. Crucially, its integrated **medically-tuned SigLIP vision encoder** allows us to rapidly process high-dimensional radiographic imagery and histopathology slides directly on-device. This vision encoder was trained on de-identified medical image/text pairs including chest X-rays, dermatology, ophthalmology, and histopathology—giving MedGemma native medical visual understanding without requiring separate foundation models.
 
@@ -71,7 +71,7 @@ We built the core "brain" of the app using a highly optimized, custom **llama.cp
 The engine dynamically routes computation paths (CPU vs. GPU vs. NPU) based on the device's hardware topology. To address thermal throttling during long hospital shifts, we implemented an explicit, user-facing "Energy Mode." The 4B multimodal model natively includes a 2B submodel in its architecture, allowing our app to dynamically trade off between maximum reasoning depth and battery preservation on the fly. 
 
 ### 3. Multiple Model Options & Background Scheduling
-Recognizing that hardware capabilities vary drastically across deployment sites, MedVed natively supports hot-swapping between multiple quantized variants (e.g., Q4_K_M vs INT8). Because downloading a 2.8GB GGUF payload over cellular networks in rural areas is challenging, we implemented a robust **Background WorkManager**. This scheduling architecture coordinates large model payload downloads exclusively during periods of Wi-Fi availability or device charging (e.g., overnight shifts), ensuring the clinician is never blocked during active triage.
+Recognizing that hardware capabilities vary drastically across deployment sites, Med Veda natively supports hot-swapping between multiple quantized variants (e.g., Q4_K_M vs INT8). Because downloading a 2.8GB GGUF payload over cellular networks in rural areas is challenging, we implemented a robust **Background WorkManager**. This scheduling architecture coordinates large model payload downloads exclusively during periods of Wi-Fi availability or device charging (e.g., overnight shifts), ensuring the clinician is never blocked during active triage.
 
 ### 4. Technical Performance and Clinical Benchmarks (Tested on Snapdragon 8 Elite Gen 5)
 We conducted extremely rigorous tests across thousands of synthetic case interactions to validate memory stability and avoid OOM crashes during long clinical shifts. Furthermore, we evaluated our quantized MedGemma 1.5 4B implementations against the MedMCQA dataset (500-question subset) to verify reasoning retention.
@@ -102,16 +102,25 @@ To ensure the model outputs programmatic, standard medical formats (like SOAP no
 India is a linguistic mosaic. To maximize patient comprehension and utility for local health workers (ASHA workers) without increasing LLM inference load, the app implements smart renaming at the presentation layer. We originally attempted to fine-tune the model to output purely in local languages, but realized that rural workers generally understand basic English structure—the actual friction point is purely complex medical jargon. Rather than wasting precious tokens or distracting the model's core reasoning engine with translation tasks, a highly efficient, zero-overhead regex interceptor dynamically cross-references complex clinical output to common disease names in local vernaculars (e.g., injecting Hindi or Telugu translations directly into the text stream for complex symptoms like "dengue shock syndrome"). This approach is vastly faster, significantly more efficient, and crucially, ensures that our core MedMCQA benchmark performance is perfectly preserved because we are not pulling the model's focus away from primary clinical reasoning.
 
 **2. The "Negative Sign" Nuance:**
-A major clinical complaint regarding AI is that it often fails to note the *absence* of a finding, which can be just as crucial as the presence of a tumor. MedVed’s system prompts explicitly force MedGemma to report both positive findings *and* critical negative signs (e.g., "No evidence of pleural effusion"). This demonstrates a nuanced clinical understanding that builds immediate trust with doctors.
+A major clinical complaint regarding AI is that it often fails to note the *absence* of a finding, which can be just as crucial as the presence of a tumor. Med Veda’s system prompts explicitly force MedGemma to report both positive findings *and* critical negative signs (e.g., "No evidence of pleural effusion"). This demonstrates a nuanced clinical understanding that builds immediate trust with doctors.
 
 **3. Multi-Faceted Document & Imaging Analysis:**
-MedVed goes significantly beyond standard text completion. By fully unlocking the SigLIP encoder on-device, clinics process multiple types of crucial analysis seamlessly. A physician can upload a chest radiograph to evaluate opacities, take a photo of a histopathology slide to identify cellular anomalies, or scan a complex dermatological presentation—all routed through the exact same unified, locally-hosted MedGemma pipeline. 
+Med Veda goes significantly beyond standard text completion. By fully unlocking the SigLIP encoder on-device, clinics process multiple types of crucial analysis seamlessly. A physician can upload a chest radiograph to evaluate opacities, take a photo of a histopathology slide to identify cellular anomalies, or scan a complex dermatological presentation—all routed through the exact same unified, locally-hosted MedGemma pipeline. 
 
 **4. FHIR Export, Interoperability, & Security:**
-While processing must be local, data cannot remain siloed. MedVed features a robust export engine that synthesizes rich longitudinal records natively into the Fast Healthcare Interoperability Resources (FHIR) format. Because data privacy is paramount, the app is gated behind strict **PIN/Biometric authentication**. Combined with unbreakable local SQLite encryption (SQLCipher) and localized AES-256 QR-code sharing, MedVed handles secure handoffs to centralized hospital networks without ever sending data to a third-party cloud.
+While processing must be local, data cannot remain siloed. Med Veda features a robust export engine that synthesizes rich longitudinal records natively into the Fast Healthcare Interoperability Resources (FHIR) format. Because data privacy is paramount, the app is gated behind strict **PIN/Biometric authentication**. Combined with unbreakable local SQLite encryption (SQLCipher) and localized AES-256 QR-code sharing, Med Veda handles secure handoffs to centralized hospital networks without ever sending data to a third-party cloud.
 
 **5. Intelligent Longitudinal Analysis:**
 Instead of a standard chat box, the app securely stores chronological patient profiles using a local, encrypted Room Database. The temporal architecture allows the clinician to "click to expand" at any specific point in the timeline, triggering MedGemma to fluidly bridge years of historical records with current presenting symptoms.
+
+**6. Dual Inference Modes (Thinking vs. Direct):**
+To balance transparency with efficiency, Med Veda supports both **"Thinking Mode"** and **"Direct Inference Mode."** When examining complex or ambiguous cases, clinicians can toggle Thinking Mode to review the model's step-by-step deductive reasoning (Chain-of-Thought) before it reaches a final diagnosis, building critical clinical trust. For rapid triage where speed is paramount, Direct Inference Mode bypasses the verbose rationale, delivering immediate, actionable insights while conserving valuable on-device compute resources.
+
+**7. Epidemiological Context via Location Settings:**
+Medical diagnostics are heavily influenced by geographic prevalence (e.g., malaria in tropical regions versus Lyme disease in temperate zones). Med Veda includes a configurable **Location Setting** that injects the clinician's operative region into the system prompt's background context. Without explicitly prompting for it during every patient interaction, the MedGemma reasoning engine automatically weights differential diagnoses according to the local epidemiological realities, resulting in significantly more accurate, region-specific output.
+
+**8. Native Multilingual Triage:**
+Beyond the presentation-layer Vernacular Injection, Med Veda directly leverages MedGemma's inherent multilingual capabilities for core interactions. The application can natively intake patient histories and output clinical advice in multiple languages without requiring external, cloud-bound translation APIs. This allows community health workers to communicate with the AI in the language they and their patients are most comfortable with, preserving nuanced symptom descriptions that are often lost in translation.
 
 ---
 
@@ -135,10 +144,10 @@ Transparency is vital in medical AI. During development, we encountered several 
 
 ## Conclusion & Reproducibility
 
-MedVed is a highly feasible, production-ready product poised to redefine the point-of-care experience. By prioritizing aggressive model compression (QLoRA, GGUF 4-bit) we fit the powerful MedGemma 1.5 4B Multimodal model into the strict memory envelopes of mobile hardware. We solved the latency, privacy, and clinical burnout challenges by providing doctors with a secure, zero-latency co-pilot wrapped in a consumer-grade, user-focused interface. 
+Med Veda is a highly feasible, production-ready product poised to redefine the point-of-care experience. By prioritizing aggressive model compression (QLoRA, GGUF 4-bit) we fit the powerful MedGemma 1.5 4B Multimodal model into the strict memory envelopes of mobile hardware. We solved the latency, privacy, and clinical burnout challenges by providing doctors with a secure, zero-latency co-pilot wrapped in a consumer-grade, user-focused interface. 
 
 **Source Code & Validation:**
 The complete, highly documented source code is available in our public repository. It includes explicit instructions for deploying the llama.cpp backend on Android, replicating our QLoRA fine-tuning steps, and running the application locally to verify our stated performance metrics. All code is licensed under CC BY 4.0.
 
 ### Future Plans: Intelligent Document Analysis
-While MedVed currently excels at radiographic and histopathological vision logic, our immediate next step is expanding the SigLIP encoder's capabilities toward dense Medical Document Analysis. By leveraging MedGemma's multimodal core, we plan to allow clinicians to simply point their device camera at complex, multi-page discharge summaries or handwritten lab reports to instantly digitize, structure, and append the data natively into the patient's local profile without ever transcribing a word.
+While Med Veda currently excels at radiographic and histopathological vision logic, our immediate next step is expanding the SigLIP encoder's capabilities toward dense Medical Document Analysis. By leveraging MedGemma's multimodal core, we plan to allow clinicians to simply point their device camera at complex, multi-page discharge summaries or handwritten lab reports to instantly digitize, structure, and append the data natively into the patient's local profile without ever transcribing a word.

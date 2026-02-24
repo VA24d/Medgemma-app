@@ -1,4 +1,4 @@
-# MedVed Project Structure
+# Med Veda Project Structure
 
 **MedGemma 4B Edge AI Medical Assistant**
 

@@ -1,6 +1,6 @@
 # 🏆 Kaggle Google MedGemma Challenge Submission
 
-**MedVed** locally processes patient files alongside the 4B multimodal weights, avoiding any egress of PHI to third-party endpoints. Built for the **Kaggle Google MedGemma Challenge**, it leverages the lightweight yet powerful **MedGemma 1.5 4B Multimodal** model to process medical inquiries and analyze X-rays directly on Android devices—ensuring 100% data privacy with zero cloud egress.
+**Med Veda** locally processes patient files alongside the 4B multimodal weights, avoiding any egress of PHI to third-party endpoints. Built for the **Kaggle Google MedGemma Challenge**, it leverages the lightweight yet powerful **MedGemma 1.5 4B Multimodal** model to process medical inquiries and analyze X-rays directly on Android devices—ensuring 100% data privacy with zero cloud egress.
 
 ---
 
@@ -8,7 +8,7 @@
 
 In the fast-paced medical environment, retrieving patient history and analyzing diagnostic images quickly is critical. Cloud-based solutions often raise privacy concerns and latency issues.
 
-**MedVed** solves this by running a specialized medical LLM locally. It allows doctors to:
+**Med Veda** solves this by running a specialized medical LLM locally. It allows doctors to:
 - **Chat with Patient Records**: Ask natural language questions about a patient's history.
 - **Analyze X-Rays**: Upload and discuss medical imagery for preliminary insights.
 - **Maintain Privacy**: All data stays on the device, compliant with strict healthcare privacy standards.
@@ -44,7 +44,7 @@ In the fast-paced medical environment, retrieving patient history and analyzing 
 1.  **Clone the Repository**
     ```bash
     git clone https://github.com/Start_Antigravity/MediPro-Chronicler.git
-    cd MedVed
+    cd Med Veda
     ```
 
 2.  **Open in Android Studio**
