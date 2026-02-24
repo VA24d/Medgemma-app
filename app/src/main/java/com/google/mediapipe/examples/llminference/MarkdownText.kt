@@ -49,7 +49,27 @@ private sealed class MarkdownBlock {
 
 private fun parseMarkdown(markdown: String): List<MarkdownBlock> {
     val blocks = mutableListOf<MarkdownBlock>()
-    val lines = markdown.lines()
+
+    // Strip outermost ```markdown … ``` or ``` … ``` wrappers that some models
+    // emit around their entire response. We want to render the content, not a
+    // giant code block. Also handles the incomplete-stream case where only the
+    // opening fence has arrived (no closing fence yet).
+    val stripped = markdown.trim()
+    val unwrapped = run {
+        // Complete fence: ```lang\n...\n```
+        val completeFence = Regex("""^```[a-zA-Z]*\n([\s\S]*?)\n```\s*$""")
+        val complete = completeFence.matchEntire(stripped)
+        if (complete != null) {
+            complete.groupValues[1]
+        } else {
+            // Incomplete stream: starts with ```lang\n but no closing fence yet
+            val openFence = Regex("""^```[a-zA-Z]*\n([\s\S]*)$""")
+            val open = openFence.matchEntire(stripped)
+            if (open != null) open.groupValues[1] else stripped
+        }
+    }
+
+    val lines = unwrapped.lines()
     var i = 0
     var inCode = false
     val codeBuf = StringBuilder()
@@ -85,7 +105,7 @@ private fun parseMarkdown(markdown: String): List<MarkdownBlock> {
         // ── Bullet ──
         val bulletIndent = (raw.length - trimmed.length) / 2
         if (trimmed.startsWith("- ") || trimmed.startsWith("* ")) {
-            blocks += MarkdownBlock.Bullet(trimmed.drop(2), bulletIndent)
+            blocks += MarkdownBlock.Bullet(trimmed.drop(2).trimStart(), bulletIndent)
             i++; continue
         }
 

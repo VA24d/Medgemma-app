@@ -125,7 +125,7 @@ Instructions:
 - Cite specific entries/dates when referencing data
 - If asked about something not in the records, say so
 - Be clinically precise and concise
-- Format responses in Markdown"""
+- Format responses in Markdown. Do not wrap your response in a code block."""
     }
 
     fun sendMessage(userMessage: String, userImages: List<Bitmap>) {

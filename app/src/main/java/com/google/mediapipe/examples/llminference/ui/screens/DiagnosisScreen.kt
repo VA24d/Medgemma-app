@@ -146,7 +146,7 @@ Provide:
 4. **Recommended next steps** (investigations, referrals, treatment)
 5. **Red flags** to monitor
 
-Format in Markdown. Be concise and clinically precise."""
+Format in Markdown. Be concise and clinically precise. Do not wrap your response in a code block."""
 }
 
 private fun buildIncrementalPrompt(
@@ -186,7 +186,7 @@ Provide an UPDATED assessment:
 4. **Recommended next steps**
 5. **Red flags added or resolved**
 
-Format in Markdown. Reference changes explicitly."""
+Format in Markdown. Reference changes explicitly. Do not wrap your response in a code block."""
 }
 
 // ─── Screen ─────────────────────────────────────────────────────────────────────
