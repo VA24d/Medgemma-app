@@ -58,11 +58,6 @@ We executed extremely rigorous tests across thousands of synthetic case interact
 
 While Q4_K_M presents a measurable drop in multi-choice factual recall, its perfect retention of reasoning logic (zero drop in MedQA/PubMedQA) combined with its ability to run natively within the strict 2.4GB memory footprint of older standard Android devices makes it the ideal edge compromise for qualitative triaging in rural environments. For high-end, recent devices, Q8_0 and Q6_K unlock perfect, base-model accuracy natively on-device.
 
-### 5. Fine-Tuning and Formatting (QLoRA)
-To ensure the model outputs programmatic, standard medical formats (like structured SOAP notes) for our FHIR export engine, we fine-tuned the model using Quantized Low-Rank Adaptation (QLoRA). 
-- **Configuration:** 4-bit NormalFloat (NF4) base weights, `torch.float32` compute dtype (to bypass T4 GPU bfloat16 errors), and a LoRA rank ($r$) of 32 applied to the attention matrices (`q_proj`, `v_proj`).
-- **Template Alignment:** We strictly utilized the native `tokenizer.apply_chat_template()` to perfectly align with the Gemma 3 conversational structure, effectively overriding the wild hallucinations often caused by standard Alpaca templates.
-
 ---
 
 # Submission Details: What Was Impactful and Creative?
