@@ -9,13 +9,14 @@ import android.provider.MediaStore
 import androidx.annotation.RequiresApi
 
 /**
- * Puts demo CXR placeholders into the public **Pictures/MedgemmaDemo** album so they appear in
- * the normal gallery / Google Photos pickers (best-effort; no-op on failure).
+ * Puts the two conference CXR demos into public **Pictures/MedgemmaDemo** so they appear in
+ * gallery / Google Photos pickers (best-effort; no-op on failure).
  */
 object DemoGalleryExport {
 
     private const val PREFS = "medgemma_demo_seed"
-    private const val KEY_EXPORTED = "demo_gallery_export_v1"
+    private const val KEY_EXPORTED = "demo_gallery_export_v3"
+
     private const val ALBUM = "MedgemmaDemo"
 
     private data class DemoAsset(
@@ -24,9 +25,10 @@ object DemoGalleryExport {
         val mime: String
     )
 
+    /** Only the two CXRs used for conference demo fast-path; filenames align with [DemoXraySummaries]. */
     private val FILES = listOf(
-        DemoAsset("demo_xrays/appa_rao_cxr_2024_10_baseline.jpg", "appa_rao_cxr_2024_10_baseline.jpg", "image/jpeg"),
-        DemoAsset("demo_xrays/appa_rao_cxr_2024_11_followup.png", "appa_rao_cxr_2024_11_followup.png", "image/png")
+        DemoAsset("demo_xrays/chest_xray_normal.png", "chest_xray_normal.png", "image/png"),
+        DemoAsset("demo_xrays/chest_xray_covid.jpg", "chest_xray_covid.jpg", "image/jpeg"),
     )
 
     fun exportOnceIfNeeded(context: Context) {

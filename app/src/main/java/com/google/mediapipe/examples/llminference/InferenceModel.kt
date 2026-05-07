@@ -200,15 +200,19 @@ class InferenceModel private constructor(context: Context) {
                 }
                 try {
                     if (images.isNotEmpty()) {
+                        Log.i(TAG, "chat_inference=VISION images=${images.size} (multimodal / slow path)")
                         val visionReady = ensureMmprojLoaded()
                         if (visionReady) {
                             generateMultimodalResponse(prompt, images.first(), progressListener, maxPredictTokens)
                         } else {
+                            Log.w(TAG, "mmproj not ready; falling back to text-only (no image)")
                             generateTextResponse(prompt, progressListener, maxPredictTokens)
                         }
                     } else {
                         if (!fast) {
-                            Log.i(TAG, "Perf: promptChars=${prompt.length}, maxOut=$maxPredictTokens")
+                            Log.i(TAG, "chat_inference=TEXT_ONLY promptChars=${prompt.length}, maxOut=$maxPredictTokens")
+                        } else {
+                            Log.i(TAG, "chat_inference=TEXT_ONLY (fast) promptChars=${prompt.length}, maxOut=$maxPredictTokens")
                         }
                         generateTextResponse(prompt, progressListener, maxPredictTokens)
                     }

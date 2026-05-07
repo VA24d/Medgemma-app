@@ -94,8 +94,8 @@ internal fun ChatRoute(
         onToggleThinking = { enabled ->
             chatViewModel.setThinkingEnabled(enabled)
         },
-        onSendMessage = { message, images ->
-            chatViewModel.sendMessage(message, images)
+        onSendMessage = { message, images, uris ->
+            chatViewModel.sendMessage(message, images, uris)
         },
         onStopGeneration = { chatViewModel.stopGeneration() },
         onClose = onClose
@@ -112,12 +112,12 @@ fun ChatScreen(
     isGenerating: Boolean = false,
     patientContext: PatientChatContext? = null,
     onToggleThinking: (Boolean) -> Unit = {},
-    onSendMessage: (String, List<Bitmap>) -> Unit,
+    onSendMessage: (String, List<Bitmap>, List<Uri>) -> Unit,
     onStopGeneration: () -> Unit = {},
     onClose: () -> Unit
 ) {
     var userMessage by rememberSaveable { mutableStateOf("") }
-    var imageUris by rememberSaveable { mutableStateOf<List<Uri>>(emptyList()) }
+    var imageUris by remember { mutableStateOf<List<Uri>>(emptyList()) }
     val context = LocalContext.current
     val view = LocalView.current
     val bitmaps = imageUris.mapNotNull { it.toBitmap(context) }
@@ -276,7 +276,7 @@ fun ChatScreen(
                 imageUris = imageUris,
                 onSendMessage = {
                     if (userMessage.isNotBlank() || bitmaps.isNotEmpty()) {
-                        onSendMessage(userMessage, bitmaps)
+                        onSendMessage(userMessage, bitmaps, imageUris)
                         userMessage = ""
                         imageUris = emptyList()
                     }

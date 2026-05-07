@@ -2,6 +2,9 @@ package com.google.mediapipe.examples.llminference
 
 import android.content.Context
 import android.graphics.Bitmap
+import android.net.Uri
+import com.google.mediapipe.examples.llminference.demo.DemoXraySummaries
+import com.google.mediapipe.examples.llminference.demo.displayNameForImageUri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -13,6 +16,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+
+private const val DEMO_CXR_LOG = "MedgemmaDemoCXR"
 
 class ChatViewModel(
     private val inferenceModel: InferenceModel,
@@ -196,7 +201,7 @@ OUTPUT LANGUAGE (mandatory): Write the entire reply in Hindi using Devanagari sc
         }
     }
 
-    fun sendMessage(userMessage: String, userImages: List<Bitmap>) {
+    fun sendMessage(userMessage: String, userImages: List<Bitmap>, imageUriHints: List<Uri> = emptyList()) {
         currentJob = viewModelScope.launch(Dispatchers.IO) {
             _uiState.value.addMessage(userMessage, USER_PREFIX, userImages)
             _uiState.value.createLoadingMessage()
@@ -205,6 +210,30 @@ OUTPUT LANGUAGE (mandatory): Write the entire reply in Hindi using Devanagari sc
             try {
                 val ctx = _patientContext.value
                 val thinkingOn = _thinkingEnabled.value
+                val firstUri = imageUriHints.firstOrNull()
+                val imageDisplayName = firstUri
+                    ?.let { displayNameForImageUri(appContext, it) }
+                    .orEmpty()
+                val firstBmp = userImages.firstOrNull()
+                val demoSummary = if (firstBmp != null) {
+                    DemoXraySummaries.summaryForKnownDemoFilename(imageDisplayName)
+                        ?: DemoXraySummaries.summaryForKnownDemoBitmapSize(firstBmp.width, firstBmp.height)
+                } else {
+                    null
+                }
+                val demoBlock = if (demoSummary != null) {
+                    DemoXraySummaries.demoRadiologyPrefix(demoSummary)
+                } else {
+                    ""
+                }
+                val inferenceImages = if (demoSummary != null) emptyList() else userImages
+                android.util.Log.i(
+                    DEMO_CXR_LOG,
+                    "uris=${imageUriHints.size} uri=$firstUri resolvedName='$imageDisplayName' " +
+                        "bitmap=${firstBmp?.let { "${it.width}x${it.height}" } ?: "-"} " +
+                        "demoFastPath=${demoSummary != null} inferImages=${inferenceImages.size}",
+                )
+                val skipThinkForThisSend = !thinkingOn || demoSummary != null
                 if (ctx != null && userImages.isEmpty()) {
                     val db = com.google.mediapipe.examples.llminference.data.MedicalDatabase.getDatabase(appContext)
                     val entries =
@@ -255,11 +284,12 @@ OUTPUT LANGUAGE (mandatory): Write the entire reply in Hindi using Devanagari sc
                         val diagnoses = db.diagnosisDao().getLatestDiagnoses(ctx.patientId, 3)
                         if (patient != null) {
                             val body = buildPatientSystemPrompt(patient, entries, diagnoses)
-                            "$body$langBlock\n\nCurrent request: $userMessage"
+                            "$body$langBlock\n\n${demoBlock}Current request: $userMessage"
                         } else {
                             buildString {
                                 if (langBlock.isNotBlank()) append(langBlock).append("\n\n")
                                 if (!thinkingOn) append(GENERAL_DIRECT_ONLY_PREFIX)
+                                append(demoBlock)
                                 append(userMessage)
                             }.toString()
                         }
@@ -267,6 +297,7 @@ OUTPUT LANGUAGE (mandatory): Write the entire reply in Hindi using Devanagari sc
                         buildString {
                             if (langBlock.isNotBlank()) append(langBlock).append("\n\n")
                             if (ctx == null && !thinkingOn) append(GENERAL_DIRECT_ONLY_PREFIX)
+                            append(demoBlock)
                             append(userMessage)
                         }.toString()
                     }
@@ -282,9 +313,9 @@ OUTPUT LANGUAGE (mandatory): Write the entire reply in Hindi using Devanagari sc
 
                 val future = inferenceModel.generateResponseAsync(
                     contextualPrompt,
-                    userImages,
+                    inferenceImages,
                     maxPredictTokens = maxOut,
-                    forceSkipThinkingForRequest = !thinkingOn,
+                    forceSkipThinkingForRequest = skipThinkForThisSend,
                 ) { partialResult, isDone ->
                     if (!isDone && partialResult.isNotEmpty()) {
                         _uiState.value.appendMessage(partialResult)
