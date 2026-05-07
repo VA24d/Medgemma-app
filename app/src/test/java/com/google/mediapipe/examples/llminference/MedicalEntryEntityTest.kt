@@ -42,6 +42,7 @@ class MedicalEntryEntityTest {
         assertEquals("", entry.content)
         assertEquals("", entry.imagePaths)
         assertEquals("", entry.analysisResult)
+        assertEquals("", entry.visitSummary)
         assertEquals("pending", entry.status)
         assertTrue(entry.createdAt > 0)
         assertTrue(entry.updatedAt > 0)

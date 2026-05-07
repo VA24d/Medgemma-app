@@ -42,6 +42,13 @@ fun NavigationSidebar(
     val prefs = remember { AppPreferences(context) }
     val tokenManager = remember { TokenManager(context) }
 
+    var selectedLanguage by remember { mutableStateOf(LocalModelFiles.getLanguageExtension(context)) }
+    LaunchedEffect(isOpen) {
+        if (isOpen) {
+            selectedLanguage = LocalModelFiles.getLanguageExtension(context)
+        }
+    }
+
     // Settings states
     var showThemeDialog by remember { mutableStateOf(false) }
     var showEnergyDialog by remember { mutableStateOf(false) }
@@ -120,7 +127,6 @@ fun NavigationSidebar(
             HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
 
             // ── Localization ──
-            var selectedLanguage by remember { mutableStateOf(LocalModelFiles.getLanguageExtension(context)) }
             SidebarSection("Localization")
             SidebarItem(
                 icon = Icons.Default.Translate,
@@ -293,6 +299,7 @@ fun NavigationSidebar(
                                 .fillMaxWidth()
                                 .clickable {
                                     LocalModelFiles.setLanguageExtension(context, lang)
+                                    selectedLanguage = lang
                                     showLanguageDialog = false
                                 }
                                 .padding(12.dp),
@@ -302,6 +309,7 @@ fun NavigationSidebar(
                                 selected = LocalModelFiles.getLanguageExtension(context) == lang,
                                 onClick = {
                                     LocalModelFiles.setLanguageExtension(context, lang)
+                                    selectedLanguage = lang
                                     showLanguageDialog = false
                                 }
                             )

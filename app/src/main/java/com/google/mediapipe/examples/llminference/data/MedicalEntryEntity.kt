@@ -28,7 +28,9 @@ data class MedicalEntryEntity(
     val title: String = "",
     val content: String = "",       // Notes or transcription
     val imagePaths: String = "",    // Comma-separated image file paths
-    val analysisResult: String = "",// AI analysis output
+    val analysisResult: String = "", // AI analysis output
+    /** One or two sentences for fast longitudinal prompts (hand-written or synced). */
+    val visitSummary: String = "",
     val status: String = "pending", // pending, analyzed, reviewed
     val createdAt: Long = System.currentTimeMillis(),
     val updatedAt: Long = System.currentTimeMillis()

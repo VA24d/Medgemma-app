@@ -31,6 +31,12 @@ interface InferenceEngine {
     fun sendUserPrompt(message: String, predictLength: Int = DEFAULT_PREDICT_LENGTH): Flow<String>
 
     /**
+     * Clears native multi-turn chat history and KV cache (same effect as before a new system
+     * prompt) without unloading the model. Use when global prefs change — e.g. output language.
+     */
+    fun resetConversation()
+
+    /**
      * Set whether to skip the model's internal thinking/reasoning phase.
      */
     fun setSkipThinking(skipThinking: Boolean)

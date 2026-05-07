@@ -10,14 +10,20 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.google.mediapipe.examples.llminference.data.DemoDataSeeder
+import com.google.mediapipe.examples.llminference.data.DemoGalleryExport
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 @Composable
 fun SplashScreen(onFinished: () -> Unit) {
+    val appContext = LocalContext.current.applicationContext
     // Logo animations
     val logoScale = remember { Animatable(0.3f) }
     val logoAlpha = remember { Animatable(0f) }
@@ -45,6 +51,12 @@ fun SplashScreen(onFinished: () -> Unit) {
     )
 
     LaunchedEffect(Unit) {
+        withContext(Dispatchers.IO) {
+            DemoDataSeeder.seedIfNeeded(appContext)
+            DemoDataSeeder.backfillVisitSummariesIfNeeded(appContext)
+            DemoDataSeeder.seedFourManualDemoPatientsIfNeeded(appContext)
+            DemoGalleryExport.exportOnceIfNeeded(appContext)
+        }
         // Animate logo in (parallel coroutines inside LaunchedEffect scope)
         launch {
             logoScale.animateTo(1f, animationSpec = tween(800, easing = FastOutSlowInEasing))

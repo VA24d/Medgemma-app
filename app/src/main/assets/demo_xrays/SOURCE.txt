@@ -1,0 +1,8 @@
+Bundled files are placeholders copied from tflite/inference/test_images for stable multimodal QA.
+
+Replace appa_rao_cxr_2024_10_baseline.jpg and appa_rao_cxr_2024_11_followup.png with
+de-identified clinical chest radiographs (same filenames) before external demos.
+
+On first launch the app copies these into Pictures/MedgemmaDemo (visible in Google Photos / gallery).
+
+Optional: adb push replacements to /sdcard/Pictures/MedgemmaDemo/ using the same filenames.

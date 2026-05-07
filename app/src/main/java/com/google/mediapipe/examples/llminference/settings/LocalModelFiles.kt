@@ -62,6 +62,16 @@ object LocalModelFiles {
     fun getLanguageExtension(context: Context): String =
         prefs(context).getString(KEY_LANGUAGE_EXTENSION, "Off") ?: "Off"
 
+    /** Canonical key for comparing sidebar language across prefs quirks ("off", "OFF", spaces). */
+    fun normalizedLanguageExtensionKey(context: Context): String {
+        val raw = getLanguageExtension(context).trim()
+        return when {
+            raw.equals("Telugu", ignoreCase = true) -> "telugu"
+            raw.equals("Hindi", ignoreCase = true) -> "hindi"
+            else -> "off"
+        }
+    }
+
     fun setLanguageExtension(context: Context, language: String) {
         prefs(context).edit().putString(KEY_LANGUAGE_EXTENSION, language).apply()
     }

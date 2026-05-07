@@ -7,6 +7,7 @@ import com.google.mediapipe.examples.llminference.InferenceModel
 import com.google.mediapipe.examples.llminference.data.DiagnosisEntity
 import com.google.mediapipe.examples.llminference.data.MedicalDatabase
 import com.google.mediapipe.examples.llminference.data.MedicalEntryEntity
+import com.google.mediapipe.examples.llminference.data.PatientChartPrompt
 import com.google.mediapipe.examples.llminference.settings.LocalModelFiles
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -146,13 +147,14 @@ class ScheduledPrognosisWorker(
 
     private fun buildAutoPrompt(entries: List<MedicalEntryEntity>): String {
         val fmt = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-        val summary = entries.joinToString("\n") { e ->
-            val ai = if (e.analysisResult.isNotBlank()) " | AI: ${e.analysisResult.take(120)}…" else ""
-            "[${fmt.format(Date(e.createdAt))}][${e.entryType}] ${e.title}: ${e.content.take(120)}$ai"
+        val sorted = entries.sortedBy { it.createdAt }
+        val summary = sorted.joinToString("\n") { e ->
+            val line = PatientChartPrompt.effectiveVisitLine(e)
+            "[${fmt.format(Date(e.createdAt))}][${e.entryType}] ${e.title}\n  → $line"
         }
         return """You are a specialist AI medical assistant. Generate a concise clinical prognosis.
 
-Patient has ${entries.size} medical record entries (oldest→newest):
+Patient has ${entries.size} medical record entries (oldest→newest). Each line uses a short visit summary when available (faster, less redundant than full notes):
 $summary
 
 Provide:

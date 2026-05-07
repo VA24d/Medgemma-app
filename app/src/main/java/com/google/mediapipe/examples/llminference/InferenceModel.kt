@@ -43,6 +43,9 @@ class InferenceModel private constructor(context: Context) {
     // Avoids enforceThinkingState() stomping on values set by updateThinkingMode().
     @Volatile private var currentThinkingEnabled: Boolean = false
 
+    /** Last language-extension key applied to the native chat/KV state (singleton engine). */
+    @Volatile private var lastConversationLangKey: String? = null
+
     /** Check if mmproj file exists on disk (even if not yet loaded into engine). */
     private fun isMmprojFileAvailable(): Boolean {
         val mmproj = mmprojPath(appContext)
@@ -117,6 +120,7 @@ class InferenceModel private constructor(context: Context) {
                 Log.i(TAG, "Thinking mode: ${if (thinkingEnabled) "enabled" else "disabled (prefill skip)"}")
             }
             Log.i(TAG, "GGUF backend initialized. mmprojLoaded=$mmprojLoaded")
+            lastConversationLangKey = null
         } catch (e: Exception) {
             Log.e(TAG, "Failed to initialize GGUF backend: ${e.message}", e)
             throw ModelLoadFailException()
@@ -154,27 +158,64 @@ class InferenceModel private constructor(context: Context) {
         Log.d(TAG, "enforceThinkingState: thinking=${currentThinkingEnabled} skipThinking=${!currentThinkingEnabled}")
     }
 
+    /**
+     * Native llama chat state accumulates user/assistant turns. When Language Extension changes,
+     * clear KV + chat_msgs so the model is not steered by prior Telugu/Hindi replies.
+     */
+    private fun syncNativeConversationWithLanguagePref() {
+        val key = LocalModelFiles.normalizedLanguageExtensionKey(appContext)
+        val prev = lastConversationLangKey
+        lastConversationLangKey = key
+        if (prev != null && prev != key) {
+            try {
+                engine.resetConversation()
+                Log.i(TAG, "Reset native chat for language change: $prev -> $key")
+            } catch (e: Exception) {
+                Log.e(TAG, "resetConversation failed", e)
+            }
+        }
+    }
+
+    /**
+     * @param maxPredictTokens Hard cap on generated tokens (native decode loop).
+     * @param forceSkipThinkingForRequest When true, skips model "thinking" prefill for this call only
+     * (faster for chart Q&A). User preference is restored afterward.
+     */
     fun generateResponseAsync(
         prompt: String,
         images: List<Bitmap>,
-        progressListener: (String, Boolean) -> Unit
+        maxPredictTokens: Int = DEFAULT_PREDICT_LENGTH,
+        forceSkipThinkingForRequest: Boolean = false,
+        progressListener: (String, Boolean) -> Unit,
     ): java.util.concurrent.Future<String> {
         return executor.submit(java.util.concurrent.Callable {
+            syncNativeConversationWithLanguagePref()
             val response = runBlocking(Dispatchers.IO) {
-                // Always re-enforce thinking state before every generation
-                enforceThinkingState()
-
-                if (images.isNotEmpty()) {
-                    // Lazy-load mmproj on first image use
-                    val visionReady = ensureMmprojLoaded()
-                    if (visionReady) {
-                        generateMultimodalResponse(prompt, images.first(), progressListener)
-                    } else {
-                        // Fall back to text-only if vision encoder can't be loaded
-                        generateTextResponse(prompt, progressListener)
-                    }
+                val fast = forceSkipThinkingForRequest
+                if (fast) {
+                    Log.i(TAG, "Perf: fast chart reply (skip-thinking override), promptChars=${prompt.length}, maxOut=$maxPredictTokens")
+                    engine.setSkipThinking(true)
                 } else {
-                    generateTextResponse(prompt, progressListener)
+                    enforceThinkingState()
+                }
+                try {
+                    if (images.isNotEmpty()) {
+                        val visionReady = ensureMmprojLoaded()
+                        if (visionReady) {
+                            generateMultimodalResponse(prompt, images.first(), progressListener, maxPredictTokens)
+                        } else {
+                            generateTextResponse(prompt, progressListener, maxPredictTokens)
+                        }
+                    } else {
+                        if (!fast) {
+                            Log.i(TAG, "Perf: promptChars=${prompt.length}, maxOut=$maxPredictTokens")
+                        }
+                        generateTextResponse(prompt, progressListener, maxPredictTokens)
+                    }
+                } finally {
+                    if (fast) {
+                        enforceThinkingState()
+                    }
                 }
             }
             progressListener("", true)
@@ -183,7 +224,7 @@ class InferenceModel private constructor(context: Context) {
     }
 
     suspend fun generateResponse(prompt: String): String = withContext(Dispatchers.IO) {
-        generateTextResponse(prompt) { _, _ -> }
+        generateTextResponse(prompt, { _, _ -> }, DEFAULT_PREDICT_LENGTH)
     }
 
     fun estimateTokensRemaining(prompt: String): Int {
@@ -202,10 +243,11 @@ class InferenceModel private constructor(context: Context) {
 
     private suspend fun generateTextResponse(
         prompt: String,
-        progressListener: (String, Boolean) -> Unit
+        progressListener: (String, Boolean) -> Unit,
+        predictLength: Int = DEFAULT_PREDICT_LENGTH,
     ): String {
         val output = StringBuilder()
-        engine.sendUserPrompt(prompt, DEFAULT_PREDICT_LENGTH).collect { token ->
+        engine.sendUserPrompt(prompt, predictLength).collect { token ->
             output.append(token)
             progressListener(token, false)
         }
@@ -215,7 +257,8 @@ class InferenceModel private constructor(context: Context) {
     private suspend fun generateMultimodalResponse(
         prompt: String,
         image: Bitmap,
-        progressListener: (String, Boolean) -> Unit
+        progressListener: (String, Boolean) -> Unit,
+        predictLength: Int = DEFAULT_PREDICT_LENGTH,
     ): String {
         val tempImage = writeBitmapToTemp(image)
         try {
@@ -225,7 +268,7 @@ class InferenceModel private constructor(context: Context) {
             }
 
             val output = StringBuilder()
-            engine.sendImagePrompt(prompt, DEFAULT_PREDICT_LENGTH).collect { token ->
+            engine.sendImagePrompt(prompt, predictLength).collect { token ->
                 output.append(token)
                 progressListener(token, false)
             }

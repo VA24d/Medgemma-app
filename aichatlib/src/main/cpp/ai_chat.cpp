@@ -414,6 +414,26 @@ Java_com_arm_aichat_internal_InferenceEngineImpl_processSystemPrompt(
     return 0;
 }
 
+/**
+ * Clears multi-turn chat template history and KV cache without decoding a new system prompt.
+ * Used when output language (or other global pref) changes so the next user turn is not
+ * conditioned on prior assistant text (e.g. Telugu continuation after toggling Off).
+ */
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_arm_aichat_internal_InferenceEngineImpl_nativeResetConversation(
+        JNIEnv * /*env*/,
+        jobject /*unused*/
+) {
+    if (!g_context) {
+        LOGw("%s: g_context is null, skip reset", __func__);
+        return;
+    }
+    reset_long_term_states();
+    reset_short_term_states();
+    LOGi("%s: Cleared chat_msgs and KV cache", __func__);
+}
+
 extern "C"
 JNIEXPORT jint JNICALL
 Java_com_arm_aichat_internal_InferenceEngineImpl_processUserPrompt(
@@ -461,8 +481,10 @@ Java_com_arm_aichat_internal_InferenceEngineImpl_processUserPrompt(
     // Update position
     current_position += user_prompt_size;
 
-    // Prefill assistant with empty thinking block to skip reasoning
-    if (g_skip_thinking && has_chat_template) {
+    // Prefill assistant with empty thinking block to skip reasoning.
+    // Apply whenever g_skip_thinking — some GGUFs do not mark chat_template as "explicit"
+    // in metadata; skipping that guard avoids models emitting a plain-text "Thinking process".
+    if (g_skip_thinking) {
         // Inject raw thinking-complete tokens directly (NO template wrapping!).
         // The model uses <unused94>thought\n...<unused95> format for thinking.
         // By prefilling open+close markers, the model sees thinking as done
@@ -740,24 +762,20 @@ Java_com_arm_aichat_internal_InferenceEngineImpl_processUserPromptWithImage(
     // Update position
     current_position = new_n_past;
 
-    // Prefill assistant with empty thinking block to skip reasoning
+    // Prefill assistant with empty thinking block (same rationale as text-only path).
     if (g_skip_thinking) {
-        const bool has_chat_tpl = common_chat_templates_was_explicit(g_chat_templates.get());
-        if (has_chat_tpl) {
-            // Raw injection — same approach as text-only path.
-            std::string prefill_raw = "<unused94>thought\n<unused95>";
-            auto prefill_tokens = common_tokenize(g_context, prefill_raw, false, true);
-            LOGi("%s: Prefilling %d raw tokens to skip thinking (multimodal)", __func__, (int) prefill_tokens.size());
-            for (auto id: prefill_tokens) {
-                LOGi("prefill token: `%s`\t -> `%d`", common_token_to_piece(g_context, id).c_str(), id);
+        std::string prefill_raw = "<unused94>thought\n<unused95>";
+        auto prefill_tokens = common_tokenize(g_context, prefill_raw, false, true);
+        LOGi("%s: Prefilling %d raw tokens to skip thinking (multimodal)", __func__, (int) prefill_tokens.size());
+        for (auto id: prefill_tokens) {
+            LOGi("prefill token: `%s`\t -> `%d`", common_token_to_piece(g_context, id).c_str(), id);
+        }
+        if (!prefill_tokens.empty()) {
+            if (decode_tokens_in_batches(g_context, g_batch, prefill_tokens, current_position, true)) {
+                LOGe("%s: llama_decode() failed for prefill!", __func__);
+                return 4;
             }
-            if (!prefill_tokens.empty()) {
-                if (decode_tokens_in_batches(g_context, g_batch, prefill_tokens, current_position, true)) {
-                    LOGe("%s: llama_decode() failed for prefill!", __func__);
-                    return 4;
-                }
-                current_position += (int) prefill_tokens.size();
-            }
+            current_position += (int) prefill_tokens.size();
         }
     }
 

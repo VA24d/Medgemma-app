@@ -100,6 +100,9 @@ internal class InferenceEngineImpl private constructor(
     private external fun processSystemPrompt(systemPrompt: String): Int
 
     @FastNative
+    private external fun nativeResetConversation()
+
+    @FastNative
     private external fun nativeSetSkipThinking(skip: Boolean)
 
     @FastNative
@@ -237,6 +240,19 @@ internal class InferenceEngineImpl private constructor(
     override fun setSkipThinking(skipThinking: Boolean) {
         nativeSetSkipThinking(skipThinking)
     }
+
+    override fun resetConversation() {
+        runBlocking(llamaDispatcher) {
+            when (val s = _state.value) {
+                is InferenceEngine.State.ModelReady -> {
+                    nativeResetConversation()
+                    Log.i(TAG, "Native conversation reset (KV + chat history cleared)")
+                }
+                else -> Log.w(TAG, "resetConversation ignored in state ${s.javaClass.simpleName}")
+            }
+        }
+    }
+
     override fun sendUserPrompt(
         message: String,
         predictLength: Int,

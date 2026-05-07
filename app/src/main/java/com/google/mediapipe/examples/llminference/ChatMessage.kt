@@ -41,10 +41,29 @@ data class ChatMessage(
             if (cleaned.startsWith("<think>")) {
                 cleaned = cleaned.removePrefix("<think>").trim()
             }
+            cleaned = ChatMessage.stripPlaintextThinkingProcessSection(cleaned)
             return cleaned
         }
     val isFromUser: Boolean
         get() = author == USER_PREFIX
     val isEmpty: Boolean
         get() = rawMessage.isEmpty()
+
+    companion object {
+        /**
+         * Some runs still emit a Markdown "Thinking process:" preamble even when native skip-thinking
+         * is on — strip that block before display (does not remove legitimate clinical prose elsewhere).
+         */
+        internal fun stripPlaintextThinkingProcessSection(text: String): String {
+            var s = text
+            val block = Regex(
+                """(?is)(^|\n)\s*(#{1,3}\s*)?\*{0,2}\s*Thinking\s*Process\*{0,2}\s*:([\s\S]*?)(?=\n\s*\n\s*(?:[^\d\s\n#*]|[#]{1,3}\s+\S|\*\*\s*\S))"""
+            )
+            while (true) {
+                val m = block.find(s) ?: break
+                s = s.removeRange(m.range).trimStart()
+            }
+            return s.trim()
+        }
+    }
 }

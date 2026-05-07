@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
+import com.google.mediapipe.examples.llminference.data.PatientChartPrompt
 import com.google.mediapipe.examples.llminference.settings.LocalModelFiles
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -55,13 +56,11 @@ class ChatViewModel(
                 val db = com.google.mediapipe.examples.llminference.data.MedicalDatabase.getDatabase(appContext)
                 val patient = db.patientDao().getPatientSync(patientId) ?: return@launch
                 val entries = db.medicalEntryDao().getEntriesForPatientSync(patientId)
-                val diagnoses = db.diagnosisDao().getLatestDiagnoses(patientId, 3)
 
                 val ctx = PatientChatContext(
                     patientId = patientId,
                     patientName = patient.name,
-                    entryCount = entries.size,
-                    systemPrompt = buildPatientSystemPrompt(patient, entries, diagnoses)
+                    entryCount = entries.size
                 )
                 _patientContext.value = ctx
 
@@ -79,53 +78,122 @@ class ChatViewModel(
     private fun buildPatientSystemPrompt(
         patient: com.google.mediapipe.examples.llminference.data.PatientEntity,
         entries: List<com.google.mediapipe.examples.llminference.data.MedicalEntryEntity>,
-        diagnoses: List<com.google.mediapipe.examples.llminference.data.DiagnosisEntity>
+        diagnoses: List<com.google.mediapipe.examples.llminference.data.DiagnosisEntity>,
     ): String {
         val fmt = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault())
         val patientInfo = buildString {
-            appendLine("Patient: ${patient.name}")
-            if (patient.dateOfBirth.isNotBlank()) appendLine("Date of Birth: ${patient.dateOfBirth}")
-            if (patient.gender.isNotBlank()) appendLine("Gender: ${patient.gender}")
-            if (patient.bloodGroup.isNotBlank()) appendLine("Blood Group: ${patient.bloodGroup}")
-            if (patient.allergies.isNotBlank()) appendLine("Allergies: ${patient.allergies}")
-            if (patient.notes.isNotBlank()) appendLine("Notes: ${patient.notes}")
-            if (patient.address.isNotBlank()) appendLine("Address: ${patient.address}")
+            appendLine("${patient.name}")
+            if (patient.dateOfBirth.isNotBlank()) appendLine("DOB ${patient.dateOfBirth}")
+            if (patient.gender.isNotBlank()) appendLine("Gender ${patient.gender}")
+            if (patient.bloodGroup.isNotBlank()) appendLine("Blood ${patient.bloodGroup}")
+            if (patient.allergies.isNotBlank()) appendLine("Allergies ${patient.allergies}")
+            if (patient.notes.isNotBlank()) {
+                val n = patient.notes
+                val cap = PATIENT_NOTES_IN_PROMPT_MAX
+                appendLine("Notes ${n.take(cap)}${if (n.length > cap) "…" else ""}")
+            }
         }
 
-        val entrySummary = if (entries.isNotEmpty()) {
-            entries.sortedBy { it.createdAt }.joinToString("\n") { e ->
-                val ai = if (e.analysisResult.isNotBlank()) " | AI: ${e.analysisResult.take(200)}" else ""
-                "[${fmt.format(java.util.Date(e.createdAt))}][${e.entryType}] ${e.title}: ${e.content.take(200)}$ai"
-            }
-        } else "No medical entries."
-
         val diagSummary = if (diagnoses.isNotEmpty()) {
-            diagnoses.joinToString("\n\n") { d ->
+            diagnoses.take(2).joinToString("\n") { d ->
                 val cleanDiag = d.diagnosis
                     .replace(Regex("<unused94>thought>[\\s\\S]*?<unused95>"), "")
                     .replace("<unused94>", "").replace("<unused95>", "")
                     .replace("thought>", "").trim()
-                "[${fmt.format(java.util.Date(d.generatedAt))}][${d.scope}] ${cleanDiag.take(500)}"
+                "${fmt.format(java.util.Date(d.generatedAt))} ${d.scope}: ${cleanDiag.take(DIAG_IN_PROMPT_MAX)}${if (cleanDiag.length > DIAG_IN_PROMPT_MAX) "…" else ""}"
             }
-        } else "No prior diagnoses."
+        } else "None."
 
-        return """You are a specialist AI medical assistant. A clinician is consulting you about the following patient. Answer their questions using the patient's medical records.
+        val fullEntryBlock = if (entries.isNotEmpty()) {
+            entries.sortedBy { it.createdAt }.joinToString("\n\n---\n\n") { e ->
+                val ai = if (e.analysisResult.isNotBlank()) {
+                    "\nImaging/AI: ${e.analysisResult.take(ENTRY_FIELD_MAX)}"
+                } else ""
+                val headline = if (e.visitSummary.isNotBlank()) "\nHeadline: ${e.visitSummary}\n" else ""
+                "${fmt.format(java.util.Date(e.createdAt))} [${e.entryType}] ${e.title}$headline${e.content.take(ENTRY_FIELD_MAX)}$ai"
+            }
+        } else "(No entries.)"
 
-PATIENT INFORMATION:
+        return """Clinical assistant. Chart below is the only source; no filler intros. Markdown OK.
+
+For progress/course/timeline: write a thorough narrative (multiple paragraphs if needed), cite dates and entry types in prose—avoid a separate boilerplate section titled "Each visit" unless the user explicitly asks for visit-by-visit bullets.
+
+PATIENT
 $patientInfo
 
-MEDICAL ENTRIES (${entries.size} entries, oldest→newest):
-$entrySummary
+ENTRIES (${entries.size}, oldest→newest)
+$fullEntryBlock
 
-RECENT DIAGNOSES:
-$diagSummary
+SAVED IMPRESSIONS (may be incomplete vs entries)
+$diagSummary"""
+    }
 
-Instructions:
-- Answer questions specifically about this patient using their records
-- Cite specific entries/dates when referencing data
-- If asked about something not in the records, say so
-- Be clinically precise and concise
-- Format responses in Markdown. Do not wrap your response in a code block."""
+    /**
+     * Tiny questions answered from Room only. Progress/course always goes through the model with full chart.
+     */
+    private suspend fun maybeInstantPatientReply(
+        patientId: Long,
+        cachedEntryCount: Int,
+        userMessage: String,
+    ): String? {
+        val n = userMessage.lowercase().trim()
+        if (n.length > 160) return null
+
+        val needsReasoning = listOf(
+            "progress", "summary", "diagnosis", "diagnose", "analyze", "analysis", "compare", "trend",
+            "prognosis", "recommend", "should ", "x-ray", "xray", "image", "finding", "interpret",
+            "worse", "better", "improving", "treatment plan", "what happened", "timeline", "course",
+            "condition", "symptom", "why ", "how did", "explain"
+        )
+        if (needsReasoning.any { n.contains(it) }) return null
+
+        if (Regex("""\b(how many entries|how many notes|number of entries|entry count|how many visits)\b""").containsMatchIn(n)) {
+            return "### Chart snapshot\n- **Medical entries on file:** $cachedEntryCount"
+        }
+
+        val identityCue = Regex(
+            """\b(who is|who's|what patient|which patient|patient name|identify the patient|patient id|patient details?|demographics|tell me about (this )?patient|describe (this )?patient|who am i looking at|what patient is this)\b"""
+        )
+        if (!identityCue.containsMatchIn(n)) return null
+
+        val db = com.google.mediapipe.examples.llminference.data.MedicalDatabase.getDatabase(appContext)
+        val p = db.patientDao().getPatientSync(patientId) ?: return null
+        return formatPatientSnapshotMarkdown(p)
+    }
+
+    private fun formatPatientSnapshotMarkdown(
+        p: com.google.mediapipe.examples.llminference.data.PatientEntity
+    ): String {
+        return buildString {
+            appendLine("### Patient profile *(from records)*")
+            appendLine("- **Name:** ${p.name}")
+            if (p.medicalRecordNumber.isNotBlank()) appendLine("- **MRN:** ${p.medicalRecordNumber}")
+            if (p.dateOfBirth.isNotBlank()) appendLine("- **DOB:** ${p.dateOfBirth}")
+            if (p.gender.isNotBlank()) appendLine("- **Gender:** ${p.gender}")
+            if (p.bloodGroup.isNotBlank()) appendLine("- **Blood group:** ${p.bloodGroup}")
+            if (p.phoneNumber.isNotBlank()) appendLine("- **Phone:** ${p.phoneNumber}")
+            if (p.email.isNotBlank()) appendLine("- **Email:** ${p.email}")
+            if (p.address.isNotBlank()) appendLine("- **Address:** ${p.address}")
+            if (p.allergies.isNotBlank()) appendLine("- **Allergies:** ${p.allergies}")
+            if (p.notes.isNotBlank()) appendLine("- **Notes:** ${p.notes}")
+            appendLine()
+            appendLine("*For imaging detail or non-English replies, use Language Extension or ask a focused question — on-device AI may take longer.*")
+        }
+    }
+
+    /** Strong output-language hint read fresh each send (sidebar preference). */
+    private fun buildReplyLanguageInstruction(context: Context): String {
+        return when (LocalModelFiles.normalizedLanguageExtensionKey(context)) {
+            "telugu" -> """
+
+OUTPUT LANGUAGE (mandatory): Write the entire reply in Telugu script. Use Telugu for all explanations, headings, lists, and summaries. Do not write narrative sentences in English. International drug names or standard abbreviations (e.g. mg, BP) may stay in Latin script when conventional.
+"""
+            "hindi" -> """
+
+OUTPUT LANGUAGE (mandatory): Write the entire reply in Hindi using Devanagari script for all narrative, headings, and bullets. Do not write explanations in English. Drug names may remain in Latin when standard.
+"""
+            else -> ""
+        }
     }
 
     fun sendMessage(userMessage: String, userImages: List<Bitmap>) {
@@ -135,12 +203,89 @@ Instructions:
             setInputEnabled(false)
             _isGenerating.value = true
             try {
-                // Prepend patient context to the prompt if available
-                val contextualPrompt = _patientContext.value?.let { ctx ->
-                    "${ctx.systemPrompt}\n\nDoctor's question: $userMessage"
-                } ?: userMessage
+                val ctx = _patientContext.value
+                val thinkingOn = _thinkingEnabled.value
+                if (ctx != null && userImages.isEmpty()) {
+                    val db = com.google.mediapipe.examples.llminference.data.MedicalDatabase.getDatabase(appContext)
+                    val entries =
+                        db.medicalEntryDao().getEntriesForPatientSync(ctx.patientId)
+                    val instant = maybeInstantPatientReply(
+                        ctx.patientId,
+                        ctx.entryCount,
+                        userMessage
+                    )
+                    if (instant != null) {
+                        android.util.Log.i("ChatViewModel", "Instant DB reply (no LLM), chars=${instant.length}")
+                        _uiState.value.appendMessage(instant)
+                        return@launch
+                    }
 
-                val future = inferenceModel.generateResponseAsync(contextualPrompt, userImages) { partialResult, isDone ->
+                    val patient = db.patientDao().getPatientSync(ctx.patientId)
+                    if (patient != null) {
+                        val langBlock = buildReplyLanguageInstruction(appContext)
+                        val diagnoses = db.diagnosisDao().getLatestDiagnoses(ctx.patientId, 3)
+                        val longitudinal =
+                            PatientChartPrompt.wantsLongitudinalQuestion(userMessage)
+                        val body = buildPatientSystemPrompt(patient, entries, diagnoses)
+                        val contextualPrompt = "$body$langBlock\n\nCurrent request: $userMessage"
+                        val maxOut =
+                            if (longitudinal) PATIENT_LONG_FORM_MAX_TOKENS else PATIENT_TEXT_MAX_TOKENS
+                        val future = inferenceModel.generateResponseAsync(
+                            contextualPrompt,
+                            userImages,
+                            maxPredictTokens = maxOut,
+                            forceSkipThinkingForRequest = !longitudinal,
+                        ) { partialResult, isDone ->
+                            if (!isDone && partialResult.isNotEmpty()) {
+                                _uiState.value.appendMessage(partialResult)
+                            }
+                        }
+                        currentFuture = future
+                        future.get()
+                        return@launch
+                    }
+                }
+
+                val langBlock = buildReplyLanguageInstruction(appContext)
+                val contextualPrompt =
+                    if (ctx != null && userImages.isNotEmpty()) {
+                        val db = com.google.mediapipe.examples.llminference.data.MedicalDatabase.getDatabase(appContext)
+                        val patient = db.patientDao().getPatientSync(ctx.patientId)
+                        val entries = db.medicalEntryDao().getEntriesForPatientSync(ctx.patientId)
+                        val diagnoses = db.diagnosisDao().getLatestDiagnoses(ctx.patientId, 3)
+                        if (patient != null) {
+                            val body = buildPatientSystemPrompt(patient, entries, diagnoses)
+                            "$body$langBlock\n\nCurrent request: $userMessage"
+                        } else {
+                            buildString {
+                                if (langBlock.isNotBlank()) append(langBlock).append("\n\n")
+                                if (!thinkingOn) append(GENERAL_DIRECT_ONLY_PREFIX)
+                                append(userMessage)
+                            }.toString()
+                        }
+                    } else {
+                        buildString {
+                            if (langBlock.isNotBlank()) append(langBlock).append("\n\n")
+                            if (ctx == null && !thinkingOn) append(GENERAL_DIRECT_ONLY_PREFIX)
+                            append(userMessage)
+                        }.toString()
+                    }
+
+                val patientTextOnly = ctx != null && userImages.isEmpty()
+                val longitudinal =
+                    patientTextOnly && PatientChartPrompt.wantsLongitudinalQuestion(userMessage)
+                val maxOut = when {
+                    longitudinal -> PATIENT_LONG_FORM_MAX_TOKENS
+                    patientTextOnly -> PATIENT_TEXT_MAX_TOKENS
+                    else -> DEFAULT_CHAT_MAX_TOKENS
+                }
+
+                val future = inferenceModel.generateResponseAsync(
+                    contextualPrompt,
+                    userImages,
+                    maxPredictTokens = maxOut,
+                    forceSkipThinkingForRequest = !thinkingOn,
+                ) { partialResult, isDone ->
                     if (!isDone && partialResult.isNotEmpty()) {
                         _uiState.value.appendMessage(partialResult)
                     }
@@ -177,6 +322,28 @@ Instructions:
     }
 
     companion object {
+        /** Enough text per entry field for CXR narratives. */
+        private const val ENTRY_FIELD_MAX = 3500
+
+        /** Cap patient problem list in system prompt to save context for entries + answer. */
+        private const val PATIENT_NOTES_IN_PROMPT_MAX = 900
+
+        /** Cap each saved diagnosis line in the prompt. */
+        private const val DIAG_IN_PROMPT_MAX = 650
+
+        /** Short answers (quick facts). */
+        private const val PATIENT_TEXT_MAX_TOKENS = 512
+
+        /** Progress / timeline / summary questions — room for a full narrative. */
+        private const val PATIENT_LONG_FORM_MAX_TOKENS = 896
+
+        /** Extra hint for general AI chat when thinking mode is off (native skip + UX). */
+        private const val GENERAL_DIRECT_ONLY_PREFIX =
+            "Instructions: Give the answer directly only. Do not print a \"Thinking process\", chain-of-thought, numbered planning steps, or meta preamble before the substantive reply.\n\n"
+
+        /** Default max output tokens when user attaches images or general chat. */
+        private const val DEFAULT_CHAT_MAX_TOKENS = 1024
+
         fun getFactory(patientId: Long? = null) = object : ViewModelProvider.Factory {
             override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
                 val application = extras[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY]!!
@@ -197,5 +364,4 @@ data class PatientChatContext(
     val patientId: Long,
     val patientName: String,
     val entryCount: Int,
-    val systemPrompt: String
 )
