@@ -337,9 +337,11 @@ OUTPUT LANGUAGE (mandatory): Write the entire reply in Hindi using Devanagari sc
         /** Progress / timeline / summary questions — room for a full narrative. */
         private const val PATIENT_LONG_FORM_MAX_TOKENS = 896
 
-        /** Extra hint for general AI chat when thinking mode is off (native skip + UX). */
+        /**
+         * Applied on every general-chat turn when thinking is off (including follow-ups like "explain more").
+         */
         private const val GENERAL_DIRECT_ONLY_PREFIX =
-            "Instructions: Give the answer directly only. Do not print a \"Thinking process\", chain-of-thought, numbered planning steps, or meta preamble before the substantive reply.\n\n"
+            "Instructions: Write only the user-facing answer. Do not start with \"Okay,\", \"I need to\", \"I should cover\", \"Let me\", planning outlines, or numbered meta steps before the content—even on follow-up questions. Begin with the explanation itself (paragraphs or bullets).\n\n"
 
         /** Default max output tokens when user attaches images or general chat. */
         private const val DEFAULT_CHAT_MAX_TOKENS = 1024

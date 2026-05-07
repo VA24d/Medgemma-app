@@ -42,6 +42,7 @@ data class ChatMessage(
                 cleaned = cleaned.removePrefix("<think>").trim()
             }
             cleaned = ChatMessage.stripPlaintextThinkingProcessSection(cleaned)
+            cleaned = ChatMessage.stripAssistantPlanningNoise(cleaned)
             return cleaned
         }
     val isFromUser: Boolean
@@ -64,6 +65,49 @@ data class ChatMessage(
                 s = s.removeRange(m.range).trimStart()
             }
             return s.trim()
+        }
+
+        /**
+         * Removes **planning / chain-of-thought** openers ("Okay, I need to provide…", "I should cover…")
+         * at the **start** of a reply. Does **not** remove normal pleasantries like "Okay, Bhaskar! I can
+         * explain…" (no "I need to" / cover-thesis phrasing).
+         * Also drops lone outline index lines ("4.") and trailing `].` decode garbage.
+         */
+        internal fun stripAssistantPlanningNoise(text: String): String {
+            var s = text.trimEnd()
+            s = s.replace(Regex("""\]\s*\.?\s*$"""), "").trimEnd()
+
+            val lines = s.lines().toMutableList()
+            // Only strong planning markers (follow-up turns often leak these, not the friendly "Okay, name!" line).
+            val planningLine = listOf(
+                Regex("""(?i)^okay,\s*i\s+need\s+to\b"""),
+                Regex("""(?i)^i\s+need\s+to\s+(provide|explain|cover|write|give|break|clarify|describe|answer|list|detail|go through|begin|break down|start by|keep)\b"""),
+                Regex("""(?i)^i\s+should\s+cover\b"""),
+                Regex("""(?i)^i\s+should\s+start\s+by\s+(outlining|explaining|listing|with)\b"""),
+                Regex("""(?i)^let me(?:\s+first)?\s+(start|explain|break|walk|clarify|outline|list|see if i)\b"""),
+                Regex("""(?i)^here'?s (what|how) i(\s+will|\s+need to|\s+am going to|\s+should|\s+plan to)\b"""),
+                Regex("""(?i)^first,\s+i\s+(need\s+to|should|will|am going to)\b"""),
+                Regex("""(?i)^i(\s+am)?\s+going to\s+(provide|explain|cover|break|walk|start)\b"""),
+            )
+            var guard = 0
+            while (lines.isNotEmpty() && guard++ < 24) {
+                val line = lines.first().trim()
+                if (line.isEmpty()) {
+                    lines.removeAt(0)
+                    continue
+                }
+                if (line.matches(Regex("""^\d+\.\s*$"""))) {
+                    lines.removeAt(0)
+                    continue
+                }
+                val isPlanning = planningLine.any { it.containsMatchIn(line) }
+                if (isPlanning) {
+                    lines.removeAt(0)
+                    continue
+                }
+                break
+            }
+            return lines.joinToString("\n").trim()
         }
     }
 }
