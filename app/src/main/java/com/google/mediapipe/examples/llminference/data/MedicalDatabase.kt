@@ -15,7 +15,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
         MedicalEntryEntity::class,
         DiagnosisEntity::class
     ],
-    version = 4,
+    version = 5,
     exportSchema = false
 )
 abstract class MedicalDatabase : RoomDatabase() {
@@ -37,6 +37,14 @@ abstract class MedicalDatabase : RoomDatabase() {
             }
         }
 
+        private val MIGRATION_4_5 = object : Migration(4, 5) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    "ALTER TABLE medical_entries ADD COLUMN cloudProcessedAt INTEGER NOT NULL DEFAULT 0"
+                )
+            }
+        }
+
         fun getDatabase(context: Context): MedicalDatabase {
             return INSTANCE ?: synchronized(this) {
                 val instance = Room.databaseBuilder(
@@ -44,7 +52,7 @@ abstract class MedicalDatabase : RoomDatabase() {
                     MedicalDatabase::class.java,
                     "medical_database"
                 )
-                    .addMigrations(MIGRATION_3_4)
+                    .addMigrations(MIGRATION_3_4, MIGRATION_4_5)
                     .fallbackToDestructiveMigration()
                     .build()
                 INSTANCE = instance

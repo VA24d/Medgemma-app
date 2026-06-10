@@ -13,6 +13,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Article
 import androidx.compose.material.icons.automirrored.filled.NoteAdd
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.filled.CloudUpload
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -43,7 +44,8 @@ fun PatientDetailScreen(
     onEntryClick: (Long) -> Unit,
     onEdit: (Long) -> Unit,
     onDelete: () -> Unit = {},
-    onChatAboutPatient: (Long) -> Unit = {}
+    onChatAboutPatient: (Long) -> Unit = {},
+    onCloudAnalysis: (Long) -> Unit = {},
 ) {
     val context = LocalContext.current
     val view = LocalView.current
@@ -205,7 +207,6 @@ fun PatientDetailScreen(
                 }
             }
 
-            // Chat about patient button
             item {
                 Button(
                     onClick = {
@@ -221,6 +222,20 @@ fun PatientDetailScreen(
                     Icon(Icons.Default.Psychology, null, modifier = Modifier.size(18.dp))
                     Spacer(modifier = Modifier.width(8.dp))
                     Text("Ask AI about this patient")
+                }
+            }
+
+            item {
+                OutlinedButton(
+                    onClick = {
+                        view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
+                        onCloudAnalysis(patientId)
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Icon(Icons.Default.CloudUpload, null, modifier = Modifier.size(18.dp))
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Cloud analysis (GPU)")
                 }
             }
 

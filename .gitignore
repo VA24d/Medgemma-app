@@ -33,6 +33,12 @@ proguard/
 *.log
 build_log.txt
 
+# Edge companion local data
+edge-companion/data/
+edge-companion/web/node_modules/
+__pycache__/
+*.pyc
+
 # Backup files
 *.bak
 *.orig

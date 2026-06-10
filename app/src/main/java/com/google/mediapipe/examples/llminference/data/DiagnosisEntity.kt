@@ -8,8 +8,9 @@ import androidx.room.PrimaryKey
 /**
  * Persisted AI-generated diagnosis for a patient.
  *
- * [scope] = "FULL"        — generated from all entries
+ * [scope] = "FULL"        — generated from all entries (on-device)
  * [scope] = "INCREMENTAL" — generated from entries added since the previous diagnosis
+ * [scope] = "CLOUD_FULL"  — longitudinal synthesis from edge companion GPU enrichment
  */
 @Entity(
     tableName = "diagnoses",

@@ -20,11 +20,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import com.google.mediapipe.examples.llminference.network.EdgeCompanionClient
+import com.google.mediapipe.examples.llminference.sync.ChartSyncManager
 import com.google.mediapipe.examples.llminference.settings.AppPreferences
 import com.google.mediapipe.examples.llminference.settings.TokenManager
 import com.google.mediapipe.examples.llminference.settings.LocalModelFiles
 import com.google.mediapipe.examples.llminference.ui.theme.AppTheme
 import com.google.mediapipe.examples.llminference.ui.theme.ThemeManager
+import kotlinx.coroutines.launch
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.text.input.KeyboardType
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -36,9 +41,11 @@ fun NavigationSidebar(
     onSignOut: () -> Unit,
     onChangePin: () -> Unit,
     onExportFhir: () -> Unit,
+    onProcessAllOnCloud: () -> Unit = {},
     onDeleteAllData: () -> Unit
 ) {
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
     val prefs = remember { AppPreferences(context) }
     val tokenManager = remember { TokenManager(context) }
 
@@ -58,6 +65,32 @@ fun NavigationSidebar(
     var showLanguageDialog by remember { mutableStateOf(false) }
     var showDeleteConfirm by remember { mutableStateOf(false) }
     var showEncryptionDialog by remember { mutableStateOf(false) }
+    var showCloudDialog by remember { mutableStateOf(false) }
+    var cloudMode by remember { mutableStateOf(LocalModelFiles.getCloudConnectionMode(context)) }
+    var cloudWifiUrl by remember { mutableStateOf(LocalModelFiles.getCloudServerUrlWifi(context)) }
+    var cloudUsbUrl by remember { mutableStateOf(LocalModelFiles.getCloudServerUrlUsb(context)) }
+    var cloudModel by remember { mutableStateOf(LocalModelFiles.getCloudModelName(context)) }
+    var cloudTestStatus by remember { mutableStateOf("") }
+    var lastSyncLabel by remember { mutableStateOf("") }
+    var syncStatus by remember { mutableStateOf("") }
+    var nightBatchEnabled by remember { mutableStateOf(true) }
+    var nightBatchStatus by remember { mutableStateOf("") }
+
+    LaunchedEffect(isOpen) {
+        if (isOpen) {
+            val at = LocalModelFiles.getLastSyncAt(context)
+            lastSyncLabel = if (at > 0) {
+                java.text.SimpleDateFormat("MMM d, HH:mm", java.util.Locale.getDefault())
+                    .format(java.util.Date(at))
+            } else "Never"
+            EdgeCompanionClient.getSettings(context).onSuccess { s ->
+                nightBatchEnabled = s.nightBatchEnabled
+                nightBatchStatus = if (s.nightBatchEnabled) {
+                    "On ${s.nightStartHour}:00–${s.nightEndHour}:00"
+                } else "Off"
+            }
+        }
+    }
 
     if (!isOpen) return
 
@@ -163,6 +196,59 @@ fun NavigationSidebar(
 
             HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
 
+            // ── Edge cloud (laptop GPU) ──
+            SidebarSection("Edge Cloud (GPU)")
+            SidebarItem(
+                icon = Icons.Default.CloudUpload,
+                title = "Cloud server settings",
+                subtitle = if (cloudMode == LocalModelFiles.CLOUD_MODE_USB) "USB" else "Wi-Fi",
+                onClick = { showCloudDialog = true }
+            )
+            SidebarItem(
+                icon = Icons.Default.Cloud,
+                title = "Process all on cloud",
+                subtitle = "Enrich every patient chart",
+                onClick = {
+                    onClose()
+                    onProcessAllOnCloud()
+                }
+            )
+            SidebarItem(
+                icon = Icons.Default.Sync,
+                title = "Sync with laptop",
+                subtitle = if (syncStatus.isNotBlank()) syncStatus else "Last: $lastSyncLabel",
+                onClick = {
+                    scope.launch {
+                        syncStatus = "Syncing…"
+                        val r = ChartSyncManager.syncIfEnabled(context)
+                        syncStatus = if (r.success) "Synced" else r.message
+                        lastSyncLabel = java.text.SimpleDateFormat("MMM d, HH:mm", java.util.Locale.getDefault())
+                            .format(java.util.Date(LocalModelFiles.getLastSyncAt(context)))
+                    }
+                }
+            )
+            SidebarItem(
+                icon = Icons.Default.Nightlight,
+                title = "Night GPU batch (laptop)",
+                subtitle = if (nightBatchStatus.isNotBlank()) nightBatchStatus
+                else if (nightBatchEnabled) "On — laptop must stay awake" else "Off",
+                onClick = {
+                    scope.launch {
+                        val next = !nightBatchEnabled
+                        nightBatchStatus = "Updating…"
+                        EdgeCompanionClient.setNightBatchEnabled(context, next).fold(
+                            onSuccess = {
+                                nightBatchEnabled = next
+                                nightBatchStatus = if (next) "On (laptop + start.ps1)" else "Off"
+                            },
+                            onFailure = { nightBatchStatus = it.message ?: "Failed" },
+                        )
+                    }
+                }
+            )
+
+            HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+
             // ── Performance ──
             SidebarSection("Performance")
             SidebarItem(
@@ -248,6 +334,119 @@ fun NavigationSidebar(
     }
 
     // ── Dialogs ──
+
+    LaunchedEffect(showCloudDialog) {
+        if (showCloudDialog) {
+            EdgeCompanionClient.getSettings(context).onSuccess { s ->
+                nightBatchEnabled = s.nightBatchEnabled
+            }
+        }
+    }
+
+    if (showCloudDialog) {
+        AlertDialog(
+            onDismissRequest = { showCloudDialog = false },
+            title = { Text("Edge Cloud Server") },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text("Connection", style = MaterialTheme.typography.labelMedium)
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        FilterChip(
+                            selected = cloudMode == LocalModelFiles.CLOUD_MODE_USB,
+                            onClick = { cloudMode = LocalModelFiles.CLOUD_MODE_USB },
+                            label = { Text("USB") },
+                        )
+                        FilterChip(
+                            selected = cloudMode == LocalModelFiles.CLOUD_MODE_WIFI,
+                            onClick = { cloudMode = LocalModelFiles.CLOUD_MODE_WIFI },
+                            label = { Text("Wi-Fi") },
+                        )
+                    }
+                    OutlinedTextField(
+                        value = cloudUsbUrl,
+                        onValueChange = { cloudUsbUrl = it },
+                        label = { Text("USB URL (adb reverse)") },
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                    OutlinedTextField(
+                        value = cloudWifiUrl,
+                        onValueChange = { cloudWifiUrl = it },
+                        label = { Text("Wi-Fi URL") },
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri),
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                    OutlinedTextField(
+                        value = cloudModel,
+                        onValueChange = { cloudModel = it },
+                        label = { Text("Ollama model") },
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                    if (cloudTestStatus.isNotBlank()) {
+                        Text(cloudTestStatus, style = MaterialTheme.typography.bodySmall)
+                    }
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text("Night GPU batch", style = MaterialTheme.typography.labelMedium)
+                            Text(
+                                "Only while laptop is on and start.ps1 is running",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                        Switch(
+                            checked = nightBatchEnabled,
+                            onCheckedChange = { enabled ->
+                                nightBatchEnabled = enabled
+                                scope.launch {
+                                    EdgeCompanionClient.setNightBatchEnabled(context, enabled)
+                                }
+                            },
+                        )
+                    }
+                    Text(
+                        "Laptop: run edge-companion\\start.ps1 — web at http://localhost:8787/patients",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    LocalModelFiles.setCloudConnectionMode(context, cloudMode)
+                    LocalModelFiles.setCloudServerUrlUsb(context, cloudUsbUrl)
+                    LocalModelFiles.setCloudServerUrlWifi(context, cloudWifiUrl)
+                    LocalModelFiles.setCloudModelName(context, cloudModel)
+                    showCloudDialog = false
+                }) { Text("Save") }
+            },
+            dismissButton = {
+                Row {
+                    TextButton(onClick = {
+                        scope.launch {
+                            cloudTestStatus = "Testing…"
+                            LocalModelFiles.setCloudConnectionMode(context, cloudMode)
+                            LocalModelFiles.setCloudServerUrlUsb(context, cloudUsbUrl)
+                            LocalModelFiles.setCloudServerUrlWifi(context, cloudWifiUrl)
+                            when (val h = EdgeCompanionClient.health(context)) {
+                                is EdgeCompanionClient.HealthResult.Ok ->
+                                    cloudTestStatus = if (h.ollamaOk) "Connected ✓" else "Companion OK, Ollama down"
+                                is EdgeCompanionClient.HealthResult.Error ->
+                                    cloudTestStatus = h.message
+                            }
+                        }
+                    }) { Text("Test") }
+                    TextButton(onClick = { showCloudDialog = false }) { Text("Cancel") }
+                }
+            },
+        )
+    }
 
     // Theme picker
     if (showThemeDialog) {

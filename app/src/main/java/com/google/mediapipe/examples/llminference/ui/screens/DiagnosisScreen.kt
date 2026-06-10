@@ -213,7 +213,8 @@ Format in Markdown. Reference changes explicitly. Do not wrap your response in a
 @Composable
 fun DiagnosisScreen(
     patientId: Long,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    onCloudEnrich: (Long) -> Unit = {},
 ) {
     val context = LocalContext.current
     val view = LocalView.current
@@ -421,7 +422,11 @@ fun DiagnosisScreen(
                         onGenerateIncremental = {
                             view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
                             runGeneration(true)
-                        }
+                        },
+                        onCloudEnrich = {
+                            view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
+                            onCloudEnrich(patientId)
+                        },
                     )
                 }
             }
@@ -599,7 +604,8 @@ private fun GenerateActionsCard(
     entriesCount: Int,
     latestDiagnosis: DiagnosisEntity?,
     onGenerateFull: () -> Unit,
-    onGenerateIncremental: () -> Unit
+    onGenerateIncremental: () -> Unit,
+    onCloudEnrich: () -> Unit = {},
 ) {
     val latestDate = latestDiagnosis?.let {
         SimpleDateFormat("MMM d, yyyy HH:mm", Locale.getDefault()).format(Date(it.generatedAt))
@@ -637,6 +643,15 @@ private fun GenerateActionsCard(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     fontStyle = FontStyle.Italic
                 )
+            }
+            OutlinedButton(
+                onClick = onCloudEnrich,
+                modifier = Modifier.fillMaxWidth(),
+                enabled = entriesCount > 0,
+            ) {
+                Icon(Icons.Default.CloudUpload, null, modifier = Modifier.size(18.dp))
+                Spacer(Modifier.width(8.dp))
+                Text("Enrich on cloud GPU")
             }
         }
     }

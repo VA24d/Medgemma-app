@@ -8,6 +8,7 @@ import android.os.Environment
 import android.provider.Settings
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.lifecycle.lifecycleScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -21,9 +22,12 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.google.mediapipe.examples.llminference.settings.AppPreferences
+import com.google.mediapipe.examples.llminference.cloud.CloudChartProcessor
 import com.google.mediapipe.examples.llminference.ui.screens.*
 import com.google.mediapipe.examples.llminference.ui.components.NavigationSidebar
+import com.google.mediapipe.examples.llminference.sync.ChartSyncManager
 import com.google.mediapipe.examples.llminference.ui.theme.LLMInferenceTheme
+import com.google.mediapipe.examples.llminference.worker.SyncWorker
 
 // Navigation routes
 const val SPLASH_SCREEN = "splash"
@@ -44,6 +48,7 @@ const val LOAD_SCREEN = "load_screen"
 const val CHAT_SCREEN = "chat_screen"
 const val PATIENT_CHAT_SCREEN = "patient_chat/{patientId}"
 const val HF_LOGIN_SCREEN = "hf_login"
+const val CLOUD_ANALYSIS_SCREEN = "cloud_analysis/{patientId}"
 
 class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalMaterial3Api::class)
@@ -63,6 +68,8 @@ class MainActivity : ComponentActivity() {
                 startActivity(Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION))
             }
         }
+
+        SyncWorker.syncSchedule(applicationContext)
 
         setContent {
             val prefs = remember { AppPreferences(applicationContext) }
@@ -117,6 +124,10 @@ class MainActivity : ComponentActivity() {
                                             onComplete = { /* Toast handled in manager */ }
                                         )
                                     }
+                                },
+                                onProcessAllOnCloud = {
+                                    scope.launch { drawerState.close() }
+                                    navController.navigate("cloud_analysis/-1")
                                 },
                                 onDeleteAllData = {
                                     scope.launch(Dispatchers.IO) {
@@ -183,8 +194,10 @@ class MainActivity : ComponentActivity() {
                                         navController.navigate(ADD_PATIENT_SCREEN)
                                     },
                                     onQuickAnalysis = {
-                                        // Quick analysis goes to model loading then chat
                                         navController.navigate(START_SCREEN)
+                                    },
+                                    onCloudProcessAll = {
+                                        navController.navigate("cloud_analysis/-1")
                                     },
                                     onOpenSidebar = {
                                         scope.launch { drawerState.open() }
@@ -248,7 +261,22 @@ class MainActivity : ComponentActivity() {
                                     },
                                     onChatAboutPatient = { id ->
                                         navController.navigate("patient_chat/$id")
+                                    },
+                                    onCloudAnalysis = { id ->
+                                        navController.navigate("cloud_analysis/$id")
                                     }
+                                )
+                            }
+
+                            composable(
+                                CLOUD_ANALYSIS_SCREEN,
+                                arguments = listOf(navArgument("patientId") { type = NavType.LongType })
+                            ) { backStackEntry ->
+                                val cloudPatientId = backStackEntry.arguments?.getLong("patientId")
+                                    ?: CloudChartProcessor.ALL_PATIENTS_ID
+                                CloudAnalysisScreen(
+                                    patientId = cloudPatientId,
+                                    onBack = { navController.popBackStack() },
                                 )
                             }
 
@@ -360,7 +388,10 @@ class MainActivity : ComponentActivity() {
                                 val patientId = backStackEntry.arguments?.getLong("patientId") ?: return@composable
                                 DiagnosisScreen(
                                     patientId = patientId,
-                                    onBack = { navController.popBackStack() }
+                                    onBack = { navController.popBackStack() },
+                                    onCloudEnrich = { id ->
+                                        navController.navigate("cloud_analysis/$id")
+                                    },
                                 )
                             }
 
@@ -433,6 +464,13 @@ class MainActivity : ComponentActivity() {
                     }
                 }
             }
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        lifecycleScope.launch(Dispatchers.IO) {
+            ChartSyncManager.syncIfEnabled(applicationContext)
         }
     }
 }

@@ -32,6 +32,8 @@ data class MedicalEntryEntity(
     /** One or two sentences for fast longitudinal prompts (hand-written or synced). */
     val visitSummary: String = "",
     val status: String = "pending", // pending, analyzed, reviewed
+    /** Epoch ms when last enriched by edge companion; 0 = never. */
+    val cloudProcessedAt: Long = 0,
     val createdAt: Long = System.currentTimeMillis(),
     val updatedAt: Long = System.currentTimeMillis()
 )

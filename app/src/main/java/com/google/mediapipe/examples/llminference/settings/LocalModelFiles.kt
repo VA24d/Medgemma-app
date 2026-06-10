@@ -17,6 +17,17 @@ object LocalModelFiles {
     private const val KEY_SCHEDULED_PROGNOSIS = "scheduled_prognosis_enabled"
     private const val KEY_SCHEDULE_HOUR = "schedule_hour"
     private const val KEY_SCHEDULE_MINUTE = "schedule_minute"
+    private const val KEY_CLOUD_MODE = "cloud_connection_mode"
+    private const val KEY_CLOUD_URL_WIFI = "cloud_server_url_wifi"
+    private const val KEY_CLOUD_URL_USB = "cloud_server_url_usb"
+    private const val KEY_CLOUD_MODEL = "cloud_model_name"
+    private const val KEY_CLOUD_ENABLED = "cloud_enabled"
+    private const val KEY_AUTO_SYNC = "auto_sync_enabled"
+    private const val KEY_LAST_SYNC_CURSOR = "last_sync_cursor"
+    private const val KEY_LAST_SYNC_AT = "last_sync_at"
+
+    const val CLOUD_MODE_USB = "USB"
+    const val CLOUD_MODE_WIFI = "WIFI"
 
     private fun prefs(context: Context) =
         context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
@@ -91,6 +102,62 @@ object LocalModelFiles {
 
     fun setScheduleTime(context: Context, hour: Int, minute: Int) {
         prefs(context).edit().putInt(KEY_SCHEDULE_HOUR, hour).putInt(KEY_SCHEDULE_MINUTE, minute).apply()
+    }
+
+    fun getCloudConnectionMode(context: Context): String =
+        prefs(context).getString(KEY_CLOUD_MODE, CLOUD_MODE_USB) ?: CLOUD_MODE_USB
+
+    fun setCloudConnectionMode(context: Context, mode: String) {
+        prefs(context).edit().putString(KEY_CLOUD_MODE, mode).apply()
+    }
+
+    fun getCloudServerUrlWifi(context: Context): String =
+        prefs(context).getString(KEY_CLOUD_URL_WIFI, "http://10.163.156.58:8787") ?: "http://10.163.156.58:8787"
+
+    fun setCloudServerUrlWifi(context: Context, url: String) {
+        prefs(context).edit().putString(KEY_CLOUD_URL_WIFI, url.trim()).apply()
+    }
+
+    fun getCloudServerUrlUsb(context: Context): String =
+        prefs(context).getString(KEY_CLOUD_URL_USB, "http://127.0.0.1:8787") ?: "http://127.0.0.1:8787"
+
+    fun setCloudServerUrlUsb(context: Context, url: String) {
+        prefs(context).edit().putString(KEY_CLOUD_URL_USB, url.trim()).apply()
+    }
+
+    fun getCloudModelName(context: Context): String =
+        prefs(context).getString(KEY_CLOUD_MODEL, "MedGemma1.5:latest") ?: "MedGemma1.5:latest"
+
+    fun setCloudModelName(context: Context, name: String) {
+        prefs(context).edit().putString(KEY_CLOUD_MODEL, name.trim()).apply()
+    }
+
+    fun isCloudEnabled(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_CLOUD_ENABLED, true)
+
+    fun setCloudEnabled(context: Context, enabled: Boolean) {
+        prefs(context).edit().putBoolean(KEY_CLOUD_ENABLED, enabled).apply()
+    }
+
+    fun isAutoSyncEnabled(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_AUTO_SYNC, true)
+
+    fun setAutoSyncEnabled(context: Context, enabled: Boolean) {
+        prefs(context).edit().putBoolean(KEY_AUTO_SYNC, enabled).apply()
+    }
+
+    fun getLastSyncCursor(context: Context): Long =
+        prefs(context).getLong(KEY_LAST_SYNC_CURSOR, 0)
+
+    fun setLastSyncCursor(context: Context, cursor: Long) {
+        prefs(context).edit().putLong(KEY_LAST_SYNC_CURSOR, cursor).apply()
+    }
+
+    fun getLastSyncAt(context: Context): Long =
+        prefs(context).getLong(KEY_LAST_SYNC_AT, 0)
+
+    fun setLastSyncAt(context: Context, at: Long) {
+        prefs(context).edit().putLong(KEY_LAST_SYNC_AT, at).apply()
     }
 
     fun displayName(context: Context, uri: Uri): String {

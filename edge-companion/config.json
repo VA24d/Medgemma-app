@@ -1,0 +1,10 @@
+{
+  "default_model": "MedGemma1.5:latest",
+  "night_batch_enabled": true,
+  "night_start_hour": 0,
+  "night_start_minute": 0,
+  "night_end_hour": 2,
+  "night_end_minute": 0,
+  "night_skip_on_battery": true,
+  "auto_sync": true
+}

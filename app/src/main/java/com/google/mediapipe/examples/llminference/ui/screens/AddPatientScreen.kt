@@ -108,6 +108,7 @@ fun AddPatientScreen(
                 if (patientIdToEdit != null) { db.patientDao().updatePatient(patient); patientIdToEdit }
                 else db.patientDao().insertPatient(patient)
             }
+            com.google.mediapipe.examples.llminference.sync.ChartSyncManager.syncIfEnabled(context)
             isSaving = false; onPatientAdded(id)
         }
     }

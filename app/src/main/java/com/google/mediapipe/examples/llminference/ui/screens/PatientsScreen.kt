@@ -10,6 +10,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.filled.CloudUpload
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -28,6 +29,7 @@ fun PatientsScreen(
     onPatientClick: (Long) -> Unit,
     onNewPatient: () -> Unit,
     onQuickAnalysis: () -> Unit,
+    onCloudProcessAll: () -> Unit = {},
     onOpenSidebar: () -> Unit
 ) {
     val context = LocalContext.current
@@ -155,6 +157,20 @@ fun PatientsScreen(
                     Spacer(modifier = Modifier.width(8.dp))
                     Text("Open Chat", style = MaterialTheme.typography.labelLarge)
                 }
+            }
+
+            OutlinedButton(
+                onClick = {
+                    view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
+                    onCloudProcessAll()
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp),
+            ) {
+                Icon(Icons.Default.CloudUpload, null, modifier = Modifier.size(18.dp))
+                Spacer(modifier = Modifier.width(8.dp))
+                Text("Process all charts on cloud GPU")
             }
 
             HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant, thickness = 0.5.dp)
