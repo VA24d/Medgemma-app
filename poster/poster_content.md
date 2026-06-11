@@ -1,6 +1,6 @@
 # Med Veda — SparQ 2026 Research Poster Content
 
-Source-of-truth for all text blocks on `Med-Veda-SparQ-2026-Poster.pptx`.
+Source-of-truth for all text blocks on `Med-Veda-SparQ-2026-Poster-v3.pptx`.
 
 ---
 
@@ -10,7 +10,9 @@ Source-of-truth for all text blocks on `Med-Veda-SparQ-2026-Poster.pptx`.
 
 Pervasive Clinical AI on Snapdragon + Governed Hybrid Compute
 
-On-device MedGemma 1.5 4B multimodal · Edge companion hub · Optional cloud APIs — privacy-first AI as a continuum, not "everything in the cloud"
+On-device MedGemma multimodal | Edge companion hub | Governed cloud tiers | Privacy-first by design
+
+**Subtitle tags:** On-Device Inference · Edge Companion · FHIR Interop · Offline-First
 
 ---
 
@@ -112,9 +114,8 @@ Public internet is used only for model weight delivery (Hugging Face CDN) and OA
 
 ## Authors (Footer)
 
-Itikela Bhaskar | Vinay G
+Itikela Bhaskar | Vijay Aravynthan
 Qualcomm India · SparQ 2026
-vinayg1752004@gmail.com
 
 ---
 
