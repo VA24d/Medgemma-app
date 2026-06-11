@@ -38,12 +38,18 @@ fun CloudAnalysisScreen(
     var job by remember { mutableStateOf<Job?>(null) }
     var forceReprocess by remember { mutableStateOf(false) }
 
+    val inferenceTier = remember { LocalModelFiles.getInferenceTier(context) }
     val connectionHint = remember {
         when (LocalModelFiles.getCloudConnectionMode(context)) {
             LocalModelFiles.CLOUD_MODE_WIFI ->
                 "Wi-Fi → ${LocalModelFiles.getCloudServerUrlWifi(context)}"
             else -> "USB → ${LocalModelFiles.getCloudServerUrlUsb(context)}"
         }
+    }
+    val backendLabel = when (inferenceTier) {
+        LocalModelFiles.TIER_GEMINI_API -> "Gemini API (via laptop companion)"
+        LocalModelFiles.TIER_EDGE_OLLAMA -> "Edge GPU (Ollama on laptop)"
+        else -> "On-device only"
     }
 
     fun start() {
@@ -112,6 +118,21 @@ fun CloudAnalysisScreen(
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
+            if (inferenceTier == LocalModelFiles.TIER_GEMINI_API) {
+                Surface(
+                    color = MaterialTheme.colorScheme.errorContainer,
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = MaterialTheme.shapes.medium,
+                ) {
+                    Text(
+                        "Clinical data is sent to Google Gemini via your API key on the laptop server.",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onErrorContainer,
+                        modifier = Modifier.padding(12.dp),
+                    )
+                }
+            }
+
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
@@ -123,7 +144,7 @@ fun CloudAnalysisScreen(
                     Icon(Icons.Default.Cloud, null, tint = MaterialTheme.colorScheme.onPrimaryContainer)
                     Spacer(Modifier.width(12.dp))
                     Column {
-                        Text("Edge GPU (laptop)", style = MaterialTheme.typography.titleMedium)
+                        Text(backendLabel, style = MaterialTheme.typography.titleMedium)
                         Text(connectionHint, style = MaterialTheme.typography.bodySmall)
                         Text(
                             "Open http://localhost:8787 on laptop for dashboard",

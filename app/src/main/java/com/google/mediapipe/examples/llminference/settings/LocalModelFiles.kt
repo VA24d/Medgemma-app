@@ -25,9 +25,15 @@ object LocalModelFiles {
     private const val KEY_AUTO_SYNC = "auto_sync_enabled"
     private const val KEY_LAST_SYNC_CURSOR = "last_sync_cursor"
     private const val KEY_LAST_SYNC_AT = "last_sync_at"
+    private const val KEY_INFERENCE_TIER = "inference_tier"
+    private const val KEY_GEMINI_MODEL = "gemini_model_name"
 
     const val CLOUD_MODE_USB = "USB"
     const val CLOUD_MODE_WIFI = "WIFI"
+
+    const val TIER_ON_DEVICE = "ON_DEVICE"
+    const val TIER_EDGE_OLLAMA = "EDGE_OLLAMA"
+    const val TIER_GEMINI_API = "GEMINI_API"
 
     private fun prefs(context: Context) =
         context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
@@ -158,6 +164,26 @@ object LocalModelFiles {
 
     fun setLastSyncAt(context: Context, at: Long) {
         prefs(context).edit().putLong(KEY_LAST_SYNC_AT, at).apply()
+    }
+
+    fun getInferenceTier(context: Context): String =
+        prefs(context).getString(KEY_INFERENCE_TIER, TIER_ON_DEVICE) ?: TIER_ON_DEVICE
+
+    fun setInferenceTier(context: Context, tier: String) {
+        prefs(context).edit().putString(KEY_INFERENCE_TIER, tier).apply()
+    }
+
+    fun getGeminiModelName(context: Context): String =
+        prefs(context).getString(KEY_GEMINI_MODEL, "gemini-2.5-flash") ?: "gemini-2.5-flash"
+
+    fun setGeminiModelName(context: Context, name: String) {
+        prefs(context).edit().putString(KEY_GEMINI_MODEL, name.trim()).apply()
+    }
+
+    fun inferenceTierLabel(tier: String): String = when (tier) {
+        TIER_EDGE_OLLAMA -> "Edge GPU (Ollama)"
+        TIER_GEMINI_API -> "Gemini API"
+        else -> "On-device"
     }
 
     fun displayName(context: Context, uri: Uri): String {

@@ -10,7 +10,7 @@ from apscheduler.triggers.cron import CronTrigger
 
 from core.config import get_setting, load_config
 from core.events import log_event
-from core.ollama import ollama_healthy
+from core.llm_router import backend_ready, resolve_backend
 from db import get_repo
 from processor.chart import process_all
 from processor.jobs import current_job, run_exclusive
@@ -87,15 +87,19 @@ async def _night_job(*, reason: str = "scheduled") -> None:
     if _on_battery():
         log_event("night_batch", "Skipped — laptop on battery (plug in for night batch)")
         return
-    ok, _ = await ollama_healthy()
+    batch_backend = resolve_backend(None, "batch_backend")
+    ok, err = await backend_ready(batch_backend)
     if not ok:
-        log_event("night_batch", "Skipped — Ollama not running (start Ollama + companion)")
+        if batch_backend == "gemini":
+            log_event("night_batch", "Skipped — Gemini API key not configured in .env")
+        else:
+            log_event("night_batch", "Skipped — Ollama not running (start Ollama + companion)")
         return
 
-    log_event("night_batch", f"Starting nightly GPU batch ({reason})")
+    log_event("night_batch", f"Starting nightly batch ({reason}, backend={batch_backend})")
     try:
         async def _run():
-            return await process_all(force=False)
+            return await process_all(force=False, backend=batch_backend)
 
         result = await run_exclusive(_run)
         get_repo().set_job_meta("last_night_batch", str(int(datetime.now().timestamp() * 1000)))

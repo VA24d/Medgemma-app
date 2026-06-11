@@ -33,6 +33,11 @@ proguard/
 *.log
 build_log.txt
 
+# Secrets
+.env
+.env.*
+!.env.example
+
 # Edge companion local data
 edge-companion/data/
 edge-companion/web/node_modules/

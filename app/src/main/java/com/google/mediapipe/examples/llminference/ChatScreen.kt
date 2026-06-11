@@ -245,6 +245,19 @@ fun ChatScreen(
                 .padding(paddingValues)
                 .fillMaxSize()
         ) {
+            if (LocalModelFiles.getInferenceTier(context) == LocalModelFiles.TIER_GEMINI_API) {
+                Surface(
+                    color = MaterialTheme.colorScheme.errorContainer,
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Text(
+                        "Clinical data is sent to Google Gemini via your API key.",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onErrorContainer,
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                    )
+                }
+            }
             // Messages list
             LazyColumn(
                 modifier = Modifier

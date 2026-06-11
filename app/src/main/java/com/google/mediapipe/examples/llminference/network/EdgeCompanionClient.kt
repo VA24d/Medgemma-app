@@ -10,6 +10,7 @@ import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
+import org.json.JSONArray
 import org.json.JSONObject
 import java.util.concurrent.TimeUnit
 
@@ -29,6 +30,9 @@ object EdgeCompanionClient {
     sealed class HealthResult {
         data class Ok(
             val ollamaOk: Boolean,
+            val geminiConfigured: Boolean,
+            val chatBackend: String,
+            val batchBackend: String,
             val models: List<String>,
             val phoneUrlWifi: String,
             val phoneUrlUsb: String,
@@ -75,6 +79,9 @@ object EdgeCompanionClient {
             }
             HealthResult.Ok(
                 ollamaOk = json.optBoolean("ollama_ok", false),
+                geminiConfigured = json.optBoolean("gemini_configured", false),
+                chatBackend = json.optString("chat_backend", "ollama"),
+                batchBackend = json.optString("batch_backend", "ollama"),
                 models = models,
                 phoneUrlWifi = json.optString("phone_url_wifi", ""),
                 phoneUrlUsb = json.optString("phone_url_usb", ""),
@@ -100,6 +107,41 @@ object EdgeCompanionClient {
         }
     }
 
+    suspend fun chat(
+        context: Context,
+        message: String,
+        patientId: Long? = null,
+        imagesBase64: List<String> = emptyList(),
+        backend: String? = null,
+        model: String? = null,
+    ): Result<String> = withContext(Dispatchers.IO) {
+        val base = baseUrl(context)
+        if (base.isBlank()) {
+            return@withContext Result.failure(Exception("Set cloud server URL in Settings"))
+        }
+        try {
+            val payload = JSONObject()
+                .put("message", message)
+                .put("model", model ?: LocalModelFiles.getCloudModelName(context))
+            if (patientId != null && patientId > 0) payload.put("patient_id", patientId)
+            if (imagesBase64.isNotEmpty()) payload.put("images", JSONArray(imagesBase64))
+            if (!backend.isNullOrBlank()) payload.put("backend", backend)
+            val req = Request.Builder()
+                .url("$base/v1/chat")
+                .post(payload.toString().toRequestBody(JSON))
+                .build()
+            val resp = http.newCall(req).execute()
+            val body = resp.body?.string() ?: ""
+            if (!resp.isSuccessful) {
+                return@withContext Result.failure(Exception("HTTP ${resp.code}: $body"))
+            }
+            val json = JSONObject(body)
+            Result.success(json.getString("reply"))
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
     suspend fun processEntry(
         context: Context,
         patientName: String,
@@ -110,6 +152,7 @@ object EdgeCompanionClient {
         prompt: String,
         imageBase64: String = "",
         numPredict: Int = 1024,
+        backend: String? = null,
     ): Result<EntryResult> = withContext(Dispatchers.IO) {
         val base = baseUrl(context)
         val model = LocalModelFiles.getCloudModelName(context)
@@ -124,6 +167,7 @@ object EdgeCompanionClient {
                 .put("prompt", prompt)
                 .put("num_predict", numPredict)
             if (imageBase64.isNotBlank()) payload.put("image_base64", imageBase64)
+            if (!backend.isNullOrBlank()) payload.put("backend", backend)
 
             val req = Request.Builder()
                 .url("$base/v1/process/entry")
@@ -237,12 +281,18 @@ object EdgeCompanionClient {
             }
         }
 
-    suspend fun triggerServerProcessPatient(context: Context, patientId: Long, force: Boolean = false): Result<Unit> =
+    suspend fun triggerServerProcessPatient(
+        context: Context,
+        patientId: Long,
+        force: Boolean = false,
+        backend: String? = null,
+    ): Result<Unit> =
         withContext(Dispatchers.IO) {
             val base = baseUrl(context)
             try {
+                val backendQ = if (!backend.isNullOrBlank()) "&backend=$backend" else ""
                 val req = Request.Builder()
-                    .url("$base/v1/process/patient/$patientId?force=$force")
+                    .url("$base/v1/process/patient/$patientId?force=$force$backendQ")
                     .post("{}".toRequestBody(JSON))
                     .build()
                 val resp = http.newCall(req).execute()
@@ -260,6 +310,7 @@ object EdgeCompanionClient {
         patientName: String,
         prompt: String,
         numPredict: Int = 1536,
+        backend: String? = null,
     ): Result<LongitudinalResult> = withContext(Dispatchers.IO) {
         val base = baseUrl(context)
         val model = LocalModelFiles.getCloudModelName(context)
@@ -269,6 +320,7 @@ object EdgeCompanionClient {
                 .put("patient_name", patientName)
                 .put("prompt", prompt)
                 .put("num_predict", numPredict)
+            if (!backend.isNullOrBlank()) payload.put("backend", backend)
             val req = Request.Builder()
                 .url("$base/v1/process/longitudinal")
                 .post(payload.toString().toRequestBody(JSON))

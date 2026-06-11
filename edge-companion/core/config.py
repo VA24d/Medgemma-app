@@ -5,12 +5,27 @@ from pathlib import Path
 from typing import Any
 
 ROOT = Path(__file__).resolve().parent.parent
+REPO_ROOT = ROOT.parent
+
+
+def _load_env_files() -> None:
+    try:
+        from dotenv import load_dotenv
+    except ImportError:
+        return
+    for path in (REPO_ROOT / ".env", ROOT / ".env"):
+        if path.exists():
+            load_dotenv(path)
+
+
+_load_env_files()
 CONFIG_PATH = ROOT / "config.json"
 DATA_DIR = ROOT / "data"
 DB_PATH = DATA_DIR / "companion.db"
 IMAGES_DIR = DATA_DIR / "images"
 
 DEFAULT_MODEL = "MedGemma1.5:latest"
+DEFAULT_GEMINI_MODEL = "gemini-2.5-flash"
 HOST = "0.0.0.0"
 PORT = 8787
 OLLAMA_BASE = "http://127.0.0.1:11434"

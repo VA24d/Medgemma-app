@@ -53,6 +53,11 @@ export default function SettingsPage() {
             <span className={`pill ${health.ollama_ok ? 'ok' : 'bad'}`}>
               {health.ollama_ok ? 'Ollama OK' : 'Ollama DOWN'}
             </span>
+            {health.gemini_configured != null && (
+              <span className={`pill ${health.gemini_configured ? 'ok' : 'bad'}`} style={{ marginLeft: 8 }}>
+                {health.gemini_configured ? 'Gemini OK' : 'Gemini key missing'}
+              </span>
+            )}
             <p className="muted" style={{ marginTop: 8 }}>
               Model: {health.default_model}
             </p>
@@ -75,6 +80,45 @@ export default function SettingsPage() {
           {t.label}
         </div>
       ))}
+
+      <div className="drawer-section">Inference backend</div>
+      {settings && (
+        <div className="card surface">
+          <p className="muted" style={{ marginBottom: 12, lineHeight: 1.5 }}>
+            Tier 3 sends chart data to Google Gemini under your API terms. Server key:{' '}
+            <code>.env</code> at repo root.
+          </p>
+          <label>Chat backend</label>
+          <select
+            value={settings.chat_backend || 'ollama'}
+            onChange={(e) => saveNight({ chat_backend: e.target.value })}
+            style={{ width: '100%', marginBottom: 12 }}
+          >
+            <option value="ollama">Ollama (local GPU)</option>
+            <option value="gemini">Gemini API</option>
+          </select>
+          <label>Batch processing backend</label>
+          <select
+            value={settings.batch_backend || 'ollama'}
+            onChange={(e) => saveNight({ batch_backend: e.target.value })}
+            style={{ width: '100%', marginBottom: 12 }}
+          >
+            <option value="ollama">Ollama (local GPU)</option>
+            <option value="gemini">Gemini API</option>
+          </select>
+          <label>Gemini model</label>
+          <input
+            type="text"
+            value={settings.gemini_model || 'gemini-2.5-flash'}
+            onChange={(e) => saveNight({ gemini_model: e.target.value })}
+            disabled={!settings.gemini_configured}
+            style={{ width: '100%', marginBottom: 8 }}
+          />
+          <span className={`pill ${settings.gemini_configured ? 'ok' : 'bad'}`}>
+            {settings.gemini_configured ? 'Gemini key configured' : 'Gemini key missing in .env'}
+          </span>
+        </div>
+      )}
 
       <div className="drawer-section">Edge Cloud — Night batch</div>
       {settings && (

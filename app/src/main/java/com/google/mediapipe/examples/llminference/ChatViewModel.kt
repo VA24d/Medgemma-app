@@ -9,26 +9,33 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
+import com.google.mediapipe.examples.llminference.cloud.CloudImageLoader
 import com.google.mediapipe.examples.llminference.data.PatientChartPrompt
+import com.google.mediapipe.examples.llminference.network.EdgeCompanionClient
+import com.google.mediapipe.examples.llminference.network.GeminiClient
 import com.google.mediapipe.examples.llminference.settings.LocalModelFiles
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 private const val DEMO_CXR_LOG = "MedgemmaDemoCXR"
 
 class ChatViewModel(
-    private val inferenceModel: InferenceModel,
+    private val inferenceModel: InferenceModel?,
     private val appContext: Context
 ) : ViewModel() {
+
+    private val onDeviceTier: Boolean
+        get() = LocalModelFiles.getInferenceTier(appContext) == LocalModelFiles.TIER_ON_DEVICE
 
     private val _thinkingEnabled = MutableStateFlow(LocalModelFiles.isThinkingEnabled(appContext))
     val thinkingEnabled: StateFlow<Boolean> = _thinkingEnabled.asStateFlow()
 
     private val _uiState = MutableStateFlow(
-        UiState(supportsThinking = _thinkingEnabled.value)
+        UiState(supportsThinking = _thinkingEnabled.value && inferenceModel != null)
     )
     val uiState: StateFlow<UiState> = _uiState.asStateFlow()
 
@@ -49,9 +56,9 @@ class ChatViewModel(
     fun setThinkingEnabled(enabled: Boolean) {
         LocalModelFiles.setThinkingEnabled(appContext, enabled)
         _thinkingEnabled.value = enabled
-        inferenceModel.updateThinkingMode(enabled)
+        inferenceModel?.updateThinkingMode(enabled)
         // Update flag on the existing UiState without clearing messages
-        _uiState.value.supportsThinking = enabled
+        _uiState.value.supportsThinking = enabled && onDeviceTier
     }
 
     /** Load patient context for interaction mode. */
@@ -69,11 +76,12 @@ class ChatViewModel(
                 )
                 _patientContext.value = ctx
 
-                // Inject patient context as the first "system" message in the chat
-                _uiState.value.addMessage(
-                    "📋 Patient loaded: **${patient.name}** (${entries.size} entries). Ask me anything about this patient.",
-                    MODEL_PREFIX
-                )
+                withContext(Dispatchers.Main) {
+                    _uiState.value.addMessage(
+                        "📋 Patient loaded: **${patient.name}** (${entries.size} entries). Ask me anything about this patient.",
+                        MODEL_PREFIX,
+                    )
+                }
             } catch (e: Exception) {
                 android.util.Log.e("ChatViewModel", "Failed to load patient context", e)
             }
@@ -259,18 +267,13 @@ OUTPUT LANGUAGE (mandatory): Write the entire reply in Hindi using Devanagari sc
                         val contextualPrompt = "$body$langBlock\n\nCurrent request: $userMessage"
                         val maxOut =
                             if (longitudinal) PATIENT_LONG_FORM_MAX_TOKENS else PATIENT_TEXT_MAX_TOKENS
-                        val future = inferenceModel.generateResponseAsync(
+                        generateReply(
                             contextualPrompt,
                             userImages,
-                            maxPredictTokens = maxOut,
-                            forceSkipThinkingForRequest = !longitudinal,
-                        ) { partialResult, isDone ->
-                            if (!isDone && partialResult.isNotEmpty()) {
-                                _uiState.value.appendMessage(partialResult)
-                            }
-                        }
-                        currentFuture = future
-                        future.get()
+                            ctx.patientId,
+                            maxOut,
+                            !longitudinal,
+                        )
                         return@launch
                     }
                 }
@@ -311,18 +314,13 @@ OUTPUT LANGUAGE (mandatory): Write the entire reply in Hindi using Devanagari sc
                     else -> DEFAULT_CHAT_MAX_TOKENS
                 }
 
-                val future = inferenceModel.generateResponseAsync(
+                generateReply(
                     contextualPrompt,
                     inferenceImages,
-                    maxPredictTokens = maxOut,
-                    forceSkipThinkingForRequest = skipThinkForThisSend,
-                ) { partialResult, isDone ->
-                    if (!isDone && partialResult.isNotEmpty()) {
-                        _uiState.value.appendMessage(partialResult)
-                    }
-                }
-                currentFuture = future
-                future.get()
+                    ctx?.patientId,
+                    maxOut,
+                    skipThinkForThisSend,
+                )
             } catch (e: Exception) {
                 if (e is java.util.concurrent.CancellationException || e is kotlinx.coroutines.CancellationException) {
                     // User stopped generation
@@ -346,6 +344,80 @@ OUTPUT LANGUAGE (mandatory): Write the entire reply in Hindi using Devanagari sc
         currentJob = null
         _isGenerating.value = false
         setInputEnabled(true)
+    }
+
+    private suspend fun generateReply(
+        prompt: String,
+        images: List<Bitmap>,
+        patientId: Long?,
+        maxPredictTokens: Int,
+        skipThinkForThisSend: Boolean,
+    ) {
+        when (LocalModelFiles.getInferenceTier(appContext)) {
+            LocalModelFiles.TIER_EDGE_OLLAMA -> {
+                val imagesB64 = images.map { CloudImageLoader.bitmapToJpegBase64(it) }
+                EdgeCompanionClient.chat(
+                    context = appContext,
+                    message = prompt,
+                    patientId = patientId,
+                    imagesBase64 = imagesB64,
+                    backend = "ollama",
+                ).fold(
+                    onSuccess = { withContext(Dispatchers.Main) { _uiState.value.appendMessage(it) } },
+                    onFailure = {
+                        withContext(Dispatchers.Main) {
+                            _uiState.value.addMessage(it.localizedMessage ?: "Edge chat failed", MODEL_PREFIX)
+                        }
+                    },
+                )
+            }
+            LocalModelFiles.TIER_GEMINI_API -> {
+                val key = SecureStorage.getGeminiApiKey(appContext)
+                if (key.isNullOrBlank()) {
+                    _uiState.value.addMessage(
+                        "Set Gemini API key in Settings → Inference tier",
+                        MODEL_PREFIX,
+                    )
+                    return
+                }
+                val imagesB64 = images.map { CloudImageLoader.bitmapToJpegBase64(it) }
+                GeminiClient.chat(
+                    apiKey = key,
+                    prompt = prompt,
+                    imagesBase64 = imagesB64,
+                    model = LocalModelFiles.getGeminiModelName(appContext),
+                ).fold(
+                    onSuccess = { withContext(Dispatchers.Main) { _uiState.value.appendMessage(it) } },
+                    onFailure = {
+                        withContext(Dispatchers.Main) {
+                            _uiState.value.addMessage(it.localizedMessage ?: "Gemini chat failed", MODEL_PREFIX)
+                        }
+                    },
+                )
+            }
+            else -> {
+                val model = inferenceModel
+                if (model == null) {
+                    _uiState.value.addMessage(
+                        "On-device model not loaded. Switch to On-device tier or load model in Settings.",
+                        MODEL_PREFIX,
+                    )
+                    return
+                }
+                val future = model.generateResponseAsync(
+                    prompt,
+                    images,
+                    maxPredictTokens = maxPredictTokens,
+                    forceSkipThinkingForRequest = skipThinkForThisSend,
+                ) { partialResult, isDone ->
+                    if (!isDone && partialResult.isNotEmpty()) {
+                        _uiState.value.appendMessage(partialResult)
+                    }
+                }
+                currentFuture = future
+                future.get()
+            }
+        }
     }
 
     private fun setInputEnabled(isEnabled: Boolean) {
@@ -381,7 +453,19 @@ OUTPUT LANGUAGE (mandatory): Write the entire reply in Hindi using Devanagari sc
             override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
                 val application = extras[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY]!!
                 val ctx = application.applicationContext
-                val inferenceModel = InferenceModel.getInstance(ctx)
+                val inferenceModel = if (LocalModelFiles.getInferenceTier(ctx) == LocalModelFiles.TIER_ON_DEVICE) {
+                    if (InferenceModel.isLoaded()) {
+                        InferenceModel.getInstance(ctx)
+                    } else {
+                        try {
+                            InferenceModel.getInstance(ctx)
+                        } catch (_: Exception) {
+                            null
+                        }
+                    }
+                } else {
+                    null
+                }
                 val vm = ChatViewModel(inferenceModel, ctx)
                 if (patientId != null && patientId > 0) {
                     vm.loadPatientContext(patientId)

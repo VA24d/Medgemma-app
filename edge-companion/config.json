@@ -1,6 +1,9 @@
 {
   "default_model": "MedGemma1.5:latest",
-  "night_batch_enabled": true,
+  "chat_backend": "ollama",
+  "batch_backend": "ollama",
+  "gemini_model": "gemini-2.5-flash",
+  "night_batch_enabled": false,
   "night_start_hour": 0,
   "night_start_minute": 0,
   "night_end_hour": 2,

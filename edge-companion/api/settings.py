@@ -4,6 +4,7 @@ from fastapi import APIRouter
 from pydantic import BaseModel
 
 from core.config import get_setting, load_config, save_config, set_setting
+from core.gemini import gemini_configured
 from db import get_repo
 from scheduler.night_batch import in_night_window, is_enabled, next_run_iso, reschedule, set_scheduler_enabled, status_message
 
@@ -12,6 +13,9 @@ router = APIRouter(prefix="/v1/settings", tags=["settings"])
 
 class SettingsBody(BaseModel):
     default_model: str | None = None
+    chat_backend: str | None = None
+    batch_backend: str | None = None
+    gemini_model: str | None = None
     night_batch_enabled: bool | None = None
     night_start_hour: int | None = None
     night_start_minute: int | None = None
@@ -27,6 +31,7 @@ async def get_settings() -> dict:
     repo = get_repo()
     return {
         **cfg,
+        "gemini_configured": gemini_configured(),
         "cursor": repo.current_revision(),
         "lastNightBatch": repo.get_job_meta("last_night_batch"),
         "lastBatchRun": repo.get_job_meta("last_batch_run"),

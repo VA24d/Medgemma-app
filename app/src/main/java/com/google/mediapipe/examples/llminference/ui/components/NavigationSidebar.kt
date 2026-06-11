@@ -20,6 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import com.google.mediapipe.examples.llminference.SecureStorage
 import com.google.mediapipe.examples.llminference.network.EdgeCompanionClient
 import com.google.mediapipe.examples.llminference.sync.ChartSyncManager
 import com.google.mediapipe.examples.llminference.settings.AppPreferences
@@ -30,6 +31,8 @@ import com.google.mediapipe.examples.llminference.ui.theme.ThemeManager
 import kotlinx.coroutines.launch
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -50,11 +53,7 @@ fun NavigationSidebar(
     val tokenManager = remember { TokenManager(context) }
 
     var selectedLanguage by remember { mutableStateOf(LocalModelFiles.getLanguageExtension(context)) }
-    LaunchedEffect(isOpen) {
-        if (isOpen) {
-            selectedLanguage = LocalModelFiles.getLanguageExtension(context)
-        }
-    }
+    var inferenceTier by remember { mutableStateOf(LocalModelFiles.getInferenceTier(context)) }
 
     // Settings states
     var showThemeDialog by remember { mutableStateOf(false) }
@@ -75,9 +74,15 @@ fun NavigationSidebar(
     var syncStatus by remember { mutableStateOf("") }
     var nightBatchEnabled by remember { mutableStateOf(true) }
     var nightBatchStatus by remember { mutableStateOf("") }
+    var showTierDialog by remember { mutableStateOf(false) }
+    var showGeminiKeyDialog by remember { mutableStateOf(false) }
+    var geminiKeyInput by remember { mutableStateOf("") }
+    var geminiKeyVisible by remember { mutableStateOf(false) }
 
     LaunchedEffect(isOpen) {
         if (isOpen) {
+            selectedLanguage = LocalModelFiles.getLanguageExtension(context)
+            inferenceTier = LocalModelFiles.getInferenceTier(context)
             val at = LocalModelFiles.getLastSyncAt(context)
             lastSyncLabel = if (at > 0) {
                 java.text.SimpleDateFormat("MMM d, HH:mm", java.util.Locale.getDefault())
@@ -192,6 +197,17 @@ fun NavigationSidebar(
                     onClose()
                     onOpenHfLogin()
                 }
+            )
+
+            HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+
+            // ── Inference tier ──
+            SidebarSection("Inference")
+            SidebarItem(
+                icon = Icons.Default.Hub,
+                title = "Inference tier",
+                subtitle = LocalModelFiles.inferenceTierLabel(inferenceTier),
+                onClick = { showTierDialog = true },
             )
 
             HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
@@ -334,6 +350,109 @@ fun NavigationSidebar(
     }
 
     // ── Dialogs ──
+
+    if (showTierDialog) {
+        AlertDialog(
+            onDismissRequest = { showTierDialog = false },
+            title = { Text("Inference tier") },
+            text = {
+                Column {
+                    listOf(
+                        LocalModelFiles.TIER_ON_DEVICE to "On-device — private, offline MedGemma on phone",
+                        LocalModelFiles.TIER_EDGE_OLLAMA to "Edge GPU — laptop/VPS Ollama over USB/Wi-Fi",
+                        LocalModelFiles.TIER_GEMINI_API to "Gemini API — cloud; data sent per Google API terms",
+                    ).forEach { (tier, label) ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    if (tier == LocalModelFiles.TIER_GEMINI_API) {
+                                        geminiKeyInput = SecureStorage.getGeminiApiKey(context).orEmpty()
+                                        showTierDialog = false
+                                        showGeminiKeyDialog = true
+                                    } else {
+                                        LocalModelFiles.setInferenceTier(context, tier)
+                                        inferenceTier = tier
+                                        showTierDialog = false
+                                    }
+                                }
+                                .padding(12.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            RadioButton(
+                                selected = inferenceTier == tier,
+                                onClick = {
+                                    if (tier == LocalModelFiles.TIER_GEMINI_API) {
+                                        geminiKeyInput = SecureStorage.getGeminiApiKey(context).orEmpty()
+                                        showTierDialog = false
+                                        showGeminiKeyDialog = true
+                                    } else {
+                                        LocalModelFiles.setInferenceTier(context, tier)
+                                        inferenceTier = tier
+                                        showTierDialog = false
+                                    }
+                                },
+                            )
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Text(label, style = MaterialTheme.typography.bodyMedium)
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showTierDialog = false }) { Text("Close") }
+            },
+        )
+    }
+
+    if (showGeminiKeyDialog) {
+        AlertDialog(
+            onDismissRequest = { showGeminiKeyDialog = false },
+            title = { Text("Gemini API key") },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text(
+                        "Clinical data is sent to Google Gemini via your API key. Key is stored encrypted on this device.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    OutlinedTextField(
+                        value = geminiKeyInput,
+                        onValueChange = { geminiKeyInput = it },
+                        label = { Text("API key") },
+                        singleLine = true,
+                        visualTransformation = if (geminiKeyVisible) {
+                            VisualTransformation.None
+                        } else {
+                            PasswordVisualTransformation()
+                        },
+                        trailingIcon = {
+                            IconButton(onClick = { geminiKeyVisible = !geminiKeyVisible }) {
+                                Icon(
+                                    if (geminiKeyVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
+                                    contentDescription = null,
+                                )
+                            }
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                }
+            },
+            confirmButton = {
+                Button(onClick = {
+                    if (geminiKeyInput.isNotBlank()) {
+                        SecureStorage.saveGeminiApiKey(context, geminiKeyInput)
+                        LocalModelFiles.setInferenceTier(context, LocalModelFiles.TIER_GEMINI_API)
+                        inferenceTier = LocalModelFiles.TIER_GEMINI_API
+                        showGeminiKeyDialog = false
+                    }
+                }) { Text("Save") }
+            },
+            dismissButton = {
+                TextButton(onClick = { showGeminiKeyDialog = false }) { Text("Cancel") }
+            },
+        )
+    }
 
     LaunchedEffect(showCloudDialog) {
         if (showCloudDialog) {

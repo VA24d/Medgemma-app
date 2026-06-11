@@ -27,6 +27,7 @@ import com.google.mediapipe.examples.llminference.ui.screens.*
 import com.google.mediapipe.examples.llminference.ui.components.NavigationSidebar
 import com.google.mediapipe.examples.llminference.sync.ChartSyncManager
 import com.google.mediapipe.examples.llminference.ui.theme.LLMInferenceTheme
+import com.google.mediapipe.examples.llminference.debug.GeminiKeyImporter
 import com.google.mediapipe.examples.llminference.worker.SyncWorker
 
 // Navigation routes
@@ -70,6 +71,7 @@ class MainActivity : ComponentActivity() {
         }
 
         SyncWorker.syncSchedule(applicationContext)
+        GeminiKeyImporter.tryImportFromFilesDir(applicationContext)
 
         setContent {
             val prefs = remember { AppPreferences(applicationContext) }

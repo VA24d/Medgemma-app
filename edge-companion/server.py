@@ -16,6 +16,7 @@ from fastapi.staticfiles import StaticFiles
 from api import chat, entries, legacy, patients, process, settings, sync
 from core import events
 from core.config import DEFAULT_MODEL, HOST, PORT, get_setting
+from core.gemini import gemini_configured
 from core.ollama import lan_ip, ollama_healthy
 from db.schema import init_db
 from scheduler.night_batch import start_scheduler, startup_catchup
@@ -47,11 +48,19 @@ async def health() -> dict:
     ollama_ok, models = await ollama_healthy()
     if not ollama_ok:
         events.log_event("error", "Ollama health fail")
+    gemini_ok = gemini_configured()
+    chat_backend = get_setting("chat_backend", "ollama")
+    batch_backend = get_setting("batch_backend", "ollama")
+    healthy = ollama_ok or gemini_ok
     return {
-        "status": "ok" if ollama_ok else "degraded",
+        "status": "ok" if healthy else "degraded",
         "ollama_ok": ollama_ok,
+        "gemini_configured": gemini_ok,
+        "chat_backend": chat_backend,
+        "batch_backend": batch_backend,
         "models": models,
         "default_model": get_setting("default_model", DEFAULT_MODEL),
+        "gemini_model": get_setting("gemini_model", "gemini-2.5-flash"),
         "uptime_sec": int(time.time() - events.start_time),
         "last_phone_ping_sec_ago": int(time.time() - events.last_phone_ping)
         if events.last_phone_ping

@@ -28,25 +28,45 @@ class CloudChartProcessor(private val context: Context) {
         const val ALL_PATIENTS_ID: Long = -1L
     }
 
+    private fun batchBackend(): String = when (LocalModelFiles.getInferenceTier(context)) {
+        LocalModelFiles.TIER_GEMINI_API -> "gemini"
+        LocalModelFiles.TIER_EDGE_OLLAMA -> "ollama"
+        else -> ""
+    }
+
     suspend fun processPatient(
         patientId: Long,
         forceReprocess: Boolean = false,
         onProgress: (CloudProgress) -> Unit = {},
     ): Result<Unit> = withContext(Dispatchers.IO) {
         try {
+            val backend = batchBackend()
+            if (backend.isBlank()) {
+                return@withContext Result.failure(
+                    Exception("Cloud analysis requires Edge Ollama or Gemini tier. Change Inference tier in Settings."),
+                )
+            }
             onProgress(CloudProgress(phase = "checking", message = "Checking edge companion…"))
             when (val health = EdgeCompanionClient.health(context)) {
                 is EdgeCompanionClient.HealthResult.Error ->
                     return@withContext Result.failure(Exception(health.message))
                 is EdgeCompanionClient.HealthResult.Ok -> {
-                    if (!health.ollamaOk) {
-                        return@withContext Result.failure(Exception("Ollama not running on laptop"))
-                    }
-                    val model = LocalModelFiles.getCloudModelName(context)
-                    if (health.models.isNotEmpty() && model !in health.models) {
-                        return@withContext Result.failure(
-                            Exception("Model '$model' not on server. Available: ${health.models.take(3).joinToString()}")
-                        )
+                    if (backend == "gemini") {
+                        if (!health.geminiConfigured) {
+                            return@withContext Result.failure(
+                                Exception("Gemini API key not configured on laptop (.env)"),
+                            )
+                        }
+                    } else {
+                        if (!health.ollamaOk) {
+                            return@withContext Result.failure(Exception("Ollama not running on laptop"))
+                        }
+                        val model = LocalModelFiles.getCloudModelName(context)
+                        if (health.models.isNotEmpty() && model !in health.models) {
+                            return@withContext Result.failure(
+                                Exception("Model '$model' not on server. Available: ${health.models.take(3).joinToString()}"),
+                            )
+                        }
                     }
                 }
             }
@@ -83,7 +103,7 @@ class CloudChartProcessor(private val context: Context) {
                     )
                 )
 
-                val updated = processOneEntry(patient.name, entry, forceReprocess)
+                val updated = processOneEntry(patient.name, entry, forceReprocess, backend)
                 db.medicalEntryDao().updateEntry(updated)
             }
 
@@ -97,7 +117,7 @@ class CloudChartProcessor(private val context: Context) {
 
             val refreshed = db.medicalEntryDao().getEntriesForPatientSync(patientId).sortedBy { it.createdAt }
             val prompt = CloudEntryPrompts.buildLongitudinalPrompt(patient, refreshed)
-            val longResult = EdgeCompanionClient.processLongitudinal(context, patient.name, prompt)
+            val longResult = EdgeCompanionClient.processLongitudinal(context, patient.name, prompt, backend = backend)
             longResult.fold(
                 onSuccess = { lr ->
                     val diagnosis = CloudThinkingStrip.stripFull(lr.diagnosis)
@@ -107,7 +127,11 @@ class CloudChartProcessor(private val context: Context) {
                             diagnosis = diagnosis,
                             scope = "CLOUD_FULL",
                             entryCount = refreshed.size,
-                            modelName = "Ollama:${LocalModelFiles.getCloudModelName(context)}",
+                            modelName = if (backend == "gemini") {
+                                "Gemini:${LocalModelFiles.getGeminiModelName(context)}"
+                            } else {
+                                "Ollama:${LocalModelFiles.getCloudModelName(context)}"
+                            },
                             thinkingEnabled = false,
                         )
                     )
@@ -163,6 +187,7 @@ class CloudChartProcessor(private val context: Context) {
         patientName: String,
         entry: MedicalEntryEntity,
         force: Boolean,
+        backend: String,
     ): MedicalEntryEntity {
         val now = System.currentTimeMillis()
         var analysis = entry.analysisResult
@@ -186,6 +211,7 @@ class CloudChartProcessor(private val context: Context) {
                     content = entry.content,
                     prompt = prompt,
                     imageBase64 = b64,
+                    backend = backend,
                 )
                 result.getOrThrow().let {
                     analysis = CloudThinkingStrip.stripFull(it.analysisResult)
@@ -202,6 +228,7 @@ class CloudChartProcessor(private val context: Context) {
                 title = entry.title,
                 content = entry.content,
                 prompt = prompt,
+                backend = backend,
             )
             result.getOrThrow().let {
                 analysis = CloudThinkingStrip.stripFull(it.analysisResult)
@@ -218,6 +245,7 @@ class CloudChartProcessor(private val context: Context) {
                 content = entry.content,
                 prompt = prompt,
                 numPredict = 128,
+                backend = backend,
             )
             result.getOrThrow().let {
                 summary = CloudThinkingStrip.stripFull(it.visitSummary.ifBlank { it.analysisResult.take(200) })

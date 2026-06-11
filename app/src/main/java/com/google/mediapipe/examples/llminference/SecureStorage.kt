@@ -8,6 +8,7 @@ object SecureStorage {
   private const val PREFS_NAME = "secure_prefs"
   private const val KEY_ACCESS_TOKEN = "access_token"
   private const val KEY_CODE_VERIFIER = "code_verifier"
+  private const val KEY_GEMINI_API_KEY = "gemini_api_key"
 
   fun saveCodeVerifier(context: Context, codeVerifier: String) {
     val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
@@ -53,5 +54,25 @@ object SecureStorage {
       EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
     )
     sharedPreferences.edit().remove(KEY_ACCESS_TOKEN).apply()
+  }
+
+  private fun encryptedPrefs(context: Context) =
+    EncryptedSharedPreferences.create(
+      PREFS_NAME,
+      MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC),
+      context,
+      EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+      EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM,
+    )
+
+  fun saveGeminiApiKey(context: Context, key: String) {
+    encryptedPrefs(context).edit().putString(KEY_GEMINI_API_KEY, key.trim()).apply()
+  }
+
+  fun getGeminiApiKey(context: Context): String? =
+    encryptedPrefs(context).getString(KEY_GEMINI_API_KEY, null)?.takeIf { it.isNotBlank() }
+
+  fun clearGeminiApiKey(context: Context) {
+    encryptedPrefs(context).edit().remove(KEY_GEMINI_API_KEY).apply()
   }
 }
